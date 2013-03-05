@@ -19,7 +19,12 @@
         labelKey:'year_label',
         _isMultilingual:true,
         //connectionType:'server', // optional field
-        cache:true
+        cache:true,
+        
+        attributes: {
+            year_id: 'integer',
+            trans_id: 'integer'
+        }
     };
     
     if (extendedDefinition) {

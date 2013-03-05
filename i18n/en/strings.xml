@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="stringPromptTitle">Database Encryption Setup</string>
-    <string name="stringPromptInfo">Please enter at least 30 random characters.  You are NOT required to remember the sequence; it is used internally to increase the security of your information.</string>
+    <!-- StringPrompt labels -->
+    <string name="stringPromptDefaultTitle">String Prompt</string>
+    <string name="stringPromptDefaultMessage">Please enter a string.</string>
+    <string name="stringPromptEncryptionTitle">Database Encryption Setup</string>
+    <string name="stringPromptEncryptionMessage">Please enter at least 30 random characters.  You are NOT required to remember the sequence; it is used internally to increase the security of your information.</string>
+    <string name="stringPromptEncryptionLengthConstraint">Input must be at least 30 characters long!</string>
+    <string name="stringPromptPasswordTitle">Login Password</string>
+    <string name="stringPromptPasswordMessage">Please choose a secure login password to prevent unathorized access.</string>
+    <string name="stringPromptPasswordLengthConstraint">Login password must be at least 30 characters long!</string>
+    <string name="stringPromptInvalidInput">Invalid input!</string>
+    
+    <!-- PasswordPrompt labels -->
+    <string name="passwordPromptDefaultTitle">Password</string>
+    <string name="passwordPromptDefaultMessage">Please enter your password</string>
+    <string name="passwordPromptLoginTitle">Login</string>
+    <string name="passwordPromptLoginMessage">Please enter your login password</string>
+    <string name="verifying">Verifying</string>
+    <string name="correct">Correct</string>
+    <string name="incorrect">Incorrect</string>
     
     <string name="returnToApp">Return to app?</string>
     
@@ -13,8 +30,10 @@
     <!-- Button labels used throughout the app -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="ok">OK</string>
     <string name="add">Add</string>
     <string name="edit">Edit</string>
+    <string name="del">Delete</string>
     <string name="save">Save</string>
     <string name="submit">Submit</string>
     <string name="done">Done</string>
@@ -94,21 +113,27 @@
     <!-- Stats labels -->
     <string name="statsHeaderSince">Stats accumulated since\n{0}:</string>
     <string name="statsHeaderEver">Stats accumulated ever:</string>
+    <string name="saveStats">New session</string>
     <string name="viewTotals">View totals</string>
     <string name="viewTotalsTitle">Total stats</string>
     <string name="statsConfirmSubmit">Are you sure you want to submit the stats report and begin a new stats collection session?  Stats totals will be preserved.</string>
     <string name="statsConfirmSave">Are you sure you want to begin a new stats collection session?  Stats totals will be preserved.</string>
     <string name="statsMessageBody">Stats report submitted by {0} on {1}.\n\n{2}</string>
     
+    <!-- Password protection labels -->
+    <string name="passwordProtectOptional">Your device appears to have full-device encryption enabled.  Would you like to pasword-protect the application anyway?</string>
+    <string name="passwordProtectRequired">Your device does not appear to have full-device encryption enabled.  The application will be password-protected.</string>
+    
     <!-- Info labels -->
     <string name="infoTitle">Info</string>
     <string name="aboutVersion">Version {0}</string>
-    <string name="aboutLicense">Copyright © 2012 AppDev Designs, portions copyright Jeff Mott.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-    * Neither the name {0} nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+    <string name="aboutLicense">
+Copyright © 2013 AppDev Designs, portions copyright Jeff Mott.  All rights reserved.\n
+\n
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n
+    * Neither the name {0} nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n
     </string>
     
     <!-- Feedback labels -->
@@ -124,8 +149,8 @@ Redistribution and use in source and binary forms, with or without modification,
     
     <!-- LoginWindow labels -->
     <string name="login">Login</string>
-    <string name="userID">User ID</string>
-    <string name="pWord">Password</string>
+    <string name="userId">User ID</string>
+    <string name="password">Password</string>
     
     <!-- ErrorWindow labels -->
     <string name="startupErrorTitle">Startup Error</string>

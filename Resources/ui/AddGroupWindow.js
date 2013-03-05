@@ -38,7 +38,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     dependencies: ['ChooseOptionWindow', 'Checkbox'],
     
     groupDefinition: {},
-    rowHeight: 40,
+    rowHeight: AD.UI.buttonHeight + AD.UI.padding,
     
     // Quick function to display the add group window in a single function call
     // Add a new group or update an existing group
@@ -60,6 +60,17 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             this.save();
         },
         rightNavButton: true
+    }, {
+        title: 'del',
+        callback: function() {
+            // Close the window and delete the group
+            this.dfd.reject();
+            this.group.destroy();
+        },
+        enabled: function() {
+            return !this.adding;
+        },
+        platform: 'Android'
     }, {
         title: 'cancel',
         callback: 'cancel', // special pre-defined callback to reject the deferred
@@ -99,27 +110,27 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     create: function() {
         // Create the name field and label
         this.add(Ti.UI.createLabel({
-            left: 10,
-            top: 10,
-            width: 'auto',
-            height: 'auto',
+            left: AD.UI.padding,
+            top: AD.UI.padding,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
             textid: 'groupName'
         }));
         this.add('name', Ti.UI.createTextField({
-            left: 10,
-            top: 10,
+            left: AD.UI.padding,
+            top: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
             height: AD.UI.textFieldHeight,
-            borderStyle: Titanium.UI.INPUT_BORDERSTYLE_ROUNDED,
+            borderStyle: Ti.UI.INPUT_BORDERSTYLE_ROUNDED,
             value: ''
         }));
         
         // Create the scrollable group fields container
         var $fieldsView = this.add('fieldsView', $.View.create(Ti.UI.createScrollView({
-            top: 10,
+            top: AD.UI.padding,
             left: 0,
             width: AD.UI.screenWidth,
-            height: this.constructor.rowHeight * 7,
+            height: Ti.UI.FILL,
             layout: 'vertical',
             scrollType: 'vertical',
             contentHeight: 'auto',
@@ -149,8 +160,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         // Create the checkbox to toggle whether this field is included in the group
         var $enabledCheckbox = $fieldRow.add('enabled', new AD.UI.Checkbox({
             createParams: {
-                top: 5,
-                left: 10
+                top: AD.UI.padding / 2,
+                left: AD.UI.padding
             },
             value: false
         }));
@@ -163,11 +174,11 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         // Create the field name label
         $fieldRow.add(Ti.UI.createLabel({
             top: 0,
-            left: 50,
-            width: 'auto',
-            height: 'auto',
-            text: L(fieldDefinition.name),
-            font: AD.UI.Fonts.header
+            left: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.FILL,
+            text: AD.Localize(fieldDefinition.name),
+            font: AD.UI.Fonts.medium
         }));
         
         var _this = this;
@@ -177,8 +188,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             // Create the checkbox to toggle the value of this field
             var $valueCheckbox = $valueView = new AD.UI.Checkbox({
                 createParams: {
-                    top: 5,
-                    left: 10 + AD.UI.useableScreenWidth - AD.UI.Checkbox.defaultSize // right align the checkbox
+                    top: AD.UI.padding / 2,
+                    right: AD.UI.padding
                 },
                 value: false
             });
@@ -195,15 +206,14 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             });
         }
         else if (fieldDefinition.type === 'choice') {
-            var buttonSize = 140;
+            var buttonSize = AD.Platform.isAndroid ? 80 : 120;
             var $valueButton = $valueView = $.View.create(Ti.UI.createButton({
-                top: 5,
+                right: AD.UI.padding,
+                top: AD.UI.padding / 2,
                 width: buttonSize,
-                height: AD.UI.buttonHeight,
-                left: 10 + AD.UI.useableScreenWidth - buttonSize // right align the button
+                height: AD.UI.buttonHeight
             }));
             var valueButton = $valueButton.getView();
-            var _this = this;
             $valueButton.addEventListener('click', function() {
                 // If fieldDefinition.data is a function execute it to get the true data
                 var options = $.isFunction(fieldDefinition.data) ? fieldDefinition.data() : fieldDefinition.data;
@@ -222,7 +232,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 var enabled = event.value;
                 fields[fieldName].value = null;
                 // Reset the button's text
-                valueButton.title = enabled ? L('unspecified') : '';
+                valueButton.title = enabled ? AD.Localize('unspecified') : '';
             });
         }
         
@@ -271,7 +281,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     // Save the current group
     save: function() {
         if (!this.getChild('name').value) {
-            alert(L('invalidGroupName'));
+            alert(AD.Localize('invalidGroupName'));
             return;
         }
         

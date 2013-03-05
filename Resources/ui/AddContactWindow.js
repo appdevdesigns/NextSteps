@@ -14,7 +14,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     },
     dependencies: ['ChooseOptionWindow'],
     
-    // Return the first value in the multivalue dictionary with a name in priorities 
+    // Return the first value in the multivalue dictionary with a name in priorities
     getDefaultFromMultivalue: function(multivalue, priorities) {
         var highestPriority = { value: null, id: null };
         priorities.forEach(function(fieldName) {
@@ -23,7 +23,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 // Use the first value
                 highestPriority = {
                     value: values[0],
-                    id: fieldName+':0' 
+                    id: fieldName+':0'
                 };
             }
         });
@@ -32,24 +32,24 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     
     // Return a new contact model instance
     createContact: function(attrs) {
-        var localContact = Ti.Contacts.getPersonByID(attrs.contact_recordId);
+        var localContact = attrs.contact_recordId === null ? null : Ti.Contacts.getPersonByID(attrs.contact_recordId);
         var firstName = '', lastName = '', nickname = '', defaultPhone = {value: null, id: null}, defaultEmail = {value: null, id: null}, note = '';
         if (localContact) {
             firstName = localContact.firstName || '';
             lastName = localContact.lastName || '';
             nickname = localContact.nickname || '';
-            if (AD.Platform.Android) {
+            if (AD.Platform.isAndroid) {
                 // Android does not allow access to the firstName, lastName, or nickname properties, so attempt to guess them
                 var nameParts = localContact.fullName.split(' ');
                 firstName = firstName || nameParts[0];
                 lastName = lastName || nameParts[nameParts.length - 1];
                 nickname = nickname || firstName;
             }
-            defaultPhone = this.getDefaultFromMultivalue(localContact.getPhone(), ['iPhone', 'mobile']);
+            defaultPhone = this.getDefaultFromMultivalue(localContact.getPhone(), ['iPhone', 'mobile', 'home']);
             defaultEmail = this.getDefaultFromMultivalue(localContact.getEmail(), ['home', 'work']);
             note = localContact.note || '';
         }
-        var defaultYear = 0;
+        var defaultYear = 1;
         
         // Populate the contact model fields with the new contact's information
         var baseAttrs = {
@@ -78,20 +78,17 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         {name: 'lastName', type: 'text'},
         {name: 'campus', type: 'choice'},
         {name: 'year', type: 'choice', field: 'year_label'},
-        {name: 'phone', type: 'choice/text', keyboard: Ti.UI.KEYBOARD_PHONE_PAD, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
-        {name: 'email', type: 'choice/text', keyboard: Ti.UI.KEYBOARD_EMAIL, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
+        {name: 'phone', type: 'choice/text', keyboardType: Ti.UI.KEYBOARD_PHONE_PAD, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
+        {name: 'email', type: 'choice/text', keyboardType: Ti.UI.KEYBOARD_EMAIL, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
         {name: 'notes', type: 'text', multiline: true}
     ],
     
     years: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; }),
     actions: [{
         title: 'save',
-        callback: function() {
-            this.save();
-        },
+        callback: 'save',
         rightNavButton: true
     }, {
-        title: 'close',
         callback: function() {
             if (this.operation === 'edit') {
                 // Changes to contacts are automatically saved during editing
@@ -102,6 +99,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 this.dfd.reject();
             }
         },
+        menuItem: false,
         onClose: true,
         backButton: true
     }]
@@ -116,18 +114,25 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         getContactDfd.done(this.proxy(function(contactData) {
             this.inAddressBook = contactData.localContact ? true : false;
             
-            // Build the fields array which is the same as the static fields array, with types expanded    
+            // Build the fields array which is the same as the static fields array, with types expanded
             this.fields = this.constructor.fields.map(function(field) {
                 // Expand the type property
                 var types = field.type.split('/');
                 var type = types[(this.inAddressBook || types.length === 1) ? 0 : 1];
+                
+                // Proxy the choice callback
+                var callback = null;
+                if (type === 'choice') {
+                    callback = this.proxy(field.callback);
+                }
+                
                 // Clone the field to prevent aliasing
-                return $.extend({}, field, {type: type});
+                return $.extend({}, field, {type: type, callback: callback});
             }, this);
             
             this.contact = contactData.contact;
             this.localContact = contactData.localContact;
-            this.window.title = L(this.operation+'Contact');
+            this.window.title = AD.Localize(this.operation+'Contact');
             this.open();
         }));
         
@@ -136,7 +141,10 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         this._super({
             tab: options.tab,
             createDfd: getContactDfd.promise(),
-            initializeDfd: getContactDfd.promise()
+            initializeDfd: getContactDfd.promise(),
+            createParams: {
+                layout: 'vertical'
+            }
         });
         
         if (this.operation === 'import') {
@@ -154,7 +162,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 var contact = null;
                 if (existingContacts.length > 0) {
                     if (existingContacts.length > 1) {
-                        console.warn('Found multiple contacts with the same recordId!');
+                        Ti.API.warn('Found multiple contacts with the same recordId!');
                     }
                     // A contact was chosen that already exists, so edit the contact
                     contact = existingContacts[0];
@@ -171,7 +179,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         }
         else if (this.operation === 'edit') {
             // Load the existing contact from the address book
-            var localContact = Ti.Contacts.getPersonByID(options.existingContact.contact_recordId);
+            var recordId = options.existingContact.contact_recordId;
+            var localContact = recordId === null ? null : Ti.Contacts.getPersonByID(recordId);
             getContactDfd.resolve({
                 contact: options.existingContact,
                 localContact: localContact
@@ -179,7 +188,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         }
         else if (this.operation === 'create') {
             // Create a contact model not tied to an address book entry
-            var contact = this.constructor.createContact({contact_recordId: -1});
+            var contact = this.constructor.createContact({contact_recordId: null});
             getContactDfd.resolve({
                 contact: contact,
                 localContact: null
@@ -189,126 +198,167 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     
     // Create each of the form fields
     create: function() {
-        var labelWidth = 80;
+        var labelWidth = AD.Platform.isiPhone ? 80 : 60;
+        var rowHeight = 40;
+        
+        var focusedTextField = null;
+        var hideKeyboard = function() {
+            if (focusedTextField) {
+                // Unfocus the previously selected text field to hide the keyboard
+                focusedTextField.blur();
+                focusedTextField = null;
+            }
+        };
+
+        // Scrollable container that will hold the field rows on non-iPhone platforms
+        var table = Ti.UI.createScrollView({
+            top: 0,
+            left: 0,
+            width: AD.UI.screenWidth,
+            height: Ti.UI.FILL,
+            layout: 'vertical',
+            scrollType: 'vertical',
+            contentHeight: 'auto',
+            showVerticalScrollIndicator: true
+        });
         
         // Create the form fields
-        if (AD.Platform.isiPhone) {
-            // On iPhone, attempt to mimic the built-in Contacts app
+        // On iPhone, attempt to mimic the built-in Contacts app
+
+        // Create each of the field views
+        var rows = [];
+        this.fields.forEach(function(field, index) {
+            // Create the field row container, a table view row on iPhone and a generic view on other platforms
+            var fieldRow = AD.Platform.isiPhone ? Ti.UI.createTableViewRow({}) : Ti.UI.createView({
+                left: AD.UI.padding,
+                right: 0,
+                top: 0
+            });
+            fieldRow.height = rowHeight;
+            fieldRow.index = index;
             
-            var focusedTextField = null;
-            
-            // Create each of the fields as rows in the table
-            var rows = [];
-            this.fields.forEach(function(field, index) {
-                var fieldRow = Ti.UI.createTableViewRow({
-                    height: 40,
-                    index: index
-                });
-                // Create the field name label
-                fieldRow.add(Ti.UI.createLabel({
-                    left: 0,
-                    width: labelWidth,
-                    height: Ti.UI.SIZE,
-                    text: L(field.name).toLowerCase(),
+            // Create the field name label
+            var label = Ti.UI.createLabel({
+                left: 0,
+                width: labelWidth,
+                height: Ti.UI.SIZE,
+                text: AD.Localize(field.name)
+            });
+            fieldRow.add(label);
+            if (AD.Platform.isiPhone) {
+                label.applyProperties({
+                    text: label.text.toLowerCase(),
                     textAlign: 'right',
                     color: AD.UI.systemBlueColor,
                     font: {fontSize: 15, fontWeight: 'bold'} // medium-small bold
-                }));
-                var fieldValue = this.contact.attr(field.field);
-                var fieldView = null;
-                if (field.type === 'choice') {
-                    // Create the value label
+                });
+            }
+            
+            var fieldValue = this.contact.attr(field.field);
+            var fieldView = null;
+            if (field.type === 'choice') {
+                // Create the value label
+                if (AD.Platform.isiPhone) {
                     fieldView = Ti.UI.createLabel({
-                        left: labelWidth + 10,
+                        left: labelWidth + AD.UI.padding,
                         width: Ti.UI.FILL,
                         height: Ti.UI.FILL,
                         text: fieldValue
                     });
                 }
-                else if (field.type === 'text') {
-                    if (field.multiline === true) {
-                        fieldView = Ti.UI.createTextArea({
-                            left: labelWidth + 10,
-                            right: 10,
-                            height: Ti.UI.FILL,
-                            font: AD.UI.Fonts.medium,
-                            keyboardType: field.keyboard,
-                            suppressReturn: false
-                        });
-                        // Make the row taller to accommodate the text area
-                        fieldRow.height = 120;
-                    }
-                    else {
-                        fieldView = Ti.UI.createTextField({
-                            left: labelWidth + 10,
-                            width: Ti.UI.FILL,
-                            height: Ti.UI.FILL,
-                            keyboardType: field.keyboard,
-                            autocapitalization: field.autocapitalization
-                        });
-                    }
-                    fieldView.value = fieldValue;
+                else {
+                    fieldView = Ti.UI.createButton({
+                        left: labelWidth + AD.UI.padding,
+                        right: AD.UI.padding,
+                        center: { y: rowHeight / 2 },
+                        height: AD.UI.buttonHeight,
+                        title: fieldValue || AD.Localize('unspecified')
+                    });
+                    // When a choice row is clicked, call the callback that will presumably allow the user to choose a value
+                    fieldView.addEventListener('click', field.callback);
+                }
+            }
+            else if (field.type === 'text') {
+                if (field.multiline === true) {
+                    fieldView = Ti.UI.createTextArea({
+                        left: labelWidth + AD.UI.padding,
+                        right: AD.UI.padding,
+                        height: Ti.UI.FILL,
+                        font: AD.UI.Fonts.small,
+                        suppressReturn: false
+                    });
+                    // Make the row taller to accommodate the text area
+                    fieldRow.height *= 3;
+                }
+                else {
+                    fieldView = Ti.UI.createTextField({
+                        left: labelWidth + AD.UI.padding,
+                        right: AD.UI.padding,
+                        center: { y: rowHeight / 2 },
+                        height: AD.UI.textFieldHeight
+                    });
                 }
                 
-                fieldView.addEventListener('focus', function() {
-                    // Keep track of which text field (or text area) is currently selected
-                    focusedTextField = fieldView;
-                });
+                fieldView.value = fieldValue;
                 
-                // Add the field to the row
-                fieldRow.add(this.record(field.labelId, fieldView));
-                rows.push(fieldRow);
-            }, this);
+                if (field.keyboardType) {
+                    fieldView.keyboardType = field.keyboardType;
+                }
+                if (field.autocapitalization) {
+                    fieldView.autocapitalization = field.autocapitalization;
+                }
+            }
             
+            fieldView.addEventListener('focus', function() {
+                // Keep track of which text field (or text area) is currently selected
+                focusedTextField = fieldView;
+            });
+            
+            // Add the field to the row
+            fieldRow.add(this.record(field.labelId, fieldView));
+            rows.push(fieldRow);
+            
+            if (!AD.Platform.isiPhone) {
+                table.add(fieldRow);
+            }
+        }, this);
+        
+        // On iPhone, hideKeyboard does not work when called from the window click
+        // handler, so workaround by calling hideKeybaord from the table click handler
+        if (AD.Platform.isiPhone) {
             // Create the fields table that holds the year, phone number, and email address fields
-            var table = this.add(Ti.UI.createTableView({
+            var iPhoneTable = this.add(Ti.UI.createTableView({
                 data: rows,
                 style: Ti.UI.iPhone.TableViewStyle.GROUPED
             }));
-            
-            var activeRow = null;
-            table.addEventListener('click', this.proxy(function(event) {
-                if (focusedTextField) {
-                    // Unfocus the previously selected text field to hide the keyboard
-                    focusedTextField.blur();
-                }
+            iPhoneTable.addEventListener('click', this.proxy(function(event) {
+                hideKeyboard();
                 
                 var field = this.fields[event.row.index];
                 if (field.type === 'choice') {
                     // When a choice row is clicked, call the callback that will presumably allow the user to choose a value
-                    // The callback can be a function or the name of function property on the window
-                    var callback = $.isFunction(field.callback) ? field.callback : this[field.callback];
-                    callback.call(this);
+                    field.callback();
                 }
-                
-                activeRow = event.row;
             }));
         }
         else {
-            this.add($headerView);
+            this.add(table);
             
-            fields.forEach(function(field, index) {
-                var labelId = field.toLowerCase() + 'Label';
-                var callback = this['change'+field];
-                
-                var top = 50 + index * 40;
-                var chooseButton = this.add(Ti.UI.createButton({
-                    left: 10,
-                    top: top,
-                    width: 80,
-                    height: AD.UI.buttonHeight,
-                    titleid: field.toLowerCase()
-                }));
-                chooseButton.addEventListener('click', this.proxy(callback));
-                this.record(labelId, Ti.UI.createLabel({
-                    left: 100,
-                    top: top,
-                    height: Ti.UI.SIZE,
-                    text: ''
-                }));
-            }, this);
+            // Click anywhere on the window to hide the keyboard
+            this.window.addEventListener('click', function(event) {
+                hideKeyboard();
+            });
             
-            this.add($footerView);
+            // Create the save button on the screen
+            var saveButton = Ti.UI.createButton({
+                left: AD.UI.padding,
+                top: AD.UI.padding,
+                width: AD.UI.useableScreenWidth,
+                height: AD.UI.buttonHeight * 1.5,
+                titleid: 'save'
+            });
+            table.add(saveButton);
+            saveButton.addEventListener('click', this.proxy('save'));
         }
     },
     
@@ -337,7 +387,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         $winChooseCampus.getDeferred().done(this.proxy(function(campusName) {
             // A campus was chosen
             this.contact.attr('contact_campus', campusName.label);
-            this.getChild('campusLabel').text = campusName.label;
+            var campusLabel = this.getChild('campusLabel');
+            campusLabel.text = campusLabel.title = campusName.label;
         }));
     },
     changeYear: function() {
@@ -352,7 +403,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             // A year was chosen
             this.contact.attr('year_id', yearData.index);
             this.contact.attr('year_label', yearData.label);
-            this.getChild('yearLabel').text = yearData.label;
+            var yearLabel = this.getChild('yearLabel');
+            yearLabel.text = yearLabel.title = yearData.label;
         }));
     },
     changePhone: function() {
@@ -367,7 +419,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             // A phone number was chosen
             this.contact.attr('contact_phone', phoneNumber.value);
             this.contact.attr('contact_phoneId', phoneNumber.id);
-            this.getChild('phoneLabel').text = phoneNumber.value;
+            var phoneLabel = this.getChild('phoneLabel');
+            phoneLabel.text = phoneLabel.title = phoneNumber.value;
         }));
     },
     changeEmail: function() {
@@ -382,7 +435,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             // An email address was chosen
             this.contact.attr('contact_email', emailAddress.value);
             this.contact.attr('contact_emailId', emailAddress.id);
-            this.getChild('emailLabel').text = emailAddress.value;
+            var emailLabel = this.getChild('emailLabel');
+            emailLabel.text = emailLabel.title = emailAddress.value;
         }));
     },
     

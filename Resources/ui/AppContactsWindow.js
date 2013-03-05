@@ -7,7 +7,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
         AD.PropertyStore.setDefault('sort_order', this.sortFields.map(function(field) { return field.field; }));
         this.indexedSortFields = $.indexArray(this.sortFields, 'field');
         $.ModelTable.addGroupProcessor('firstLetter', function(key) {
-            return key[0] ? key[0].toUpperCase() : '';
+            return key ? key[0].toUpperCase() : key;
         });
         $.ModelTable.addGroupProcessor('year', function(key) {
             return AD.Models.Year.cache.getById(key).year_label;
@@ -58,51 +58,49 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
     createRow: function(contact) {
         // Create a table view row that represents this contact
         var row = Ti.UI.createTableViewRow({
-            height: 60
+            height: 50
         });
         
-        var useableRowWidth = AD.UI.useableScreenWidth - 20; // 10 unit padding on each side and space for 'hasChild' arrow
-        
         // Create the contact name label
+        var nameRowHeight = 25;
         var nameFont = {fontWeight: 'bold', fontSize: 20};
         var nameLabel = Ti.UI.createLabel({
-            left: 10,
-            top: 5,
-            width: 200,
-            height: 24,
+            left: AD.UI.padding,
+            top: 0,
+            width: Ti.UI.SIZE,
+            height: nameRowHeight,
             text: '', // will be set by 'update'
             font: nameFont
         });
         row.add(nameLabel);
         // Create the contact year label
         var yearLabel = Ti.UI.createLabel({
-            left: 10,
-            top: 5,
-            width: AD.UI.useableScreenWidth - 10,
-            height: 'auto',
+            right: AD.UI.padding,
+            top: 0,
+            width: Ti.UI.SIZE,
+            height: nameRowHeight,
             text: '', // will be set by 'update'
             textAlign: 'right',
             font: AD.UI.Fonts.medium
         });
         row.add(yearLabel);
         
-        var firstRowHeight = 30;
         // Create the last step taken row which consists of the step name and date
         var lastUpdateStepLabel = Ti.UI.createLabel({
-            left: 30,
-            top: firstRowHeight,
-            width: useableRowWidth * 3 / 5,
-            height: 'auto',
+            left: AD.UI.padding * 3,
+            top: nameRowHeight,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
             text: '', // will be set by 'update'
             color: 'gray',
             font: AD.UI.Fonts.medium
         });
         row.add(lastUpdateStepLabel);
         var lastUpdateDateLabel = Ti.UI.createLabel({
-            left: 30,
-            top: firstRowHeight,
-            width: useableRowWidth - 20,
-            height: 'auto',
+            right: AD.UI.padding,
+            top: nameRowHeight,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
             text: '', // will be set by 'update'
             color: 'gray',
             textAlign: 'right',
@@ -118,7 +116,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             // Use space instead of empty string to work around iPhone quirk where label text is not updated when changed from an empty string
             var lastStepCompleted = contact.getLastStep();
             lastUpdateDateLabel.text = lastStepCompleted ? $.formatDate(lastStepCompleted.completionDate) : ' ';
-            lastUpdateStepLabel.text = lastStepCompleted ? L('step_'+lastStepCompleted.stepName) : ' ';
+            lastUpdateStepLabel.text = lastStepCompleted ? AD.Localize('step_'+lastStepCompleted.stepName) : ' ';
         };
         update();
         
@@ -214,6 +212,10 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
             this.updateTitle();
             this.open();
             this.smartBind(this.options.group, 'updated.attr', this.updateTitle);
+            this.smartBind(this.options.group, 'destroyed', function() {
+                // If the group is destroyed, close the window
+                this.dfd.reject();
+            });
         }
         else {
             // Update the window title after a little while so that the tab
@@ -239,7 +241,7 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
             this.window.title = this.options.group.attr('group_name') + ' - ' + contactCount;
         }
         else {
-            this.window.title = L('contactsTitle') + ' - ' + contactCount;
+            this.window.title = AD.Localize('contactsTitle') + ' - ' + contactCount;
         }
     },
     
@@ -248,7 +250,7 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
         var methods = this.constructor.addContactMethods;
         var dialog = Ti.UI.createOptionDialog({
             cancel: methods.length - 1,
-            options: methods.map(function(method) { return L(method.title); }),
+            options: methods.map(function(method) { return AD.Localize(method.title); }),
             titleid: 'addMethod'
         });
         var _this = this;

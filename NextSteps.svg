@@ -1,0 +1,23 @@
+<svg width="480" height="480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <!-- Created with SVG-edit - http://svg-edit.googlecode.com/ -->
+ <title>NextSteps</title>
+ <defs>
+  <linearGradient id="background-gradient" spreadMethod="pad" x2="0" y2="1">
+   <stop stop-color="#ff2200" offset="0"/>
+   <stop stop-color="#820000" offset="1"/>
+  </linearGradient>
+ </defs>
+ <g id="background">
+  <title>Background</title>
+  <rect x="0" y="0" width="480" height="480" stroke="#000000" stroke-width="3" fill="url(#background-gradient)"/>
+ </g>
+ <g id="foreground">
+  <title>NextSteps</title>
+  <text fill="#ffffff" x="-6" y="191" id="nextsteps-n" font-size="216" font-family="Skia">N</text>
+  <text fill="#ffffff" x="143" y="182" id="nextsteps-ext" font-size="108" font-family="Skia">EXT</text>
+  <text fill="#ffffff" x="114" y="347" id="nextsteps-s" font-size="216" font-family="Skia">S</text>
+  <text fill="#ffffff" x="216" y="329" id="nextsteps-teps" font-size="108" font-family="Skia">TEPS</text>
+  <path id="arrow-line" d="m125,413l122,0l0,-174l58,0l0,-173l92,0" stroke="#ffff00" stroke-width="15" fill="none"/>
+  <path id="arrow-head" d="m397,84l35,-18l-35,-18" fill="#ffff00"/>
+ </g>
+</svg>

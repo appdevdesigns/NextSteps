@@ -15,7 +15,8 @@
         // Shared model attributes
         _adModule:'nextSteps',
         _adModel:'Contact',
-        id:'contact_id',
+        id:'contact_guid',
+        autoIncrementKey:'contact_id',
         labelKey:'contact_firstName',
         _isMultilingual:false,
         //connectionType:'server', // optional field
@@ -35,6 +36,10 @@
         },
         
         attributes: {
+            contact_id: 'integer',
+            viewer_id: 'integer',
+            contact_recordId: 'integer',
+            contact_yearId: 'integer',
             contact_preEv: 'date',
             contact_conversation: 'date',
             contact_Gpresentation: 'date',
@@ -44,21 +49,6 @@
             contact_engaged: 'date',
             contact_ministering: 'date',
             contact_multiplying: 'date'
-        },
-        convert: {
-            date: function(raw) {
-                if (typeof raw === 'string') {
-                    var matches = raw.match(/(\d+)-(\d+)-(\d+)/);
-                    return new Date(matches[1], (+matches[2])-1, matches[3]);
-                } else if (raw instanceof Date) {
-                    return raw;
-                }
-            }
-        },
-        serialize: {
-            date: function(val, type) {
-                return val instanceof Date ? (val.getFullYear() + "-" + (val.getMonth() + 1) + "-" + val.getDate()) : null;
-            } 
         },
         // Calculate the stats information between startDate and endDate inclusive
         // The parameters can be set to null to remove that bound
@@ -89,7 +79,7 @@
                     var stepCompletionDate = contact[stepFieldName];
                     // The step must have been taken and between the start and end dates, if they were specified
                     if (stepCompletionDate && (!startDate || stepCompletionDate >= startDate) && (!endDate || stepCompletionDate <= endDate)) {
-                        stats[stepFieldName]++;
+                        ++stats[stepFieldName];
                     }
                 });
             });
@@ -105,7 +95,9 @@
             dbTable:'nextsteps_contact',
             modelFields: {
                   contact_id:"int(11) unsigned",
+                  contact_guid:"varchar(60)",
                   viewer_id:"int(11) unsigned",
+                  device_id:"text",
                   contact_recordId:"int(11) unsigned",
                   contact_firstName:"text",
                   contact_lastName:"text",
@@ -136,7 +128,7 @@
                     label: 'year_label'
                 }
             },
-            primaryKey:'contact_id'
+            primaryKey:'contact_guid'
         });
     }
     

@@ -15,25 +15,17 @@
         // Shared model attributes
         _adModule:'nextSteps',
         _adModel:'Group',
-        id:'group_id',
+        id:'group_guid',
+        autoIncrementKey:'group_id',
         labelKey:'group_name',
         _isMultilingual:false,
         //connectionType:'server', // optional field
         cache:true,
-
-        attributes: {
-            group_filter: 'JSON'
-        },
         
-        convert: {
-            JSON: function(raw) {
-                return (typeof raw === 'string') ? JSON.parse(raw) : raw;
-            }
-        },
-        serialize: {
-            JSON: function(val, type) {
-                return (typeof val === 'object') ? JSON.stringify(val) : val;
-            } 
+        attributes: {
+            group_id: 'integer',
+            viewer_id: 'integer',
+            group_filter: 'JSON'
         }
     };
     
@@ -44,12 +36,14 @@
             dbTable:'nextsteps_group',
             modelFields: {
                   group_id:"int(11) unsigned",
+                  group_guid:"varchar(60)",
                   viewer_id:"int(11) unsigned",
+                  device_id:"text",
                   group_name:"text",
                   group_filter:"text"
 
             },
-            primaryKey:'group_id'
+            primaryKey:'group_guid'
         });
     }
     

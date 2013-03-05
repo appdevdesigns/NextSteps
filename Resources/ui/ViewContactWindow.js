@@ -16,6 +16,24 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             var $winAddContactWindow = new AD.UI.AddContactWindow({tab: this.options.tab, operation: 'edit', existingContact: this.contact});
         },
         rightNavButton: true
+    }, {
+        title: 'del',
+        callback: function() {
+            // Close the window and delete the group
+            this.dfd.reject();
+            this.contact.destroy();
+        },
+        platform: 'Android'
+    }, {
+        callback: function() {
+            if (this.contactModified) {
+                // When the window is closed, if any of the contact's attributes have
+                // changed, save the updated contact information to the database
+                this.contact.save();
+            }
+        },
+        menuItem: false,
+        onClose: true
     }]
 }, {
     init: function(options) {
@@ -29,20 +47,12 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             autoOpen: true
         });
         
-        var contact = this.contact;
-        this.addEventListener('close', function() {
-            if (this.contactModified) {
-                // When the window is closed, if any of the contact's attributes have changed, save the updated contact information to the database
-                contact.save();
-            }
-        });
-        
-        this.smartBind(contact, 'updated.attr', function(property, value) {
+        this.smartBind(this.contact, 'updated.attr', function(property, value) {
             // Update the name label in case the name changed
             this.getChild('nameLabel').text = this.contact.getLabel();
             
             // Simulate a global model 'updated' event
-            $(contact.constructor).trigger('updated', contact);
+            $(this.contact.constructor).trigger('updated', this.contact);
         });
     },
     
@@ -51,14 +61,14 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         var contact = this.contact;
         
         // Show the contact's image if it exists
-        var localContact = Ti.Contacts.getPersonByID(contact.contact_recordId);
+        var localContact = contact.contact_recordId === null ? null : Ti.Contacts.getPersonByID(contact.contact_recordId);
         var contactImage = localContact && localContact.getImage();
         var imageExists = contactImage ? true : false;
         if (imageExists) {
             var dimensions = AD.UI.getImageScaledDimensions(contactImage, AD.UI.contactImageSize);
             this.add('contactImage', Ti.UI.createImageView({
-                left: 10,
-                top: 10,
+                left: AD.UI.padding,
+                top: AD.UI.padding,
                 width: dimensions.width,
                 height: dimensions.height,
                 image: contactImage
@@ -67,33 +77,33 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         
         // Create the contact label 
         var nameLabel = this.add('nameLabel', Ti.UI.createLabel({
-            left: 10 + (imageExists ? AD.UI.contactImageSize.width : 0),
-            top: 10,
+            left: AD.UI.padding + (imageExists ? AD.UI.contactImageSize.width : 0),
+            top: AD.UI.padding,
             width: AD.UI.useableScreenWidth - (imageExists ? AD.UI.contactImageSize.width : 0),
-            height: 27,
+            height: Ti.UI.SIZE,
             text: null,
             textAlign: 'center',
             font: AD.UI.Fonts.header
         }));
         
         var headerHeight = imageExists ? AD.UI.contactImageSize.height : 40;
-        var bodyTop = headerHeight + 10;
+        var bodyTop = headerHeight + AD.UI.padding;
         
         // Create the contact button bar which allows the user to call, SMS, or e-mail the contact
         if (AD.Platform.isiOS) {
             // Create a button bar under iOS
             var labels = this.constructor.contactMethods.map(function(method) {
                 return {
-                    title: L(method.label),
-                    enabled: contact.attr(method.field) !== null
+                    title: AD.Localize(method.label),
+                    enabled: contact.attr(method.field) ? true : false
                 };
             });
-            var contactBB = Titanium.UI.createButtonBar({
-                left: 10,
+            var contactBB = Ti.UI.createButtonBar({
+                left: AD.UI.padding,
                 top: bodyTop,
-                style: Titanium.UI.iPhone.SystemButtonStyle.BAR,
+                width: AD.UI.useableScreenWidth,
                 height: AD.UI.buttonHeight,
-                width: AD.UI.useableScreenWidth
+                style: Ti.UI.iPhone.SystemButtonStyle.BAR
             });
             this.addEventListener('open', function() {
                 // Set the labels AFTER the window opens because of a bug in Titanium
@@ -116,55 +126,38 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         else {
             // Create muliple buttons under any other platform
             
-            // Allow the user to call the contact
-            var callButton = Ti.UI.createButton({
-                top: bodyTop,
-                left: 10,
-                width: AD.UI.useableScreenWidth / 3 - 10,
-                height: AD.UI.buttonHeight,
-                titleid: 'contact_call'
-            });
-            callButton.addEventListener('click', this.proxy('callContact'));
-            this.add(callButton);
-            
-            // Allow the user to text the contact
-            var SMSButton = Ti.UI.createButton({
-                top: bodyTop,
-                left: 15 + AD.UI.useableScreenWidth / 3,
-                width: AD.UI.useableScreenWidth / 3 - 10,
-                height: AD.UI.buttonHeight,
-                titleid: 'contact_SMS'
-            });
-            SMSButton.addEventListener('click', this.proxy('SMSContact'));
-            this.add(SMSButton);
-            
-            // Allow the user to email the contact
-            var emailButton = Ti.UI.createButton({
-                top: bodyTop,
-                left: 20 + AD.UI.useableScreenWidth / 3 * 2,
-                width: AD.UI.useableScreenWidth / 3 - 10,
-                height: AD.UI.buttonHeight,
-                titleid: 'contact_email'
-            });
-            emailButton.addEventListener('click', this.proxy('emailContact'));
-            this.add(emailButton);
+            // The buttons are spaced evenly and horizontally with AD.UI.padding units of padding between them
+            var buttonWidth = AD.UI.useableScreenWidth / this.constructor.contactMethods.length - AD.UI.padding; 
+            this.constructor.contactMethods.forEach(function(method, index) {
+                var button = Ti.UI.createButton({
+                    top: bodyTop,
+                    left: AD.UI.padding + buttonWidth * index + AD.UI.padding / 2,
+                    width: buttonWidth,
+                    height: AD.UI.buttonHeight,
+                    titleid: method.label,
+                    enabled: contact.attr(method.field) ? true : false
+                });
+                button.addEventListener('click', this.proxy(method.callback));
+                this.add(button);
+            }, this);
         }
         
         // Create the steps view
         var $stepsView = $.View.create(Ti.UI.createScrollView({
-            top: bodyTop + 40,
+            top: bodyTop + AD.UI.buttonHeight + AD.UI.padding,
             left: 0,
             scrollType: 'vertical',
             contentHeight: 'auto',
             showVerticalScrollIndicator: true
         }));
+        var rowHeight = AD.UI.buttonHeight;
         var rowCount = 0;
         var _this = this;
         $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
             var $newRow = $.View.create(Ti.UI.createView({
                 left: 0,
-                top: rowCount * 40,
-                height: 40,
+                top: rowCount * rowHeight,
+                height: rowHeight,
                 borderWidth: 1,
                 borderColor: 'black'
             }));
@@ -172,11 +165,11 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             
             // Create the step title
             $newRow.add(Ti.UI.createLabel({
-                top: 5,
-                left: 10,
+                top: AD.UI.padding,
+                left: AD.UI.padding,
                 width: AD.UI.useableScreenWidth,
-                height: 'auto',
-                text: L('step_'+stepName),
+                height: Ti.UI.SIZE,
+                textid: 'step_'+stepName,
                 font: AD.UI.Fonts.medium
             }));
             
@@ -186,7 +179,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             // Create the switch to toggle the step's completion status
             var $completedCheckbox = new AD.UI.Checkbox({
                 createParams: {
-                    left: 10 + AD.UI.useableScreenWidth - AD.UI.Checkbox.defaultSize
+                    right: AD.UI.padding
                 },
                 value: stepCompleted
             });
@@ -203,9 +196,8 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             
             // Create the button to set the step completion date
             var dateButton = Ti.UI.createButton({
-                left: 10 + AD.UI.useableScreenWidth - 130,
-                top: 5,
-                width: 90,
+                right: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
+                width: AD.Platform.isiOS ? 90 : 60,
                 height: AD.UI.buttonHeight,
                 title: ''
             });

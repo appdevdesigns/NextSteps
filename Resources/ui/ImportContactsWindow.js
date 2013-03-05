@@ -34,8 +34,8 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     create: function() {
         // Explanatory text label
         this.add(Ti.UI.createLabel({
-            left: 10,
-            top: 10,
+            left: AD.UI.padding,
+            top: AD.UI.padding,
             width: Ti.UI.SIZE,
             height: Ti.UI.SIZE,
             textid: 'importHelp'
@@ -43,14 +43,14 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         
         // Create the contacts label choose contacts button
         this.add('contactsLabel', Ti.UI.createLabel({
-            left: 10,
-            top: 30,
+            left: AD.UI.padding,
+            top: AD.UI.padding * 2,
             width: Ti.UI.SIZE,
             height: Ti.UI.SIZE
         }));
         var chooseButton = this.add(Ti.UI.createButton({
-            left: 10,
-            top: 5,
+            left: AD.UI.padding,
+            top: AD.UI.padding / 2,
             width: 120,
             height: AD.UI.buttonHeight,
             titleid: 'unspecified'
@@ -58,57 +58,44 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         chooseButton.addEventListener('click', this.proxy('chooseContacts'));
         
         // Campus and year fields
-        var labelWidth = 80;
-        var fieldHeight = 40;
-        var $fieldsView = this.add($.View.create(Ti.UI.createView({
-            top: 20,
-            left: 0,
+        var fieldsView = this.add(Ti.UI.createView({
+            top: AD.UI.padding,
+            left: AD.UI.padding,
             width: Ti.UI.SIZE,
             height: Ti.UI.SIZE,
             layout: 'vertical'
-        })));
+        }));
+        var labelWidth = AD.Platform.isAndroid ? 40 : 80;
+        var fieldHeight = AD.UI.buttonHeight;
         this.constructor.fields.forEach(function(field, index) {
-            var $fieldView = $fieldsView.add($.View.create(Ti.UI.createView({
-                top: 0,
+            var fieldView = Ti.UI.createView({
+                top: AD.UI.padding,
                 left: 0,
                 width: Ti.UI.SIZE,
                 height: fieldHeight
-            })));
-            $fieldView.add(Ti.UI.createLabel({
-                left: 10,
-                top: 0,
+            });
+            fieldView.add(Ti.UI.createLabel({
+                left: 0,
                 width: labelWidth,
                 height: Ti.UI.SIZE,
                 textid: field
             }));
-            var chooseButton = this.record(field, $fieldView.add(Ti.UI.createButton({
-                left: 10 + labelWidth,
+            var chooseButton = Ti.UI.createButton({
+                left: labelWidth + AD.UI.padding,
                 top: 0,
                 width: 120,
                 height: AD.UI.buttonHeight
-            })));
+            });
             chooseButton.addEventListener('click', this.proxy('change'+$.capitalize(field)));
+            fieldView.add(this.record(field, chooseButton));
+            
+            fieldsView.add(fieldView);
         }, this);
-
-        // Create the import progress bar, which is initially hidden
-        this.add('importProgress', Ti.UI.createProgressBar({
-            top: 10,
-            center: {
-                x: AD.UI.screenWidth / 2
-            },
-            width: 180,
-            height: 40,
-            font: { fontSize: 14, fontWeight: 'bold' },
-            message: null,
-            visible: false
-        }));
         
         // Create the import button
         var importButton = this.add('importButton', Ti.UI.createButton({
-            top: -40,
-            center: {
-                x: AD.UI.screenWidth / 2
-            },
+            top: AD.UI.padding * 2,
+            center: { x: AD.UI.screenWidth / 2 }, // horizontally centered
             width: 120,
             height: AD.UI.buttonHeight,
             titleid: 'importTitle'
@@ -116,11 +103,22 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         importButton.addEventListener('click', this.proxy(function() {
             this.validate().done(this.proxy('import'));
         }));
+        
+        // Create the import progress bar, which is initially hidden
+        this.add('importProgress', Ti.UI.createProgressBar({
+            top: -AD.UI.buttonHeight, // display on top of the import button
+            center: { x: AD.UI.screenWidth / 2 }, // horizontally centered
+            width: AD.UI.screenWidth * 0.75,
+            height: 40,
+            font: { fontSize: 14, fontWeight: 'bold' },
+            message: '',
+            visible: false
+        }));
     },
     
     // Set the initial contents of the form fields
     initialize: function() {
-        this.getChild('campus').title = L('unspecified');
+        this.getChild('campus').title = AD.Localize('unspecified');
         this.getChild('year').title = AD.Models.Year.cache.getById(this.year).year_label;
         
         this.updateContactsView();
@@ -183,11 +181,11 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             return !this[field];
         }, this);
         if (this.contacts.length === 0) {
-            alert(L('importNoContacts'));
+            alert(AD.Localize('importNoContacts'));
             warnDfd.reject();
         }
         else if (missingFields.length > 0) {
-            var warning = $.formatString('importWarning', missingFields.join(' '+L('or')+' '));
+            var warning = $.formatString('importWarning', missingFields.join(' '+AD.Localize('or')+' '));
             AD.UI.yesNoAlert(warning).then(warnDfd.resolve, warnDfd.reject);
         }
         else {
