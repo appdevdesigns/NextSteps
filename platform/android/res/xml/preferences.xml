@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Preferences">
+	<PreferenceScreen
+        android:title="Sync"
+        android:summary="Sync data with server">
+		<CheckBoxPreference
+		    android:title="Enable"
+            android:defaultValue="false"
+            android:summary="Enable sync"
+            android:key="sync_enabled_preference" />
+		<EditTextPreference
+		    android:title="Server URL"
+            android:defaultValue=""
+            android:summary="URL of the server to sync with"
+            android:key="server_url_preference" />
+	</PreferenceScreen>
+	<PreferenceScreen
+        android:title="Stats Reporting"
+        android:summary="Click to see more options">
+		<CheckBoxPreference
+		    android:title="Send stats email"
+            android:defaultValue="false"
+            android:summary="Enable stats reporting via email"
+            android:key="send_stats_email_preference" />
+		<EditTextPreference
+		    android:title="Email address"
+            android:defaultValue=""
+            android:summary="Address to send stats reports to"
+            android:key="send_stats_email_address_preference" />
+	</PreferenceScreen>
+</PreferenceScreen>
