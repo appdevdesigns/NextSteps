@@ -17,7 +17,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         this.contacts = [];
         
         this.campus = '';
-        this.year = 0;
+        this.year = 1;
         
         // Initialize the base $.Window object
         this._super({
