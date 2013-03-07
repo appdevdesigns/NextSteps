@@ -48,8 +48,8 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         });
         
         this.smartBind(this.contact, 'updated.attr', function(property, value) {
-            // Update the name label in case the name changed
-            this.getChild('nameLabel').text = this.contact.getLabel();
+            // Re-initialize the name label and contact buttons
+            this.initialize();
             
             // Simulate a global model 'updated' event
             $(this.contact.constructor).trigger('updated', this.contact);
@@ -92,25 +92,19 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         // Create the contact button bar which allows the user to call, SMS, or e-mail the contact
         if (AD.Platform.isiOS) {
             // Create a button bar under iOS
-            var labels = this.constructor.contactMethods.map(function(method) {
-                return {
-                    title: AD.Localize(method.label),
-                    enabled: contact.attr(method.field) ? true : false
-                };
+            this.contactBBLabels = this.constructor.contactMethods.map(function(method) {
+                return $.extend({
+                    title: AD.Localize(method.label)
+                }, method);
             });
-            var contactBB = Ti.UI.createButtonBar({
+            var contactBB = this.add('contactBB', Ti.UI.createButtonBar({
                 left: AD.UI.padding,
                 top: bodyTop,
                 width: AD.UI.useableScreenWidth,
                 height: AD.UI.buttonHeight,
-                style: Ti.UI.iPhone.SystemButtonStyle.BAR
-            });
-            this.addEventListener('open', function() {
-                // Set the labels AFTER the window opens because of a bug in Titanium
-                // See http://developer.appcelerator.com/question/124468/how-to-disable-buttons-in-tabbed-bar
-                contactBB.labels = labels;
-            });
-            
+                style: Ti.UI.iPhone.SystemButtonStyle.BAR,
+                labels: this.contactBBLabels
+            }));
             contactBB.addEventListener('click', this.proxy(function(event) {
                 var callbackName = this.constructor.contactMethods[event.index].callback;
                 // callbackName will be undefined if event.index is null
@@ -121,7 +115,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                     callback.call(this);
                 }
             }));
-            this.add(contactBB);
         }
         else {
             // Create muliple buttons under any other platform
@@ -129,16 +122,14 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             // The buttons are spaced evenly and horizontally with AD.UI.padding units of padding between them
             var buttonWidth = AD.UI.useableScreenWidth / this.constructor.contactMethods.length - AD.UI.padding; 
             this.constructor.contactMethods.forEach(function(method, index) {
-                var button = Ti.UI.createButton({
+                var button = this.add(method.label, Ti.UI.createButton($.extend({
                     top: bodyTop,
                     left: AD.UI.padding + buttonWidth * index + AD.UI.padding / 2,
                     width: buttonWidth,
                     height: AD.UI.buttonHeight,
-                    titleid: method.label,
-                    enabled: contact.attr(method.field) ? true : false
-                });
+                    titleid: method.label
+                }, method)));
                 button.addEventListener('click', this.proxy(method.callback));
-                this.add(button);
             }, this);
         }
         
@@ -237,6 +228,22 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     // Initialize the child views
     initialize: function() {
         this.getChild('nameLabel').text = this.contact.getLabel();
+        
+        // Update the enabled status of each of the contact buttons
+        
+        // Extract the button array
+        var buttons = AD.Platform.isiOS ? this.contactBBLabels : this.constructor.contactMethods.map(function(method) {
+            return this.getChild(method.label);
+        }, this);
+        buttons.forEach(function(button) {
+            button.enabled = this.contact.attr(button.field) ? true : false;
+            console.log('button = '+JSON.stringify(button));
+            //console.log('button.enabled = '+button.enabled);
+        }, this);
+        if (AD.Platform.isiOS) {
+            // Force the button bar to recognize the new button states
+            this.getChild('contactBB').labels = buttons;
+        }
     },
     
     // Helper functions that allow the user to contact the contact via telephone, SMS, or e-mail
