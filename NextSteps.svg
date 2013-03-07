@@ -2,7 +2,7 @@
  <!-- Created with SVG-edit - http://svg-edit.googlecode.com/ -->
  <title>NextSteps</title>
  <defs>
-  <linearGradient id="background-gradient" spreadMethod="pad" x2="0" y2="1">
+  <linearGradient id="background-gradient" spreadMethod="pad" x2="0" y2="100%">
    <stop stop-color="#ff2200" offset="0"/>
    <stop stop-color="#820000" offset="1"/>
   </linearGradient>
