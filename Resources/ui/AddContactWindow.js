@@ -396,12 +396,12 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         var $winChooseYear = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'year',
-            initial: this.contact.year_id,
+            initial: this.contact.year_id - 1,
             options: this.constructor.years
         });
         $winChooseYear.getDeferred().done(this.proxy(function(yearData) {
             // A year was chosen
-            this.contact.attr('year_id', yearData.index);
+            this.contact.attr('year_id', yearData.index + 1);
             this.contact.attr('year_label', yearData.label);
             var yearLabel = this.getChild('yearLabel');
             yearLabel.text = yearLabel.title = yearData.label;

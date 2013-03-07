@@ -153,12 +153,12 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         var $winChooseYear = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'year',
-            initial: this.year,
+            initial: this.year - 1,
             options: AD.UI.AddContactWindow.years
         });
         $winChooseYear.getDeferred().done(this.proxy(function(yearData) {
             // A year was chosen
-            this.year = yearData.index;
+            this.year = yearData.index + 1;
             this.getChild('year').title = yearData.label;
         }));
     },
@@ -176,10 +176,13 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     // Validate the contacts
     validate: function() {
         var warnDfd = $.Deferred();
-        var missingFields = this.constructor.fields.filter(function(field) {
-            // Filter out all fields that have a 'truthy' value
-            return !this[field];
-        }, this);
+        var missingFields = [];
+        if (!this.campus) {
+            missingFields.push('campus');
+        }
+        if (this.year === 1) {
+            missingFields.push('year');
+        }
         if (this.contacts.length === 0) {
             alert(AD.Localize('importNoContacts'));
             warnDfd.reject();
