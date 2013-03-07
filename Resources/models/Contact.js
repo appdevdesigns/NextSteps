@@ -39,7 +39,7 @@
             contact_id: 'integer',
             viewer_id: 'integer',
             contact_recordId: 'integer',
-            contact_yearId: 'integer',
+            year_id: 'integer',
             contact_preEv: 'date',
             contact_conversation: 'date',
             contact_Gpresentation: 'date',
