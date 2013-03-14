@@ -198,7 +198,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     
     // Create each of the form fields
     create: function() {
-        var labelWidth = AD.Platform.isiPhone ? 80 : 60;
+        var labelWidth = 80;
         var rowHeight = 40;
         
         var focusedTextField = null;
