@@ -6,6 +6,10 @@ Resources/appdev
 Resources/AppDev.js
 Resources/jquery.js
 Resources/models/Viewer.js
+Resources/images/checkbox-checked.png
+Resources/images/checkbox-unchecked.png
+Resources/images/info.png
+Resources/images/info@2x.png
 Resources/ui/AboutWindow.js
 Resources/ui/AppInfoWindow.js
 Resources/ui/AppTabGroup.js
