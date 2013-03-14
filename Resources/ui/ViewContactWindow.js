@@ -210,6 +210,9 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             
             // Update the checkbox image and the title and visibility of the dateButton
             var updateRow = function() {
+                console.log('Updating row...');
+                console.log(stepCompleted);
+                console.log(stepCompletedDate);
                 if (stepCompleted) {
                     dateButton.visible = true;
                     dateButton.title = $.formatDate(stepCompletedDate);
@@ -237,8 +240,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         }, this);
         buttons.forEach(function(button) {
             button.enabled = this.contact.attr(button.field) ? true : false;
-            console.log('button = '+JSON.stringify(button));
-            //console.log('button.enabled = '+button.enabled);
         }, this);
         if (AD.Platform.isiOS) {
             // Force the button bar to recognize the new button states
