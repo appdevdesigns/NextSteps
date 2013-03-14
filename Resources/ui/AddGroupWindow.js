@@ -206,11 +206,10 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             });
         }
         else if (fieldDefinition.type === 'choice') {
-            var buttonSize = AD.Platform.isAndroid ? 80 : 120;
             var $valueButton = $valueView = $.View.create(Ti.UI.createButton({
                 right: AD.UI.padding,
                 top: AD.UI.padding / 2,
-                width: buttonSize,
+                width: 120,
                 height: AD.UI.buttonHeight
             }));
             var valueButton = $valueButton.getView();

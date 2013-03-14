@@ -65,7 +65,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             height: Ti.UI.SIZE,
             layout: 'vertical'
         }));
-        var labelWidth = AD.Platform.isAndroid ? 40 : 80;
+        var labelWidth = 80;
         var fieldHeight = AD.UI.buttonHeight;
         this.constructor.fields.forEach(function(field, index) {
             var fieldView = Ti.UI.createView({

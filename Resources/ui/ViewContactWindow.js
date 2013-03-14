@@ -188,7 +188,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             // Create the button to set the step completion date
             var dateButton = Ti.UI.createButton({
                 right: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
-                width: AD.Platform.isiOS ? 90 : 60,
+                width: 90,
                 height: AD.UI.buttonHeight,
                 title: ''
             });
