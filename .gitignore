@@ -6,6 +6,10 @@ Resources/appdev
 Resources/AppDev.js
 Resources/jquery.js
 Resources/models/Viewer.js
+Resources/images/arrow-down.png
+Resources/images/arrow-down@2x.png
+Resources/images/arrow-up.png
+Resources/images/arrow-up@2x.png
 Resources/images/checkbox-checked.png
 Resources/images/checkbox-unchecked.png
 Resources/images/info.png
