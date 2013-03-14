@@ -120,11 +120,12 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             // Create muliple buttons under any other platform
             
             // The buttons are spaced evenly and horizontally with AD.UI.padding units of padding between them
-            var buttonWidth = AD.UI.useableScreenWidth / this.constructor.contactMethods.length - AD.UI.padding; 
+            var buttonCount = this.constructor.contactMethods.length;
+            var buttonWidth = (AD.UI.useableScreenWidth - (buttonCount - 1) * AD.UI.padding) / buttonCount;
             this.constructor.contactMethods.forEach(function(method, index) {
                 var button = this.add(method.label, Ti.UI.createButton($.extend({
                     top: bodyTop,
-                    left: AD.UI.padding + buttonWidth * index + AD.UI.padding / 2,
+                    left: AD.UI.padding + (buttonWidth + AD.UI.padding) * index,
                     width: buttonWidth,
                     height: AD.UI.buttonHeight,
                     titleid: method.label
