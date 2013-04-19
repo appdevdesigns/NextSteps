@@ -2,10 +2,10 @@
 .settings/
 build.log
 build/
+# AppDev resources start
 Resources/appdev
 Resources/AppDev.js
 Resources/jquery.js
-Resources/models/Viewer.js
 Resources/images/arrow-down.png
 Resources/images/arrow-down@2x.png
 Resources/images/arrow-up.png
@@ -14,7 +14,7 @@ Resources/images/checkbox-checked.png
 Resources/images/checkbox-unchecked.png
 Resources/images/info.png
 Resources/images/info@2x.png
-Resources/ui/AboutWindow.js
+Resources/models/Viewer.js
 Resources/ui/AppInfoWindow.js
 Resources/ui/AppTabGroup.js
 Resources/ui/Checkbox.js
@@ -29,3 +29,4 @@ Resources/ui/SortOrderWindow.js
 Resources/ui/StringPromptWindow.js
 Resources/ui/View.js
 Resources/ui/Window.js
+# AppDev resources end
