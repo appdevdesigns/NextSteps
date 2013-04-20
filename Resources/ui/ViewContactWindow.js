@@ -211,9 +211,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             
             // Update the checkbox image and the title and visibility of the dateButton
             var updateRow = function() {
-                console.log('Updating row...');
-                console.log(stepCompleted);
-                console.log(stepCompletedDate);
                 if (stepCompleted) {
                     dateButton.visible = true;
                     dateButton.title = $.formatDate(stepCompletedDate);
