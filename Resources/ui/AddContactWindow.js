@@ -42,7 +42,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 // Android does not allow access to the firstName, lastName, or nickname properties, so attempt to guess them
                 var nameParts = localContact.fullName.split(' ');
                 firstName = firstName || nameParts[0];
-                lastName = lastName || nameParts[nameParts.length - 1];
+                lastName = lastName || (nameParts.length === 1 ? '' : nameParts[nameParts.length - 1]);
                 nickname = nickname || firstName;
             }
             defaultPhone = this.getDefaultFromMultivalue(localContact.getPhone(), ['iPhone', 'mobile', 'home']);

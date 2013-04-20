@@ -19,9 +19,11 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     }, {
         title: 'del',
         callback: function() {
-            // Close the window and delete the group
-            this.dfd.reject();
-            this.contact.destroy();
+            AD.UI.yesNoAlert('contactDeleteConfirmation').done(this.proxy(function() {
+                // The user chose "Yes", so close the window and delete the contact
+                this.dfd.reject();
+                this.contact.destroy();
+            }));
         },
         platform: 'Android'
     }, {
@@ -76,7 +78,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         }
         
         // Create the contact label 
-        var nameLabel = this.add('nameLabel', Ti.UI.createLabel({
+        this.add('nameLabel', Ti.UI.createLabel({
             left: AD.UI.padding + (imageExists ? AD.UI.contactImageSize.width : 0),
             top: AD.UI.padding,
             width: AD.UI.useableScreenWidth - (imageExists ? AD.UI.contactImageSize.width : 0),
@@ -87,7 +89,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         }));
         
         var headerHeight = imageExists ? AD.UI.contactImageSize.height : 40;
-        var bodyTop = headerHeight + AD.UI.padding;
+        var bodyTop = headerHeight + AD.UI.padding * 2;
         
         // Create the contact button bar which allows the user to call, SMS, or e-mail the contact
         if (AD.Platform.isiOS) {
@@ -211,9 +213,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             
             // Update the checkbox image and the title and visibility of the dateButton
             var updateRow = function() {
-                console.log('Updating row...');
-                console.log(stepCompleted);
-                console.log(stepCompletedDate);
                 if (stepCompleted) {
                     dateButton.visible = true;
                     dateButton.title = $.formatDate(stepCompletedDate);
