@@ -227,7 +227,7 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
                     steps += line+'\n';
                 });
                 var messageBody = $.formatString('statsMessageBody', Ti.Platform.username, $.formatDate(today), steps);
-                Ti.API.log(messageBody);
+                console.log(messageBody);
                 
                 var address = Ti.App.Properties.getString('send_stats_email_address_preference');
                 var emailDialog = Ti.UI.createEmailDialog({

@@ -162,7 +162,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 var contact = null;
                 if (existingContacts.length > 0) {
                     if (existingContacts.length > 1) {
-                        Ti.API.warn('Found multiple contacts with the same recordId!');
+                        console.warn('Found multiple contacts with the same recordId!');
                     }
                     // A contact was chosen that already exists, so edit the contact
                     contact = existingContacts[0];

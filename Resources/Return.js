@@ -6,7 +6,7 @@ var core = require('com.yydigital.coretelephony');
 var timer = setInterval(function() {
     // Get the array of current calls
     var outstandingCalls = core.getCurrentCalls();
-    Ti.API.log('outstandingCalls: '+outstandingCalls);
+    console.log('outstandingCalls: '+outstandingCalls);
     if (!outstandingCalls) {
         // Popup one second after ALL calls have ended
         var notification = Ti.App.iOS.scheduleLocalNotification({
