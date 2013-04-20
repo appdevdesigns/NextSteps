@@ -63,9 +63,11 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     }, {
         title: 'del',
         callback: function() {
-            // Close the window and delete the group
-            this.dfd.reject();
-            this.group.destroy();
+            AD.UI.yesNoAlert('groupDeleteConfirmation').done(this.proxy(function() {
+                // The user chose "Yes", so close the window and delete the group
+                this.dfd.reject();
+                this.group.destroy();
+            }));
         },
         enabled: function() {
             return !this.adding;

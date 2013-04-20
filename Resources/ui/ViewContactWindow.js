@@ -19,9 +19,11 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     }, {
         title: 'del',
         callback: function() {
-            // Close the window and delete the group
-            this.dfd.reject();
-            this.contact.destroy();
+            AD.UI.yesNoAlert('contactDeleteConfirmation').done(this.proxy(function() {
+                // The user chose "Yes", so close the window and delete the contact
+                this.dfd.reject();
+                this.contact.destroy();
+            }));
         },
         platform: 'Android'
     }, {
