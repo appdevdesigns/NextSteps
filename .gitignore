@@ -18,7 +18,6 @@ Resources/models/Viewer.js
 Resources/ui/AppInfoWindow.js
 Resources/ui/AppTabGroup.js
 Resources/ui/Checkbox.js
-Resources/ui/ChooseContactsWindow.js
 Resources/ui/ChooseOptionWindow.js
 Resources/ui/DatePickerWindow.js
 Resources/ui/ErrorWindow.js
