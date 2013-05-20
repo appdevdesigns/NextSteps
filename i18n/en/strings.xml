@@ -103,8 +103,6 @@
     <string name="importWarning">You have not specified a {0}.  Would you like to import anyway?</string>
     <string name="or">or</string>
     
-    <string name="chooseContactsTitle">Choose Contacts</string>
-    
     <!-- Groups labels -->
     <string name="addGroup">Add Group</string>
     <string name="editGroup">Edit Group</string>
