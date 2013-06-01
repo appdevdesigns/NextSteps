@@ -42,8 +42,8 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
     create: function() {
         // Create the header label
         this.add('headerLabel', Ti.UI.createLabel({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: Ti.UI.SIZE,
             height: Ti.UI.SIZE,
             text: '',
@@ -64,8 +64,8 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         if (this.footerPresent) {
             // Create the abstract footer view
             this.add('footerView', Ti.UI.createView({
-                bottom: AD.UI.padding,
                 left: 0,
+                bottom: AD.UI.padding,
                 width: AD.UI.screenWidth,
                 height: this.footerHeight
             }));
@@ -111,8 +111,8 @@ var StatRow = $.View('AppDev.UI.StatRow', {
     init: function(options) {
         // Create the stat row containing view
         var rowView = Ti.UI.createView({
-            top: this.options.index * this.constructor.rowHeight,
             left: AD.UI.padding,
+            top: this.options.index * this.constructor.rowHeight,
             width: AD.UI.useableScreenWidth,
             height: this.constructor.rowHeight,
             backgroundColor: (this.options.index % 2 === 0) ? 'white' : '#CCC' // alternate background colors
@@ -179,8 +179,8 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
         
         // Create the view totals button
         var viewTotalsButton = this.record('viewTotals', Ti.UI.createButton({
-            top: 0,
             left: AD.UI.padding,
+            top: 0,
             width: AD.UI.screenWidth / 2 - AD.UI.padding * 2,
             height: AD.UI.buttonHeight,
             titleid: 'viewTotals',
@@ -193,8 +193,8 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
         
         // Create the save button
         var saveButton = Ti.UI.createButton({
-            top: 0,
             right: AD.UI.padding,
+            top: 0,
             width: AD.UI.screenWidth / 2 - AD.UI.padding * 2,
             height: AD.UI.buttonHeight,
             titleid: 'saveStats'

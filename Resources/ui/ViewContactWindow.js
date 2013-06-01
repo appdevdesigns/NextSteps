@@ -126,8 +126,8 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             var buttonWidth = (AD.UI.useableScreenWidth - (buttonCount - 1) * AD.UI.padding) / buttonCount;
             this.constructor.contactMethods.forEach(function(method, index) {
                 var button = this.add(method.label, Ti.UI.createButton($.extend({
-                    top: bodyTop,
                     left: AD.UI.padding + (buttonWidth + AD.UI.padding) * index,
+                    top: bodyTop,
                     width: buttonWidth,
                     height: AD.UI.buttonHeight,
                     titleid: method.label
@@ -159,8 +159,8 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             
             // Create the step title
             $newRow.add(Ti.UI.createLabel({
-                top: AD.UI.padding,
                 left: AD.UI.padding,
+                top: AD.UI.padding,
                 width: AD.UI.useableScreenWidth,
                 height: Ti.UI.SIZE,
                 textid: 'step_'+stepName,

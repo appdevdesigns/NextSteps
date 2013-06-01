@@ -59,8 +59,8 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         
         // Campus and year fields
         var fieldsView = this.add(Ti.UI.createView({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: Ti.UI.SIZE,
             height: Ti.UI.SIZE,
             layout: 'vertical'
@@ -69,8 +69,8 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         var fieldHeight = AD.UI.buttonHeight;
         this.constructor.fields.forEach(function(field, index) {
             var fieldView = Ti.UI.createView({
-                top: AD.UI.padding,
                 left: 0,
+                top: AD.UI.padding,
                 width: Ti.UI.SIZE,
                 height: fieldHeight
             });

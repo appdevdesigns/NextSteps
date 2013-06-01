@@ -129,8 +129,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         
         // Create the scrollable group fields container
         var $fieldsView = this.add('fieldsView', $.View.create(Ti.UI.createScrollView({
-            top: AD.UI.padding,
             left: 0,
+            top: AD.UI.padding,
             width: AD.UI.screenWidth,
             height: Ti.UI.FILL,
             layout: 'vertical',
@@ -153,8 +153,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         
         // Create the field row container
         var $fieldRow = $.View.create(Ti.UI.createView({
-            top: 0,
             left: 0,
+            top: 0,
             width: AD.UI.screenWidth,
             height: this.constructor.rowHeight
         }));
@@ -162,8 +162,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         // Create the checkbox to toggle whether this field is included in the group
         var $enabledCheckbox = $fieldRow.add('enabled', new AD.UI.Checkbox({
             createParams: {
-                top: AD.UI.padding / 2,
-                left: AD.UI.padding
+                left: AD.UI.padding,
+                top: AD.UI.padding / 2
             },
             value: false
         }));
@@ -175,8 +175,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         
         // Create the field name label
         $fieldRow.add(Ti.UI.createLabel({
-            top: 0,
             left: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
+            top: 0,
             width: Ti.UI.SIZE,
             height: Ti.UI.FILL,
             text: AD.Localize(fieldDefinition.name),
@@ -190,8 +190,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             // Create the checkbox to toggle the value of this field
             var $valueCheckbox = $valueView = new AD.UI.Checkbox({
                 createParams: {
-                    top: AD.UI.padding / 2,
-                    right: AD.UI.padding
+                    right: AD.UI.padding,
+                    top: AD.UI.padding / 2
                 },
                 value: false
             });

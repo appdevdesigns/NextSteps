@@ -212,8 +212,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
 
         // Scrollable container that will hold the field rows on non-iPhone platforms
         var table = Ti.UI.createScrollView({
-            top: 0,
             left: 0,
+            top: 0,
             width: AD.UI.screenWidth,
             height: Ti.UI.FILL,
             layout: 'vertical',
