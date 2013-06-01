@@ -137,24 +137,23 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         
         // Create the steps view
         var $stepsView = $.View.create(Ti.UI.createScrollView({
-            top: bodyTop + AD.UI.buttonHeight + AD.UI.padding,
             left: 0,
+            top: bodyTop + AD.UI.buttonHeight + AD.UI.padding,
+            layout: 'vertical',
             scrollType: 'vertical',
             contentHeight: 'auto',
             showVerticalScrollIndicator: true
         }));
         var rowHeight = AD.UI.buttonHeight;
-        var rowCount = 0;
         var _this = this;
         $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
             var $newRow = $.View.create(Ti.UI.createView({
                 left: 0,
-                top: rowCount * rowHeight,
+                top: 0,
                 height: rowHeight,
                 borderWidth: 1,
                 borderColor: 'black'
             }));
-            ++rowCount;
             
             // Create the step title
             $newRow.add(Ti.UI.createLabel({
