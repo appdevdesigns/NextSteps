@@ -135,16 +135,16 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         var $winChooseCampus = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'campus',
-            initial: campuses.indexOf(this.campus),
+            initial: this.campus,
             options: campuses,
             editable: true,
             onOptionsUpdate: function(campusesNew) {
                 AD.PropertyStore.set('campuses', campusesNew);
             }
         });
-        $winChooseCampus.getDeferred().done(this.proxy(function(campusName) {
+        $winChooseCampus.getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
-            this.getChild('campus').title = this.campus = campusName.label;
+            this.getChild('campus').title = this.campus = campus.value;
         }));
     },
     changeYear: function() {
@@ -155,10 +155,10 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             initial: this.year - 1,
             options: AD.UI.AddContactWindow.years
         });
-        $winChooseYear.getDeferred().done(this.proxy(function(yearData) {
+        $winChooseYear.getDeferred().done(this.proxy(function(year) {
             // A year was chosen
-            this.year = yearData.index + 1;
-            this.getChild('year').title = yearData.label;
+            this.year = year.index + 1;
+            this.getChild('year').title = year.value;
         }));
     },
     

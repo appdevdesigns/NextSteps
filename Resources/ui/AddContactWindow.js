@@ -374,7 +374,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         var $winChooseCampus = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'campus',
-            initial: campuses.indexOf(this.contact.contact_campus),
+            initial: this.contact.contact_campus,
             options: campuses,
             editable: true,
             onOptionsUpdate: function(campusesNew) {
@@ -382,11 +382,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 AD.PropertyStore.set('campuses', campusesNew);
             }
         });
-        $winChooseCampus.getDeferred().done(this.proxy(function(campusName) {
+        $winChooseCampus.getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
-            this.contact.attr('contact_campus', campusName.label);
+            this.contact.attr('contact_campus', campus.value);
             var campusLabel = this.getChild('campusLabel');
-            campusLabel.text = campusLabel.title = campusName.label;
+            campusLabel.text = campusLabel.title = campus.value;
         }));
     },
     changeYear: function() {
@@ -397,12 +397,14 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             initial: this.contact.year_id - 1,
             options: this.constructor.years
         });
-        $winChooseYear.getDeferred().done(this.proxy(function(yearData) {
+        $winChooseYear.getDeferred().done(this.proxy(function(year) {
             // A year was chosen
-            this.contact.attr('year_id', yearData.index + 1);
-            this.contact.attr('year_label', yearData.label);
+            var year_label = year.value;
+            var year_id = year.index + 1;
+            this.contact.attr('year_id', year_id);
+            this.contact.attr('year_label', year_label);
             var yearLabel = this.getChild('yearLabel');
-            yearLabel.text = yearLabel.title = yearData.label;
+            yearLabel.text = yearLabel.title = year_label;
         }));
     },
     changePhone: function() {

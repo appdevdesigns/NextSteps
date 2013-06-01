@@ -219,12 +219,12 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 var $winChooseOption = new AD.UI.ChooseOptionWindow($.extend({
                     tab: _this.tab,
                     groupName: fieldDefinition.name,
-                    initial: options.indexOf(fields[fieldName].value),
+                    initial: fields[fieldName].value,
                     options: options
                 }, fieldDefinition.params));
-                $winChooseOption.getDeferred().done(function(campusData) {
-                    // A campus was chosen, so set the value of the field in the filter
-                    valueButton.title = fields[fieldName].value = campusData.label;
+                $winChooseOption.getDeferred().done(function(option) {
+                    // An option was chosen, so set the value of the field in the filter
+                    valueButton.title = fields[fieldName].value = option.value;
                 });
             });
             $enabledCheckbox.addEventListener('change', function(event) {
