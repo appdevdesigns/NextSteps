@@ -92,7 +92,7 @@
     
     <!-- ImportContacts labels -->
     <string name="importContactsTitle">Mass Import</string>
-    <string name="importHelp">Choose the contacts that you want to import, choose the year and campus to be applied to the contacts, the click import.</string>
+    <string name="importHelp">Choose the contacts that you want to import, choose the year and campus to be applied to the contacts, then click import.</string>
     <string name="importTitle">Import</string>
     <string name="importingContacts">Contacts to import - {0}</string>
     <string name="importStatus">Importing contact {0} of {1}</string>
