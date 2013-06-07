@@ -162,13 +162,13 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
     
     addContactMethods: [
         {title: 'create', callback: function() {
-            var $winAddContactWindow = new AD.UI.AddContactWindow({ tab: this.options.tab, operation: 'create' });
+            var $winAddContactWindow = new AD.UI.AddContactWindow({ tab: this.tab, operation: 'create' });
         }},
         {title: 'importTitle', callback: function() {
-            var $winAddContactWindow = new AD.UI.AddContactWindow({ tab: this.options.tab, operation: 'import' });
+            var $winAddContactWindow = new AD.UI.AddContactWindow({ tab: this.tab, operation: 'import' });
         }},
         {title: 'massImport', callback: function() {
-            var $winImportContactsWindow = new AD.UI.ImportContactsWindow({ tab: this.options.tab });
+            var $winImportContactsWindow = new AD.UI.ImportContactsWindow({ tab: this.tab });
         }},
         {title: 'cancel'}
     ],
@@ -184,9 +184,9 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
     }, {
         title: 'sort',
         callback: function() {
-            // Allow the user to specify the conact sort order
+            // Allow the user to specify the contact sort order
             var $winSortOrder = new AD.UI.SortOrderWindow({
-                tab: this.options.tab,
+                tab: this.tab,
                 fields: ContactTable.sortFields,
                 order: AD.PropertyStore.get('sort_order')
             });

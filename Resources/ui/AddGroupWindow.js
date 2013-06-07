@@ -219,7 +219,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 // If fieldDefinition.data is a function execute it to get the true data
                 var options = $.isFunction(fieldDefinition.data) ? fieldDefinition.data() : fieldDefinition.data;
                 var $winChooseOption = new AD.UI.ChooseOptionWindow($.extend({
-                    tab: _this.options.tab,
+                    tab: _this.tab,
                     groupName: fieldDefinition.name,
                     initial: options.indexOf(fields[fieldName].value),
                     options: options

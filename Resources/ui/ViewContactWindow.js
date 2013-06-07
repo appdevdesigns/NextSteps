@@ -13,7 +13,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         title: 'edit',
         callback: function() {
             // Open the EditContact window
-            var $winAddContactWindow = new AD.UI.AddContactWindow({tab: this.options.tab, operation: 'edit', existingContact: this.contact});
+            var $winAddContactWindow = new AD.UI.AddContactWindow({tab: this.tab, operation: 'edit', existingContact: this.contact});
         },
         rightNavButton: true
     }, {
@@ -198,7 +198,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             dateButton.addEventListener('click', function() {
                 // Set the completion date of the step
                 AD.UI.DatePickerWindow.datePicker({
-                    tab: _this.options.tab,
+                    tab: _this.tab,
                     minDate: new Date(2012, 0, 1), // January 1, 2012
                     maxDate: $.today(),
                     initialDate: stepCompletedDate
