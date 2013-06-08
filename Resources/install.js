@@ -114,6 +114,30 @@ var installDatabases = function(dbVersion) {
         query("INSERT INTO nextsteps_year_trans (trans_id, year_id, language_code, year_label) VALUES (?, ?, 'en', ?)", [id, id, yearLabel]);
     });
     
+    query("CREATE TABLE IF NOT EXISTS nextsteps_tag (\
+               tag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+               tag_guid TEXT DEFAULT NULL,\
+               viewer_id INTEGER NOT NULL,\
+               device_id TEXT NOT NULL,\
+               tag_label TEXT NOT NULL\
+           )");
+    query("CREATE TRIGGER IF NOT EXISTS tag_guid AFTER INSERT ON nextsteps_tag FOR EACH ROW\
+           BEGIN\
+               UPDATE nextsteps_tag SET tag_guid = NEW.tag_id||'.'||NEW.device_id WHERE tag_id=NEW.tag_id;\
+           END");
+    query("CREATE TABLE IF NOT EXISTS nextsteps_contact_tag (\
+               contacttag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+               contacttag_guid TEXT DEFAULT NULL,\
+               viewer_id INTEGER NOT NULL,\
+               device_id TEXT NOT NULL,\
+               contact_guid TEXT NOT NULL,\
+               tag_guid TEXT NOT NULL\
+           )");
+    query("CREATE TRIGGER IF NOT EXISTS contacttag_guid AFTER INSERT ON nextsteps_contact_tag FOR EACH ROW\
+           BEGIN\
+               UPDATE nextsteps_contact_tag SET contacttag_guid = NEW.contacttag_id||'.'||NEW.device_id WHERE contacttag_id=NEW.contacttag_id;\
+           END");
+
     if (pre1_1) {
         // After recreating the nextsteps_contact table, copy contact data back in
         var fields = 'contact_id, contact_guid, viewer_id, device_id, contact_recordId, contact_firstName, contact_lastName, contact_nickname, contact_campus, year_id, contact_phone, contact_phoneId, contact_email, contact_emailId, contact_notes, contact_preEv, contact_conversation, contact_Gpresentation, contact_decision, contact_finishedFU, contact_HSpresentation, contact_engaged, contact_ministering, contact_multiplying';
