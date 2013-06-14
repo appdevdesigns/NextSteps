@@ -51,6 +51,10 @@
     attr,
     {
         // define instance methods here.
+
+        getLabel: function() {
+            return AD.Models.Tag.cache.getById(this.attr('tag_guid'));
+        }
     });
 
     if (module && module.exports) {

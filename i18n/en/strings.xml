@@ -85,6 +85,9 @@
     <string name="nickname">Nickname</string>
     <string name="campus">Campus</string>
     <string name="year">Year</string>
+    <string name="tag">Tag</string>
+    <string name="tags">Tags</string>
+    <string name="none">none</string>
     <string name="phone">Phone</string>
     <string name="phoneNumber">Phone number</string>
     <string name="email">Email</string>

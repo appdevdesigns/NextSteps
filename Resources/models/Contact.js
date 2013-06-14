@@ -143,6 +143,31 @@
             return this.contact_firstName+' '+this.contact_lastName+(this.contact_nickName ? ' ('+this.contact_nickName+')' : '');
         },
         
+        // Return an array of the Tag models associated with this contact
+        getTags: function() {
+            return AD.Models.ContactTag.cache.query({
+                contact_guid: this.attr('contact_guid')
+            });
+        },
+
+        // Set the tags associated with this contact
+        setTags: function(newTags) {
+            var contact_guid = this.attr('contact_guid');
+            var oldTags = this.getTags();
+            newTags.forEach(function(newTag, index) {
+                // newTag can be a Tag instance or a plain object
+                var newTagAttrs = AD.jQuery.isFunction(newTag.attrs) ? newTag.attrs() : newTag;
+                // Reuse the existing tag if possible, but create a new tag instance if necessary
+                var tagInstance = oldTags[index] || new AD.Models.ContactTag({ contact_guid: contact_guid });
+                tagInstance.attrs(newTagAttrs);
+                tagInstance.save();
+            });
+            // Delete any remaining tags that were not reused
+            oldTags.slice(newTags.length).forEach(function(oldTag) {
+                oldTag.destroy();
+            });
+        },
+
         // Return the last completed step of this contact
         getLastStep: function() {
             var self = this;
