@@ -4,7 +4,6 @@ var AD = require('AppDev');
 module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     dependencies: ['ChooseOptionWindow', 'ChooseContactsWindow', 'AddContactWindow'],
     
-    years: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; }),
     fields: ['campus', 'year'],
     actions: [{
         title: 'cancel',
@@ -152,13 +151,13 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         var $winChooseYear = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'year',
-            initial: this.year - 1,
-            options: AD.UI.AddContactWindow.years
+            Model: 'Year',
+            initial: this.year
         });
         $winChooseYear.getDeferred().done(this.proxy(function(year) {
             // A year was chosen
-            this.year = year.index + 1;
-            this.getChild('year').title = year.value;
+            this.year = year.getId();
+            this.getChild('year').title = year.attr(year.constructor.labelKey);
         }));
     },
     

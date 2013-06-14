@@ -82,7 +82,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         {name: 'notes', type: 'text', multiline: true}
     ],
     
-    years: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; }),
     actions: [{
         title: 'save',
         callback: 'save',
@@ -394,13 +393,13 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         var $winChooseYear = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'year',
-            initial: this.contact.year_id - 1,
-            options: this.constructor.years
+            Model: 'Year',
+            initial: this.contact.year_id
         });
         $winChooseYear.getDeferred().done(this.proxy(function(year) {
             // A year was chosen
-            var year_label = year.value;
-            var year_id = year.index + 1;
+            var year_id = year.attr('year_id');
+            var year_label = year.attr('year_label');
             this.contact.attr('year_id', year_id);
             this.contact.attr('year_label', year_label);
             var yearLabel = this.getChild('yearLabel');
