@@ -53,7 +53,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         
         // Populate the contact model fields with the new contact's information
         var baseAttrs = {
-            viewer_id: AD.Viewer.viewer_id,
             contact_firstName: firstName,
             contact_lastName: lastName,
             contact_nickname: nickname,

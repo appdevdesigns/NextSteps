@@ -88,7 +88,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         
         // Create a new local group model if necessary
         this.group = this.adding ? new AD.Models.Group({
-            viewer_id: AD.Viewer.viewer_id,
             group_name: '',
             group_filter: {}
         }) : this.options.existingGroup;
