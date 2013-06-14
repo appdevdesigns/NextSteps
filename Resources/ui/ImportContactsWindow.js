@@ -4,7 +4,14 @@ var AD = require('AppDev');
 module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     dependencies: ['ChooseOptionWindow', 'ChooseContactsWindow', 'AddContactWindow'],
     
-    fields: ['campus', 'year'],
+    fields: [{
+        name: 'campus'
+    }, {
+        name: 'year'
+    }, {
+        name: 'tags',
+        noButton: true
+    }],
     actions: [{
         title: 'cancel',
         callback: 'cancel',
@@ -17,6 +24,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         
         this.campus = '';
         this.year_id = 1;
+        this.tags = []; // an array of Tag model instances
         
         // Initialize the base $.Window object
         this._super({
@@ -71,7 +79,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             height: Ti.UI.SIZE,
             layout: 'vertical'
         }));
-        // Create the campus and year fields
+        // Create the campus, year, and tag fields
         var labelWidth = 80;
         var fieldHeight = AD.UI.buttonHeight;
         this.constructor.fields.forEach(function(field, index) {
@@ -85,28 +93,43 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
                 left: 0,
                 width: labelWidth,
                 height: Ti.UI.SIZE,
-                textid: field
+                textid: field.name
             }));
 
             var changeCallback = function() {
                 // Calculate the names of the change and update field functions
                 // changeFieldFuncName === 'changeYear' and updateFieldFuncName === 'updateYear', for example
-                var changeFieldFuncName = 'change'+$.capitalize(field);
-                var updateFieldFuncName = 'update'+$.capitalize(field);
+                var changeFieldFuncName = 'change'+$.capitalize(field.name);
+                var updateFieldFuncName = 'update'+$.capitalize(field.name);
                 _this[changeFieldFuncName]().done(function() {
                     // After the field is changed, update its associated UI
                     _this[updateFieldFuncName]();
                 });
             };
-            var chooseButton = Ti.UI.createButton({
-                left: labelWidth + AD.UI.padding,
-                top: 0,
-                width: 120,
-                height: AD.UI.buttonHeight
-            });
-            chooseButton.addEventListener('click', changeCallback);
-            fieldView.add(this.record(field, chooseButton));
-            
+            var valueField = null;
+            if (field.noButton) {
+                // Create a label that can be clicked to change the field value
+                valueField = Ti.UI.createLabel({
+                    left: labelWidth + AD.UI.padding,
+                    right: AD.UI.padding,
+                    top: 0,
+                    height: Ti.UI.FILL,
+                    font: AD.UI.Fonts.mediumSmall
+                });
+                fieldView.addEventListener('click', changeCallback);
+            }
+            else {
+                // Create a button that can be clicked to change the field value
+                var chooseButton = valueField = Ti.UI.createButton({
+                    left: labelWidth + AD.UI.padding,
+                    top: 0,
+                    width: 120,
+                    height: AD.UI.buttonHeight
+                });
+                chooseButton.addEventListener('click', changeCallback);
+            }
+            fieldView.add(this.record(field.name, valueField));
+
             fieldsView.add(fieldView);
         }, this);
         
@@ -156,7 +179,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         });
     },
     
-    // Handlers for setting the campus and year applied to the imported contacts
+    // Handlers for setting the campus, year, and tags applied to the imported contacts
     changeCampus: function() {
         var _this = this;
         // Allow the user to choose the contacts' campus
@@ -190,6 +213,20 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             _this.year_id = year.getId();
         });
     },
+    changeTags: function() {
+        var _this = this;
+        // Allow the user to choose the contacts' associated tags
+        var $winChooseTags = new AD.UI.ChooseOptionsWindow({
+            tab: this.tab,
+            groupName: 'tag',
+            Model: 'Tag',
+            initial: this.tags.map(function(tag) { return tag.getId() }),
+            editable: true
+        });
+        return $winChooseTags.getDeferred().done(function(tags) {
+            _this.tags = tags;
+        });
+    },
     
     // Update the scrollable view that contains the names of the contacts
     updateContactsView: function() {
@@ -202,6 +239,10 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     },
     updateYear: function() {
         this.getChild('year').title = AD.Models.Year.cache.getById(this.year_id).year_label;
+    },
+    updateTags: function() {
+        var tagLabels = this.tags.map(function(tag) { return tag.attr(tag.constructor.labelKey) });
+        this.getChild('tags').text = tagLabels.join(', ') || AD.Localize('none');
     },
     
     // Validate the contacts
@@ -251,7 +292,11 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
                 contact_campus: this.campus,
                 year_id: this.year_id,
             });
-            contactModel.save();
+            var tags = this.tags;
+            contactModel.save().done(function() {
+                // Set the tags AFTER saving the contact so that contact_guid will be available
+                contactModel.setTags(tags);
+            });
         }, this);
         this.dfd.resolve();
     }
