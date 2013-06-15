@@ -137,8 +137,8 @@ var installDatabases = function(dbVersion) {
                contacttag_guid TEXT DEFAULT NULL UNIQUE,\
                viewer_id INTEGER NOT NULL,\
                device_id TEXT NOT NULL,\
-               contact_guid TEXT NOT NULL,\
-               tag_guid TEXT NOT NULL\
+               contact_guid TEXT NOT NULL REFERENCES nextsteps_contact(contact_guid) ON DELETE CASCADE,\
+               tag_guid TEXT NOT NULL REFERENCES nextsteps_tag(tag_guid) ON DELETE CASCADE\
            )");
     query("CREATE TRIGGER IF NOT EXISTS contacttag_guid AFTER INSERT ON nextsteps_contact_tag FOR EACH ROW\
            BEGIN\
