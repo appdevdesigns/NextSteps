@@ -25,15 +25,17 @@ var installDatabases = function(dbVersion) {
     
     // Between 0 (uninstalled) and 1.1, exclusive
     var pre1_1 = ADinstall.compareVersions(dbVersion, '0') > 0 && ADinstall.compareVersions(dbVersion, '1.1') < 0;
+    // Between 0 (uninstalled) and 1.5, exclusive
+    var pre1_5 = ADinstall.compareVersions(dbVersion, '0') > 0 && ADinstall.compareVersions(dbVersion, '1.5') < 0;
     if (pre1_1) {
         // Add device_id columns
         query("ALTER TABLE nextsteps_contact ADD COLUMN device_id TEXT DEFAULT ?", [Ti.Platform.id]);
         query("ALTER TABLE nextsteps_group ADD COLUMN device_id TEXT DEFAULT ?", [Ti.Platform.id]);
         
         // Add and populate guid columns
-        query("ALTER TABLE nextsteps_contact ADD COLUMN contact_guid TEXT DEFAULT NULL");
+        query("ALTER TABLE nextsteps_contact ADD COLUMN contact_guid TEXT DEFAULT NULL UNIQUE");
         query("UPDATE nextsteps_contact SET contact_guid = contact_id||'.'||device_id");
-        query("ALTER TABLE nextsteps_group ADD COLUMN group_guid TEXT DEFAULT NULL");
+        query("ALTER TABLE nextsteps_group ADD COLUMN group_guid TEXT DEFAULT NULL UNIQUE");
         query("UPDATE nextsteps_group SET group_guid = group_id||'.'||device_id");
         
         // Contact year_id is now a 1-based index, rather than a 0-based index
@@ -41,6 +43,11 @@ var installDatabases = function(dbVersion) {
         
         // Rename the nextsteps_contact table so that it will be recreated
         query("ALTER TABLE nextsteps_contact RENAME TO nextsteps_contact_temp");
+    }
+    else if (pre1_5) {
+        // Rename the nextsteps_contact and nextsteps_group tables so they will be recreated
+        query("ALTER TABLE nextsteps_contact RENAME TO nextsteps_contact_temp");
+        query("ALTER TABLE nextsteps_group RENAME TO nextsteps_group_temp");
     }
     
     query("CREATE TABLE IF NOT EXISTS site_viewer (\
@@ -54,7 +61,7 @@ var installDatabases = function(dbVersion) {
            )");
     query("CREATE TABLE IF NOT EXISTS nextsteps_contact (\
                contact_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-               contact_guid TEXT DEFAULT NULL,\
+               contact_guid TEXT DEFAULT NULL UNIQUE,\
                viewer_id INTEGER NOT NULL,\
                device_id TEXT NOT NULL,\
                contact_recordId INTEGER,\
@@ -84,7 +91,7 @@ var installDatabases = function(dbVersion) {
            END");
     query("CREATE TABLE IF NOT EXISTS nextsteps_group (\
                group_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-               group_guid TEXT DEFAULT NULL,\
+               group_guid TEXT DEFAULT NULL UNIQUE,\
                viewer_id INTEGER NOT NULL,\
                device_id TEXT NOT NULL,\
                group_name TEXT NOT NULL,\
@@ -116,7 +123,7 @@ var installDatabases = function(dbVersion) {
     
     query("CREATE TABLE IF NOT EXISTS nextsteps_tag (\
                tag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-               tag_guid TEXT DEFAULT NULL,\
+               tag_guid TEXT DEFAULT NULL UNIQUE,\
                viewer_id INTEGER NOT NULL,\
                device_id TEXT NOT NULL,\
                tag_label TEXT NOT NULL\
@@ -127,7 +134,7 @@ var installDatabases = function(dbVersion) {
            END");
     query("CREATE TABLE IF NOT EXISTS nextsteps_contact_tag (\
                contacttag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-               contacttag_guid TEXT DEFAULT NULL,\
+               contacttag_guid TEXT DEFAULT NULL UNIQUE,\
                viewer_id INTEGER NOT NULL,\
                device_id TEXT NOT NULL,\
                contact_guid TEXT NOT NULL,\
@@ -146,5 +153,12 @@ var installDatabases = function(dbVersion) {
         
         // Now contact_recordId of NULL, rather than -1, refers to a contact not in the address book
         query("UPDATE nextsteps_contact SET contact_recordId = NULL WHERE contact_recordId = -1");
+    }
+    else if (pre1_5) {
+        // After recreating the nextsteps_contact and nextsteps_group tables, copy contact and group data back in
+        query("INSERT INTO nextsteps_contact SELECT * FROM nextsteps_contact_temp");
+        query("DROP TABLE nextsteps_contact_temp");
+        query("INSERT INTO nextsteps_group SELECT * FROM nextsteps_group_temp");
+        query("DROP TABLE nextsteps_group_temp");
     }
 };
