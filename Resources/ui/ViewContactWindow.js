@@ -171,9 +171,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         });
         var updateTagLabel = function() {
             // Get an array of the lab
-            var tagLabels = contact.getTags().map(function(tag) {
-                return tag.getLabel().attr('tag_label');
-            });
+            var tagLabels = contact.getTags().map(function(tag) { return tag.attr('tag_label'); });
             tagsLabel.text = AD.Localize('tags')+': '+(tagLabels.join(', ') || AD.Localize('none'));
         };
         updateTagLabel();

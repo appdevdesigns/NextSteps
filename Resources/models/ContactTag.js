@@ -17,7 +17,7 @@
         _adModel:'ContactTag',
         id:'contacttag_guid',
         autoIncrementKey:'contacttag_id',
-        labelKey:'tag_guid',
+        labelKey:'tag_label',
         _isMultilingual:false,
         //connectionType:'server', // optional field
         cache:true,
@@ -42,6 +42,15 @@
                   tag_guid:"varchar(60)"
 
             },
+            lookupLabels: {
+                tag_label: {
+                    tableName: 'nextsteps_tag',
+                    foreignKey: 'tag_guid',
+                    referencedKey: 'tag_guid',
+                    label: 'tag_label',
+                    hasLanguageCode: false
+                }
+            },
             primaryKey:'contacttag_guid'
         });
     }
@@ -51,10 +60,6 @@
     attr,
     {
         // define instance methods here.
-
-        getLabel: function() {
-            return AD.Models.Tag.cache.getById(this.attr('tag_guid'));
-        }
     });
 
     if (module && module.exports) {
