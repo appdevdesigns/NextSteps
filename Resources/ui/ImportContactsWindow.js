@@ -22,7 +22,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     init: function(options) {
         this.contacts = [];
         
-        this.campus = '';
+        this.campus_guid = null;
         this.year_id = 1;
         this.tags = []; // an array of Tag model instances
         
@@ -183,20 +183,16 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     changeCampus: function() {
         var _this = this;
         // Allow the user to choose the contacts' campus
-        var campuses = AD.PropertyStore.get('campuses');
         var $winChooseCampus = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'campus',
-            initial: this.campus,
-            options: campuses,
-            editable: true,
-            onOptionsUpdate: function(campusesNew) {
-                AD.PropertyStore.set('campuses', campusesNew);
-            }
+            Model: 'Campus',
+            initial: this.campus_guid,
+            editable: true
         });
         return $winChooseCampus.getDeferred().done(function(campus) {
             // A campus was chosen
-            _this.campus = campus.value;
+            _this.campus_guid = campus.getId();
         });
     },
     changeYear: function() {
@@ -235,7 +231,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
 
     // Update the field labels
     updateCampus: function() {
-        this.getChild('campus').title = this.campus || AD.Localize('unspecified');
+        this.getChild('campus').title = this.campus_guid ? AD.Models.Campus.cache.getById(this.campus_guid).campus_label : AD.Localize('unspecified');
     },
     updateYear: function() {
         this.getChild('year').title = AD.Models.Year.cache.getById(this.year_id).year_label;
@@ -249,7 +245,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     validate: function() {
         var warnDfd = $.Deferred();
         var missingFields = [];
-        if (!this.campus) {
+        if (!this.campus_guid) {
             missingFields.push('campus');
         }
         if (this.year_id === 1) {
@@ -289,7 +285,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             
             var contactModel = AD.UI.AddContactWindow.createContact({
                 contact_recordId: contact.recordId,
-                contact_campus: this.campus,
+                campus_guid: this.campus_guid,
                 year_id: this.year_id,
             });
             var tags = this.tags;

@@ -1,4 +1,5 @@
 var AD = require('AppDev');
+var $ = require('jquery');
 var ADinstall = require('appdev/install');
 
 module.exports.install = function() {
@@ -9,9 +10,14 @@ module.exports.install = function() {
 };
 
 // Called when the app is installed or updated
-var onInstall = function() {
-    // Set the campus list to an empty array if the property does not exist yet
-    AD.PropertyStore.setDefault('campuses', []);
+var onInstall = function(previousVersion) {
+    var sortOrder = AD.PropertyStore.get('sort_order');
+    if (sortOrder && ADinstall.compareVersions(previousVersion, '1.5') < 0) {
+        // The "contact_campus" sort order field was renamed to "campus_label" in version 1.5
+        AD.PropertyStore.set('sort_order', sortOrder.map(function(field) {
+            return field === 'contact_campus' ? 'campus_label' : field;
+        }));
+    }
 };
 
 // Create the necessary databases for the application
@@ -47,7 +53,9 @@ var installDatabases = function(dbVersion) {
     else if (pre1_5) {
         // Rename the nextsteps_contact and nextsteps_group tables so they will be recreated
         query("ALTER TABLE nextsteps_contact RENAME TO nextsteps_contact_temp");
+        query("DROP TRIGGER TABLE contact_guid");
         query("ALTER TABLE nextsteps_group RENAME TO nextsteps_group_temp");
+        query("DROP TRIGGER TABLE group_guid");
     }
     
     query("CREATE TABLE IF NOT EXISTS site_viewer (\
@@ -68,7 +76,7 @@ var installDatabases = function(dbVersion) {
                contact_firstName TEXT NOT NULL,\
                contact_lastName TEXT NOT NULL,\
                contact_nickname TEXT,\
-               contact_campus TEXT,\
+               campus_guid TEXT DEFAULT NULL REFERENCES nextsteps_campus(campus_guid) ON DELETE SET DEFAULT,\
                year_id INTEGER NOT NULL DEFAULT 1,\
                contact_phone TEXT,\
                contact_phoneId TEXT,\
@@ -102,6 +110,18 @@ var installDatabases = function(dbVersion) {
                UPDATE nextsteps_group SET group_guid = NEW.group_id||'.'||NEW.device_id WHERE group_id=NEW.group_id;\
            END");
     
+    query("CREATE TABLE IF NOT EXISTS nextsteps_campus (\
+               campus_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+               campus_guid TEXT DEFAULT NULL UNIQUE,\
+               viewer_id INTEGER NOT NULL,\
+               device_id TEXT NOT NULL,\
+               campus_label TEXT NOT NULL\
+           )");
+    query("CREATE TRIGGER IF NOT EXISTS campus_guid AFTER INSERT ON nextsteps_campus FOR EACH ROW\
+           BEGIN\
+               UPDATE nextsteps_campus SET campus_guid = NEW.campus_id||'.'||NEW.device_id WHERE campus_id=NEW.campus_id;\
+           END");
+
     query("CREATE TABLE IF NOT EXISTS nextsteps_year_data (\
                year_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE\
            )");
@@ -156,9 +176,48 @@ var installDatabases = function(dbVersion) {
     }
     else if (pre1_5) {
         // After recreating the nextsteps_contact and nextsteps_group tables, copy contact and group data back in
-        query("INSERT INTO nextsteps_contact SELECT * FROM nextsteps_contact_temp");
-        query("DROP TABLE nextsteps_contact_temp");
+        var fields = 'contact_id, contact_guid, viewer_id, device_id, contact_recordId, contact_firstName, contact_lastName, contact_nickname, year_id, contact_phone, contact_phoneId, contact_email, contact_emailId, contact_notes, contact_preEv, contact_conversation, contact_Gpresentation, contact_decision, contact_finishedFU, contact_HSpresentation, contact_engaged, contact_ministering, contact_multiplying';
+        query("INSERT INTO nextsteps_contact ("+fields+") SELECT "+fields+" FROM nextsteps_contact_temp");
         query("INSERT INTO nextsteps_group SELECT * FROM nextsteps_group_temp");
+
+        // Load the campus labels from the property store
+        var campuses = AD.PropertyStore.get('campuses').map(function(campusLabel) {
+            return {
+                campus_label: campusLabel
+            };
+        });
+        // Fill the nextsteps_campus table with the defined campuses
+        campuses.forEach(function(campus) {
+            // Create a new campus
+            query("INSERT INTO nextsteps_campus (viewer_id, device_id, campus_label) VALUES (?, ?, ?)", [AD.Defaults.viewerId, Ti.Platform.id, campus.campus_label]).done(function(campus_id) {
+                // Get the campus_guid of the campus just created and find all the contacts that reference this campus
+                var getCampusGuid = query("SELECT campus_guid FROM nextsteps_campus WHERE campus_id=?", [campus_id]);
+                var getContacts = query("SELECT contact_id FROM nextsteps_contact_temp WHERE contact_campus=?", [campus.campus_label]);
+                $.when(getCampusGuid, getContacts).done(function(campusArgs, contactArgs) {
+                    // Now update all the contacts that referenced this campus
+                    var campus_guid = campus.campus_guid = campusArgs[0][0].campus_guid;
+                    var contact_ids = contactArgs[0].map(function(row) { return row.contact_id; });
+                    query("UPDATE nextsteps_contact SET campus_guid=? WHERE contact_id IN ("+contact_ids.join(',')+")", [campus_guid]);
+                });
+            });
+        });
+        AD.PropertyStore.remove('campuses');
+
+        // Update the group filters to reference campuses by guid, rather than by label
+        query("SELECT group_guid,group_filter FROM nextsteps_group").done(function(groupArgs) {
+            var indexedCampuses = $.indexArray(campuses, 'campus_label');
+            var groups = groupArgs[0];
+            groups.forEach(function(group) {
+                var filter = JSON.parse(group.group_filter);
+                if (filter.contact_campus) {
+                    filter.campus_guid = indexedCampuses[filter.contact_campus].campus_guid;
+                    delete filter.contact_campus;
+                }
+                query("UPDATE nextsteps_group SET group_filter = ? WHERE group_guid = ?", [JSON.stringify(filter), group.group_guid]);
+            });
+        });
+
+        query("DROP TABLE nextsteps_contact_temp");
         query("DROP TABLE nextsteps_group_temp");
     }
 };

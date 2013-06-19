@@ -102,7 +102,7 @@
                   contact_firstName:"text",
                   contact_lastName:"text",
                   contact_nickname:"text",
-                  contact_campus:"text",
+                  campus_guid:"varchar(60)",
                   year_id:"int(11)",
                   contact_phone:"text",
                   contact_phoneId:"text",
@@ -121,6 +121,13 @@
 
             },
             lookupLabels: {
+                campus_guid: {
+                    tableName: 'nextsteps_campus',
+                    foreignKey: 'campus_guid',
+                    referencedKey: 'campus_guid',
+                    label: 'campus_label',
+                    hasLanguageCode: false
+                },
                 year_id: {
                     tableName: 'nextsteps_year_trans',
                     foreignKey: 'year_id',

@@ -15,7 +15,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
     },
     
     sortFields: [
-        {field: 'contact_campus', label: 'campus'},
+        {field: 'campus_label', label: 'campus'},
         {field: 'contact_firstName', label: 'firstName', groupProcessor: 'firstLetter'},
         {field: 'contact_lastName', label: 'lastName', groupProcessor: 'firstLetter'},
         {field: 'year_id', label: 'year', groupProcessor: 'year'}

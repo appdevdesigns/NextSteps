@@ -56,7 +56,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             contact_firstName: firstName,
             contact_lastName: lastName,
             contact_nickname: nickname,
-            contact_campus: '',
+            campus_guid: null,
             year_id: defaultYear,
             contact_phone: defaultPhone.value,
             contact_phoneId: defaultPhone.id,
@@ -68,6 +68,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             baseAttrs[stepFieldName] = null;
         });
         var mergedAttrs = $.extend(baseAttrs, attrs);
+        mergedAttrs.campus_label = mergedAttrs.campus_guid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_guid).campus_label : '';
         mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).year_label;
         return new AD.Models.Contact(mergedAttrs);
     },
@@ -75,7 +76,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     fields: [
         {name: 'firstName', type: 'text'},
         {name: 'lastName', type: 'text'},
-        {name: 'campus', type: 'choice'},
+        {name: 'campus', type: 'choice', field: 'campus_label'},
         {name: 'year', type: 'choice', field: 'year_label'},
         {name: 'phone', type: 'choice/text', keyboardType: Ti.UI.KEYBOARD_PHONE_PAD, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
         {name: 'email', type: 'choice/text', keyboardType: Ti.UI.KEYBOARD_EMAIL, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
@@ -369,23 +370,21 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     // Handlers for allowing the user to change the contact's campus, year, phone number, and e-mail address
     changeCampus: function() {
         // Allow the user to set the contact's campus
-        var campuses = AD.PropertyStore.get('campuses');
         var $winChooseCampus = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'campus',
-            initial: this.contact.contact_campus,
-            options: campuses,
-            editable: true,
-            onOptionsUpdate: function(campusesNew) {
-                campuses = campusesNew;
-                AD.PropertyStore.set('campuses', campusesNew);
-            }
+            Model: 'Campus',
+            initial: this.contact.campus_guid,
+            editable: true
         });
         $winChooseCampus.getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
-            this.contact.attr('contact_campus', campus.value);
+            var campus_guid = campus.attr('campus_guid');
+            var campus_label = campus.attr('campus_label');
+            this.contact.attr('campus_guid', campus_guid);
+            this.contact.attr('campus_label', campus_label);
             var campusLabel = this.getChild('campusLabel');
-            campusLabel.text = campusLabel.title = campus.value;
+            campusLabel.text = campusLabel.title = campus_label;
         }));
     },
     changeYear: function() {
