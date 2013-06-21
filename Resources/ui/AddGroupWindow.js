@@ -3,13 +3,13 @@ var $ = require('jquery');
 
 module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     setup: function() {
-        // When this class is created, create the static groupDefinition object
-        var groupDefinition = this.groupDefinition;
-        var addGroupField = function(fieldName, fieldData) {
-            groupDefinition[fieldName] = fieldData;
+        // When this class is created, create the static fieldDefinitions object
+        var fieldDefinitions = this.fieldDefinitions;
+        var defineField = function(fieldName, fieldData) {
+            fieldDefinitions[fieldName] = fieldData;
         };
-        
-        addGroupField('contact_campus', {
+        // Define each of the supported group fields
+        defineField('contact_campus', {
             name: 'campus',
             type: 'choice',
             data: function() {
@@ -22,14 +22,13 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 }
             }
         });
-        addGroupField('year_label', {
+        defineField('year_label', {
             name: 'year',
             type: 'choice',
             data: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; })
         });
-        
         $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-            addGroupField(stepFieldName, {
+            defineField(stepFieldName, {
                 name: 'step_'+stepName,
                 type: 'bool'
             });
@@ -37,7 +36,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     },
     dependencies: ['ChooseOptionWindow', 'Checkbox'],
     
-    groupDefinition: {},
+    fieldDefinitions: {},
     rowHeight: AD.UI.buttonHeight + AD.UI.padding,
     
     // Quick function to display the add group window in a single function call
@@ -142,8 +141,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             _this.getChild('name').blur();
         });
         
-        // Create a field row for each step
-        $.each(this.constructor.groupDefinition, this.proxy('createRow'));
+        // Create a field row for each group field
+        $.each(this.constructor.fieldDefinitions, this.proxy('createRow'));
     },
     
     createRow: function(fieldName, fieldDefinition) {
@@ -248,9 +247,11 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         this.getChild('name').value = this.group.attr('group_name');
         
         // Initialize each of the set rows
+        var fieldDefinitions = this.constructor.fieldDefinitions;
         var fields = this.fields; // this object was populated by this.create
         var filter = this.group.attr('group_filter');
         $.each(this.get$Child('fieldsView').children, function(stepFieldName, fieldRow) {
+            var fieldDefinition = fieldDefinitions[fieldName];
             var enabled = typeof filter[stepFieldName] !== 'undefined';
             var fieldData = fields[stepFieldName] = {
                 enabled: enabled,
@@ -264,7 +265,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             // Modify the enabled and value views to reflect their values in the group
             $valueView.setEnabled(enabled);
             $enabledCheckbox.setValue(fieldData.enabled);
-            var fieldType = $fieldRow.fieldDefinition.type; // custom property
+            var fieldType = fieldDefinition.type;
             if (fieldType === 'bool') {
                 var $valueCheckbox = $valueView;
                 $valueCheckbox.setEnabled(fieldData.enabled);
@@ -286,10 +287,10 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         
         // Build the filter object that will be stringified and inserted into the database
         var valid = true;
-        var groupDefinition = this.constructor.groupDefinition;
+        var fieldDefinitions = this.constructor.fieldDefinitions;
         var filter = {};
         $.each(this.fields, function(fieldName, fieldData) {
-            var fieldDefinition = groupDefinition[fieldName];
+            var fieldDefinition = fieldDefinitions[fieldName];
             if (fieldDefinition.type === 'choice' && fieldData.enabled && fieldData.value === null) {
                 // No option has been chosen
                 alert($.formatString('invalidOptionChoice', fieldDefinition.name.toLowerCase()));
