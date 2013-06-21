@@ -9,23 +9,18 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             fieldDefinitions[fieldName] = fieldData;
         };
         // Define each of the supported group fields
-        defineField('contact_campus', {
+        defineField('campus_guid', {
             name: 'campus',
             type: 'choice',
-            data: function() {
-                return AD.PropertyStore.get('campuses');
-            },
+            Model: 'Campus',
             params: {
-                editable: true,
-                onOptionsUpdate: function(campusesNew) {
-                    AD.PropertyStore.set('campuses', campusesNew);
-                }
+                editable: true
             }
         });
-        defineField('year_label', {
+        defineField('year_id', {
             name: 'year',
             type: 'choice',
-            data: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; })
+            Model: 'Year'
         });
         $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
             defineField(stepFieldName, {
@@ -213,17 +208,18 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             }));
             var valueButton = $valueButton.getView();
             $valueButton.addEventListener('click', function() {
-                // If fieldDefinition.data is a function execute it to get the true data
-                var options = $.isFunction(fieldDefinition.data) ? fieldDefinition.data() : fieldDefinition.data;
-                var $winChooseOption = new AD.UI.ChooseOptionWindow($.extend({
+                // Assume that all choices are model instances
+                var params = $.extend({
                     tab: _this.tab,
                     groupName: fieldDefinition.name,
+                    Model: fieldDefinition.Model,
                     initial: fields[fieldName].value,
-                    options: options
-                }, fieldDefinition.params));
+                }, fieldDefinition.params);
+                var $winChooseOption = new AD.UI.ChooseOptionWindow(params);
                 $winChooseOption.getDeferred().done(function(option) {
                     // An option was chosen, so set the value of the field in the filter
-                    valueButton.title = fields[fieldName].value = option.value;
+                    fields[fieldName].value = option.getId();
+                    valueButton.title = option.getLabel();
                 });
             });
             $enabledCheckbox.addEventListener('change', function(event) {
@@ -250,12 +246,25 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         var fieldDefinitions = this.constructor.fieldDefinitions;
         var fields = this.fields; // this object was populated by this.create
         var filter = this.group.attr('group_filter');
-        $.each(this.get$Child('fieldsView').children, function(stepFieldName, fieldRow) {
+        $.each(this.get$Child('fieldsView').children, function(fieldName, fieldRow) {
             var fieldDefinition = fieldDefinitions[fieldName];
-            var enabled = typeof filter[stepFieldName] !== 'undefined';
-            var fieldData = fields[stepFieldName] = {
+            var enabled = typeof filter[fieldName] !== 'undefined';
+            var value = filter[fieldName];
+            var title = value;
+            if (value && fieldDefinition.isChoice) {
+                // "value" refers to the primary key of the model, so lookup the associated model instance
+                var model = AD.Models[fieldDefinition.Model].cache.getById(value);
+                if (model) {
+                    title = model.getLabel();
+                }
+                else {
+                    // This model instance does not exist anymore
+                    enabled = false;
+                }
+            }
+            var fieldData = fields[fieldName] = {
                 enabled: enabled,
-                value: enabled && filter[stepFieldName]
+                value: enabled && value
             };
             
             var $fieldRow = fieldRow.get$View();
@@ -273,7 +282,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             }
             else if (fieldType === 'choice') {
                 var $valueButton = $valueView;
-                $valueButton.getView().title = fieldData.enabled ? fieldData.value : '';
+                $valueButton.getView().title = fieldData.enabled ? title : '';
             }
         });
     },
