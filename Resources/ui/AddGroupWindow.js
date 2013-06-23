@@ -6,6 +6,9 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         // When this class is created, create the static fieldDefinitions object
         var fieldDefinitions = this.fieldDefinitions;
         var defineField = function(fieldName, fieldData) {
+            // Add a boolean property to quickly check the type of a field
+            // For example, fieldData.isChoice === true
+            fieldData['is'+$.capitalize(fieldData.type)] = true;
             fieldDefinitions[fieldName] = fieldData;
         };
         // Define each of the supported group fields
@@ -178,7 +181,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         var _this = this;
         var $valueView = null;
         
-        if (fieldDefinition.type === 'bool') {
+        if (fieldDefinition.isBool) {
             // Create the checkbox to toggle the value of this field
             var $valueCheckbox = $valueView = new AD.UI.Checkbox({
                 createParams: {
@@ -199,7 +202,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 }
             });
         }
-        else if (fieldDefinition.type === 'choice') {
+        else if (fieldDefinition.isChoice) {
             var $valueButton = $valueView = $.View.create(Ti.UI.createButton({
                 right: AD.UI.padding,
                 top: AD.UI.padding / 2,
@@ -274,13 +277,12 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             // Modify the enabled and value views to reflect their values in the group
             $valueView.setEnabled(enabled);
             $enabledCheckbox.setValue(fieldData.enabled);
-            var fieldType = fieldDefinition.type;
-            if (fieldType === 'bool') {
+            if (fieldDefinition.isBool) {
                 var $valueCheckbox = $valueView;
                 $valueCheckbox.setEnabled(fieldData.enabled);
                 $valueCheckbox.setValue(fieldData.enabled && fieldData.value);
             }
-            else if (fieldType === 'choice') {
+            else if (fieldDefinition.isChoice) {
                 var $valueButton = $valueView;
                 $valueButton.getView().title = fieldData.enabled ? title : '';
             }
@@ -300,7 +302,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         var filter = {};
         $.each(this.fields, function(fieldName, fieldData) {
             var fieldDefinition = fieldDefinitions[fieldName];
-            if (fieldDefinition.type === 'choice' && fieldData.enabled && fieldData.value === null) {
+            if (fieldDefinition.isChoice && fieldData.enabled && fieldData.value === null) {
                 // No option has been chosen
                 alert($.formatString('invalidOptionChoice', fieldDefinition.name.toLowerCase()));
                 valid = false;
