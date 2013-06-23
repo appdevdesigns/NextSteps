@@ -12,6 +12,15 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             fieldDefinitions[fieldName] = fieldData;
         };
         // Define each of the supported group fields
+        defineField('tags', {
+            name: 'tags',
+            type: 'multichoice',
+            Model: 'Tag',
+            params: {
+                groupName: 'tag',
+                editable: true
+            }
+        });
         defineField('campus_guid', {
             name: 'campus',
             type: 'choice',
@@ -202,28 +211,42 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 }
             });
         }
-        else if (fieldDefinition.isChoice) {
-            var $valueButton = $valueView = $.View.create(Ti.UI.createButton({
+        else if (fieldDefinition.isChoice || fieldDefinition.isMultichoice) {
+            var valueButton = Ti.UI.createButton({
                 right: AD.UI.padding,
                 top: AD.UI.padding / 2,
                 width: 120,
                 height: AD.UI.buttonHeight
-            }));
-            var valueButton = $valueButton.getView();
-            $valueButton.addEventListener('click', function() {
+            });
+            $valueView = $.View.create(valueButton);
+            valueButton.addEventListener('click', function() {
                 // Assume that all choices are model instances
+                var value = fields[fieldName].value;
                 var params = $.extend({
                     tab: _this.tab,
                     groupName: fieldDefinition.name,
                     Model: fieldDefinition.Model,
-                    initial: fields[fieldName].value,
                 }, fieldDefinition.params);
-                var $winChooseOption = new AD.UI.ChooseOptionWindow(params);
-                $winChooseOption.getDeferred().done(function(option) {
-                    // An option was chosen, so set the value of the field in the filter
-                    fields[fieldName].value = option.getId();
-                    valueButton.title = option.getLabel();
-                });
+                if (fieldDefinition.isChoice) {
+                    // This is a single choice field
+                    params.initial = value;
+                    var $winChooseOption = new AD.UI.ChooseOptionWindow(params);
+                    $winChooseOption.getDeferred().done(function(option) {
+                        // An option was chosen, so set the value of the field in the filter
+                        fields[fieldName].value = option.getId();
+                        valueButton.title = option.getLabel();
+                    });
+                }
+                else {
+                    // This is a multi choice field
+                    params.initial = value || [];
+                    var $winChooseOptions = new AD.UI.ChooseOptionsWindow(params);
+                    $winChooseOptions.getDeferred().done(function(options) {
+                        // An option was chosen, so set the value of the field in the filter
+                        var ids = options.map(function(model) { return model.getId() });
+                        fields[fieldName].value = ids;
+                    });
+                }
             });
             $enabledCheckbox.addEventListener('change', function(event) {
                 var enabled = event.value;
@@ -276,15 +299,19 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             
             // Modify the enabled and value views to reflect their values in the group
             $valueView.setEnabled(enabled);
-            $enabledCheckbox.setValue(fieldData.enabled);
+            $enabledCheckbox.setValue(enabled);
             if (fieldDefinition.isBool) {
                 var $valueCheckbox = $valueView;
-                $valueCheckbox.setEnabled(fieldData.enabled);
-                $valueCheckbox.setValue(fieldData.enabled && fieldData.value);
+                $valueCheckbox.setEnabled(enabled);
+                $valueCheckbox.setValue(fieldData.value);
             }
             else if (fieldDefinition.isChoice) {
                 var $valueButton = $valueView;
-                $valueButton.getView().title = fieldData.enabled ? title : '';
+                $valueButton.getView().title = enabled ? title : '';
+            }
+            else if (fieldDefinition.isMultichoice) {
+                var $valueButton = $valueView;
+                $valueView.getView().title = enabled ? AD.Localize('unspecified') : '';
             }
         });
     },
