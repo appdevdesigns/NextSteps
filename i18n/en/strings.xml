@@ -112,6 +112,7 @@
     <string name="groupName">Group name</string>
     <string name="groupDeleteConfirmation">Are you sure you want to delete the group?</string>
     <string name="unspecified">Choose...</string>
+    <string name="all">All</string>
     <string name="invalidGroupName">Please specify a group name</string>
     <string name="invalidOptionChoice">Please choose a {0}</string>
     

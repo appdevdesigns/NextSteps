@@ -212,10 +212,26 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             });
         }
         else if (fieldDefinition.isChoice || fieldDefinition.isMultichoice) {
+            var valueButtonWidth = 120;
+
+            var $conditionCheckbox = null;
+            if (fieldDefinition.isMultichoice) {
+                // Create the condition (any/all) checkbox
+                $conditionCheckbox = new AD.UI.Checkbox({
+                    createParams: {
+                        right: AD.UI.padding * 2 + valueButtonWidth,
+                        top: AD.UI.padding / 2
+                    },
+                    overlayText: AD.Localize('all').toUpperCase(),
+                    value: false
+                });
+                $fieldRow.add('condition', $conditionCheckbox);
+            }
+
             var valueButton = Ti.UI.createButton({
                 right: AD.UI.padding,
                 top: AD.UI.padding / 2,
-                width: 120,
+                width: valueButtonWidth,
                 height: AD.UI.buttonHeight
             });
             $valueView = $.View.create(valueButton);
@@ -253,6 +269,13 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 fields[fieldName].value = null;
                 // Reset the button's text
                 valueButton.title = enabled ? AD.Localize('unspecified') : '';
+
+                if ($conditionCheckbox) {
+                    $conditionCheckbox.setEnabled(enabled);
+                    if (!enabled) {
+                        $conditionCheckbox.setValue(false);
+                    }
+                }
             });
         }
         
@@ -312,6 +335,10 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             else if (fieldDefinition.isMultichoice) {
                 var $valueButton = $valueView;
                 $valueView.getView().title = enabled ? AD.Localize('unspecified') : '';
+
+                var $conditionCheckbox = $fieldRow.get$Child('condition');
+                $conditionCheckbox.setEnabled(enabled);
+                $conditionCheckbox.setValue(false);
             }
         });
     },
