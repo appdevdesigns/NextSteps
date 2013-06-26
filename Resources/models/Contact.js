@@ -50,6 +50,10 @@
             contact_ministering: 'date',
             contact_multiplying: 'date'
         },
+
+        // An array of the conditions supported by matchesFilter
+        filterConditions: ['OR', 'AND'],
+
         // Calculate the stats information between startDate and endDate inclusive
         // The parameters can be set to null to remove that bound
         // Return an object whose keys represent fieldnames and values represents the number of contacts who have completed the step

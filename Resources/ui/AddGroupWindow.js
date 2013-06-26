@@ -239,6 +239,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
 
             var $conditionCheckbox = null;
             if (fieldDefinition.isMultichoice) {
+                var conditions = AD.Models.Contact.filterConditions;
                 // Create the condition (any/all) checkbox
                 $conditionCheckbox = new AD.UI.Checkbox({
                     createParams: {
@@ -247,7 +248,10 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                     },
                     overlayText: AD.Localize('all').toUpperCase(),
                     enabled: field.enabled,
-                    value: field.condition
+                    value: field.value.condition === conditions[1]
+                });
+                $conditionCheckbox.addEventListener('change', function(event) {
+                    field.value.condition = conditions[event.value ? 1 : 0];
                 });
                 $fieldRow.add('condition', $conditionCheckbox);
             }
@@ -279,18 +283,21 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 }
                 else {
                     // This is a multi choice field
-                    params.initial = field.value || [];
+                    params.initial = field.value.ids || [];
                     var $winChooseOptions = new AD.UI.ChooseOptionsWindow(params);
                     $winChooseOptions.getDeferred().done(function(options) {
                         // An option was chosen, so set the value of the field in the filter
                         var ids = options.map(function(model) { return model.getId() });
-                        field.value = ids;
+                        field.value.ids = ids;
                     });
                 }
             });
             $enabledCheckbox.addEventListener('change', function(event) {
                 var enabled = event.value;
-                field.value = null;
+                field.value = enabled && fieldDefinition.isMultichoice ? {
+                    ids: [],
+                    condition: 'OR'
+                } : null;
                 // Reset the button's text
                 valueButton.title = enabled ? AD.Localize('unspecified') : '';
 
