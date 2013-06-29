@@ -68,8 +68,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             baseAttrs[stepFieldName] = null;
         });
         var mergedAttrs = $.extend(baseAttrs, attrs);
-        mergedAttrs.campus_label = mergedAttrs.campus_guid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_guid).campus_label : '';
-        mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).year_label;
+        mergedAttrs.campus_label = mergedAttrs.campus_guid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_guid).getLabel() : '';
+        mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).getLabel();
         return new AD.Models.Contact(mergedAttrs);
     },
     
@@ -379,12 +379,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         });
         $winChooseCampus.getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
-            var campus_guid = campus.attr('campus_guid');
-            var campus_label = campus.attr('campus_label');
-            this.contact.attr('campus_guid', campus_guid);
-            this.contact.attr('campus_label', campus_label);
+            var label = campus.getLabel();
+            this.contact.attr('campus_guid', campus.getId());
+            this.contact.attr('campus_label', label);
             var campusLabel = this.getChild('campusLabel');
-            campusLabel.text = campusLabel.title = campus_label;
+            campusLabel.text = campusLabel.title = label;
         }));
     },
     changeYear: function() {
@@ -397,12 +396,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         });
         $winChooseYear.getDeferred().done(this.proxy(function(year) {
             // A year was chosen
-            var year_id = year.attr('year_id');
-            var year_label = year.attr('year_label');
-            this.contact.attr('year_id', year_id);
-            this.contact.attr('year_label', year_label);
+            var label = year.getLabel();
+            this.contact.attr('year_id', year.getId());
+            this.contact.attr('year_label', label);
             var yearLabel = this.getChild('yearLabel');
-            yearLabel.text = yearLabel.title = year_label;
+            yearLabel.text = yearLabel.title = label;
         }));
     },
     changePhone: function() {

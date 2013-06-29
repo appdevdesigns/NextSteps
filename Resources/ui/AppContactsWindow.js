@@ -10,7 +10,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             return key ? key[0].toUpperCase() : key;
         });
         $.ModelTable.addGroupProcessor('year', function(key) {
-            return AD.Models.Year.cache.getById(key).year_label;
+            return AD.Models.Year.cache.getById(key).getLabel();
         });
     },
     

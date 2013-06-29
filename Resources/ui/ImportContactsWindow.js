@@ -231,14 +231,13 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
 
     // Update the field labels
     updateCampus: function() {
-        this.getChild('campus').title = this.campus_guid ? AD.Models.Campus.cache.getById(this.campus_guid).campus_label : AD.Localize('unspecified');
+        this.getChild('campus').title = this.campus_guid ? AD.Models.Campus.cache.getById(this.campus_guid).getLabel() : AD.Localize('unspecified');
     },
     updateYear: function() {
-        this.getChild('year').title = AD.Models.Year.cache.getById(this.year_id).year_label;
+        this.getChild('year').title = AD.Models.Year.cache.getById(this.year_id).getLabel();
     },
     updateTags: function() {
-        var tagLabels = this.tags.map(function(tag) { return tag.attr(tag.constructor.labelKey) });
-        this.getChild('tags').text = tagLabels.join(', ') || AD.Localize('none');
+        this.getChild('tags').text = $.Model.getLabels(this.tags).join(', ') || AD.Localize('none');
     },
     
     // Validate the contacts
