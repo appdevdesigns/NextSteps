@@ -98,7 +98,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         // Initialize the base $.Window object
         this._super({
             title: this.adding ? 'addGroup' : 'editGroup',
-            tab: options.tab,
             autoOpen: true,
             focusedChild: this.adding ? 'name' : null,
             createParams: {

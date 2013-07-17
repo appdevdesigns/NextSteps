@@ -60,8 +60,7 @@ module.exports = $.Window('AppDev.UI.AppGroupsWindow', {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
-            title: 'groupsTitle',
-            tab: options.tab
+            title: 'groupsTitle'
         });
         
         this.smartBind(AD.Models.Group, 'created', function(event, group) {

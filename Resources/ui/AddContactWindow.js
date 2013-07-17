@@ -138,7 +138,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         // Initialize the base $.Window object
         // Pass in deferreds to delay the execution of this.create and this.initialize until a contact is chosen
         this._super({
-            tab: options.tab,
             createDfd: getContactDfd.promise(),
             initializeDfd: getContactDfd.promise(),
             createParams: {

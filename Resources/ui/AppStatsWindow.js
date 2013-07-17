@@ -6,7 +6,6 @@ var ViewTotalsWindow = $.Window('AppDev.UI.ViewTotalsWindow', {}, {
         // Initialize the base $.Window object
         this._super({
             title: 'viewTotalsTitle',
-            tab: options.tab,
             autoOpen: true
         });
     },
@@ -160,8 +159,7 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
-            title: 'statsTitle',
-            tab: options.tab
+            title: 'statsTitle'
         });
     },
     

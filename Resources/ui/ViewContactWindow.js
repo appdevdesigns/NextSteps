@@ -45,7 +45,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         // Initialize the base $.Window object
         this._super({
             title: 'viewContact',
-            tab: this.options.tab,
             autoOpen: true
         });
         

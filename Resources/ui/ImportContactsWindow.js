@@ -21,7 +21,6 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         
         // Initialize the base $.Window object
         this._super({
-            tab: this.options.tab,
             title: 'importContactsTitle',
             autoOpen: true,
             createParams: {

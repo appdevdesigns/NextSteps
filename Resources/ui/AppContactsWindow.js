@@ -203,8 +203,7 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
-            title: 'contactsTitle',
-            tab: options.tab
+            title: 'contactsTitle'
         });
         
         this.smartBind(AD.Models.Contact, '*', this.updateTitle);
