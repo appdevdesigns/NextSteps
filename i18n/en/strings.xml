@@ -33,6 +33,7 @@
     <string name="contactsTitle">Contacts</string>
     <string name="groupsTitle">Groups</string>
     <string name="statsTitle">Stats Reporting</string>
+    <string name="toolsTitle">Tools</string>
     
     <!-- Button labels used throughout the app -->
     <string name="yes">Yes</string>
@@ -116,6 +117,12 @@
     <string name="statsConfirmSave">Are you sure you want to begin a new stats collection session?  Stats totals will be preserved.</string>
     <string name="statsMessageBody">Stats report submitted by {0} on {1}.\n\n{2}</string>
     
+    <!-- Tools labels -->
+    <string name="backupRestoreInfoText">Backup the database to or restore the database from Google Drive.</string>
+    <string name="backupDatabase">Backup</string>
+    <string name="restoreDatabase">Restore</string>
+    <string name="backupTitleFormat">NextSteps database dump {0}/{1}/{2}</string>
+
     <!-- Password protection labels -->
     <string name="passwordProtectOptional">Your device appears to have full-device encryption enabled.  Would you like to pasword-protect the application anyway?</string>
     <string name="passwordProtectRequired">Your device does not appear to have full-device encryption enabled.  The application will be password-protected.</string>
