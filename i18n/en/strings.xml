@@ -48,6 +48,7 @@
     <string name="back">Back</string>
     <string name="reset">Reset</string>
     <string name="sort">Sort</string>
+    <string name="choose">Choose</string>
     
     <!-- Contacts labels -->
     <string name="addMethod">Add method</string>
@@ -143,6 +144,12 @@ Redistribution and use in source and binary forms, with or without modification,
     <string name="suggestionTemplate">I really like {0}, but this feature would make it even better:\n\n</string>
     <string name="bugReportTemplate">I really like {0}, but I am experiencing problems.\n\nWhenever I do this:\n\n\nThis happens:\n\n\n{0} version: {1}\n{2} version: {3}</string>
     
+    <!-- Google APIs labels -->
+    <string name="googleDrive">Google Drive</string>
+    <string name="chooseFileTitle">Choose file</string>
+    <string name="chooseFolderTitle">Choose folder</string>
+    <string name="chooseFile">Please choose a file</string>
+
     <!-- LoginWindow labels -->
     <string name="login">Login</string>
     <string name="userId">User ID</string>
