@@ -122,6 +122,8 @@
     <string name="backupDatabase">Backup</string>
     <string name="restoreDatabase">Restore</string>
     <string name="backupTitleFormat">NextSteps database dump {0}/{1}/{2}</string>
+    <string name="stringPromptBackupTitle">NextSteps Database Backup</string>
+    <string name="stringPromptBackupMessage">Please choose the name of the NextSteps database backup file.</string>
 
     <!-- Password protection labels -->
     <string name="passwordProtectOptional">Your device appears to have full-device encryption enabled.  Would you like to pasword-protect the application anyway?</string>

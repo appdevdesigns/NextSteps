@@ -2,7 +2,7 @@ var AD = require('AppDev');
 var $ = require('jquery');
 
 module.exports = $.Window('AppDev.UI.AppToolsWindow', {
-    dependencies: ['GoogleDriveChooseFileWindow']
+    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow']
 }, {
     init: function(options) {
         // Initialize the base $.Window object
@@ -37,20 +37,29 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             titleid: 'backupDatabase'
         }));
         backupButton.addEventListener('click', function() {
-            // Calculate the backup title
+            // Calculate the default backup title
             var today = new Date();
-            var backupTitle = $.formatString('backupTitleFormat',
+            var defaultTitle = $.formatString('backupTitleFormat',
                 ('0' + (today.getMonth() + 1)).slice(-2),
                 ('0' + today.getDate()).slice(-2),
                 today.getFullYear());
-            DataStore.export(AD.Defaults.dbName).done(function(dump) {
-                AD.Comm.GoogleDriveFileAPI.write({
-                    content: JSON.stringify(dump),
-                    metadata: {
-                        title: backupTitle,
-                        mimeType: 'application/json',
-                        parents: ['root']
-                    }
+
+            // Prompt the user for the name of the database backup file
+            var $winStringPrompt = new AD.UI.StringPromptWindow({
+                title: 'stringPromptBackupTitle',
+                message: 'stringPromptBackupMessage',
+                initial: defaultTitle
+            });
+            $winStringPrompt.getDeferred().done(function(backupTitle) {
+                DataStore.export(AD.Defaults.dbName).done(function(dump) {
+                    AD.Comm.GoogleDriveFileAPI.write({
+                        content: JSON.stringify(dump),
+                        metadata: {
+                            title: backupTitle,
+                            mimeType: 'application/json',
+                            parents: ['root']
+                        }
+                    });
                 });
             });
         });
