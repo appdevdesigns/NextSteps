@@ -17,7 +17,6 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
     // Create the child views
     create: function() {
         var tab = this.tab;
-        var DataStore = require('appdev/db/DataStoreSQLite');
 
         this.add(Ti.UI.createLabel({
             left: AD.UI.padding,
@@ -51,7 +50,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 initial: defaultTitle
             });
             $winStringPrompt.getDeferred().done(function(backupTitle) {
-                DataStore.export(AD.Defaults.dbName).done(function(dump) {
+                AD.Database.export(AD.Defaults.dbName).done(function(dump) {
                     AD.Comm.GoogleDriveFileAPI.write({
                         content: JSON.stringify(dump),
                         metadata: {
@@ -82,7 +81,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             });
             $winChooseFile.getDeferred().done(function(fileId) {
                 AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
-                    DataStore.import(AD.Defaults.dbName, JSON.parse(dump));
+                    AD.Database.import(AD.Defaults.dbName, JSON.parse(dump));
                 });
             });
         });
