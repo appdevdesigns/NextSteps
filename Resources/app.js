@@ -19,6 +19,6 @@
 // Initialize the AppDev framework
 var AD = require('AppDev');
 AD.init({
-    models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag'],
+    models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
     windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppInfoWindow']
 });

@@ -30,21 +30,10 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             }));
         },
         platform: 'Android'
-    }, {
-        callback: function() {
-            if (this.contactModified) {
-                // When the window is closed, if any of the contact's attributes have
-                // changed, save the updated contact information to the database
-                this.contact.save();
-            }
-        },
-        menuItem: false,
-        onClose: true
     }]
 }, {
     init: function(options) {
         this.contact = this.options.contact;
-        this.contactModified = false;
         
         // Initialize the base $.Window object
         this._super({
@@ -187,11 +176,14 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             $winChooseTags.getDeferred().done(function(options) {
                 contact.setTags(options);
                 updateTagLabel();
-                _this.contactModified = true;
             });
         });
 
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
+        AD.Models.Step.cache.getArray().forEach(function(step) {
+            // Lookup the associated with the contact
+            var stepId = step.getId();
+            var contactStep = contact.getStep(stepId);
+
             var $newRow = $.View.create(createRow());
             
             // Create the step title
@@ -200,11 +192,11 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                 top: 0,
                 width: AD.UI.useableScreenWidth,
                 height: Ti.UI.FILL,
-                textid: 'step_'+stepName,
+                text: step.getLabel(),
                 font: AD.UI.Fonts.medium
             }));
             
-            var stepCompletedDate = contact.attr(stepFieldName);
+            var stepCompletedDate = contactStep.attr('step_date');
             var stepCompleted = stepCompletedDate !== null;
             
             // Create the switch to toggle the step's completion status
@@ -219,8 +211,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                 // The step's completion state has been changed
                 stepCompleted = event.value;
                 stepCompletedDate = stepCompleted ? $.today() : null;
-                contact.attr(stepFieldName, stepCompletedDate);
-                _this.contactModified = true;
+                contactStep.attr('step_date', stepCompletedDate).save();
                 updateRow();
             });
             $newRow.add($completedCheckbox);
@@ -241,8 +232,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                     initialDate: stepCompletedDate
                 }).done(function(completedDate) {
                     stepCompletedDate = completedDate;
-                    contact.attr(stepFieldName, stepCompletedDate);
-                    _this.contactModified = true;
+                    contactStep.attr('step_date', stepCompletedDate).save();
                     updateRow();
                 });
             });
@@ -260,7 +250,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             };
             updateRow();
             
-            $stepsView.add(stepFieldName, $newRow);
+            $stepsView.add(stepId, $newRow);
         });
         this.add($stepsView);
     },

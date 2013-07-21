@@ -35,9 +35,10 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             type: 'choice',
             Model: 'Year'
         });
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-            defineField(stepFieldName, {
-                name: 'step_'+stepName,
+
+        AD.Models.Step.cache.getArray().forEach(function(step) {
+            defineField('step_'+step.getId(), {
+                name: step.getLabel(),
                 type: 'bool'
             });
         });

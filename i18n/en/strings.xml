@@ -49,17 +49,6 @@
     <string name="reset">Reset</string>
     <string name="sort">Sort</string>
     
-    <!-- Step name labels -->
-    <string name="step_preEv">Pre-ev</string>
-    <string name="step_conversation">G conversation</string>
-    <string name="step_Gpresentation">G presentation</string>
-    <string name="step_decision">Decision</string>
-    <string name="step_finishedFU">Finished follow up</string>
-    <string name="step_HSpresentation">HS presentation</string>
-    <string name="step_engaged">Engaged disc</string>
-    <string name="step_ministering">Ministering disc</string>
-    <string name="step_multiplying">Multiplying disc</string>
-    
     <!-- Contacts labels -->
     <string name="addMethod">Add method</string>
     

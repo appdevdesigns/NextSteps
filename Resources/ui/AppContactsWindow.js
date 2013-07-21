@@ -48,6 +48,8 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             });
         }
         
+        this.smartBind(AD.Models.ContactStep, '*', this.refresh);
+
         // When the sort order is updated, refresh the contacts list
         this.smartBind(AD.PropertyStore, 'sort_order', function(event, sortOrder) {
             this.setSortOrder(sortOrder);
@@ -115,15 +117,13 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             
             // Use space instead of empty string to work around iPhone quirk where label text is not updated when changed from an empty string
             var lastStepCompleted = contact.getLastStep();
-            lastUpdateDateLabel.text = lastStepCompleted ? $.formatDate(lastStepCompleted.completionDate) : ' ';
-            lastUpdateStepLabel.text = lastStepCompleted ? AD.Localize('step_'+lastStepCompleted.stepName) : ' ';
+            lastUpdateDateLabel.text = lastStepCompleted ? $.formatDate(lastStepCompleted.attr('step_date')) : ' ';
+            lastUpdateStepLabel.text = lastStepCompleted ? lastStepCompleted.getLabel() : ' ';
         };
         update();
         
-        this.smartBind(contact, 'updated', function(event, updatedContact) {
-            // This row's contact was updated
-            update();
-        });
+        this.smartBind(AD.Models.ContactStep, '*', update);
+        this.smartBind(contact, 'updated', update);
         
         return row;
     },

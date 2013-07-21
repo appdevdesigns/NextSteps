@@ -22,33 +22,11 @@
         //connectionType:'server', // optional field
         cache:true,
         
-        // name:field_name map of all step fields
-        steps: {
-            'preEv': 'contact_preEv',
-            'conversation': 'contact_conversation',
-            'Gpresentation': 'contact_Gpresentation',
-            'decision': 'contact_decision',
-            'finishedFU': 'contact_finishedFU',
-            'HSpresentation': 'contact_HSpresentation',
-            'engaged': 'contact_engaged',
-            'ministering': 'contact_ministering',
-            'multiplying': 'contact_multiplying'
-        },
-        
         attributes: {
             contact_id: 'integer',
             viewer_id: 'integer',
             contact_recordId: 'integer',
-            year_id: 'integer',
-            contact_preEv: 'date',
-            contact_conversation: 'date',
-            contact_Gpresentation: 'date',
-            contact_decision: 'date',
-            contact_finishedFU: 'date',
-            contact_HSpresentation: 'date',
-            contact_engaged: 'date',
-            contact_ministering: 'date',
-            contact_multiplying: 'date'
+            year_id: 'integer'
         },
 
         // An array of the conditions supported by matchesFilter
@@ -95,25 +73,25 @@
         //    contact_multiplying: 8
         //}
         getStats: function(startDate, endDate) {
-            var steps = this.steps;
+            var steps = AD.Models.Step.cache.getArray();
             
             // Initialize the stats object
             var stats = {};
-            AD.jQuery.each(steps, function(stepName, stepFieldName) {
-                stats[stepFieldName] = 0;
+            steps.forEach(function(step) {
+                stats[step.getId()] = 0;
             });
             
             // For each contact, determine whether any steps have been taken since the last stats report
             this.cache.getArray().forEach(function(contact) {
-                AD.jQuery.each(steps, function(stepName, stepFieldName) {
-                    var stepCompletionDate = contact[stepFieldName];
+                steps.forEach(function(step) {
+                    var stepId = step.getId();
+                    var stepCompletionDate = contact.getStep(stepId).attr('step_date');
                     // The step must have been taken and between the start and end dates, if they were specified
                     if (stepCompletionDate && (!startDate || stepCompletionDate >= startDate) && (!endDate || stepCompletionDate <= endDate)) {
-                        ++stats[stepFieldName];
+                        ++stats[stepId];
                     }
                 });
             });
-            
             return stats;
         }
     };
@@ -138,16 +116,7 @@
                   contact_phoneId:"text",
                   contact_email:"text",
                   contact_emailId:"text",
-                  contact_notes:"text",
-                  contact_preEv:"date",
-                  contact_conversation:"date",
-                  contact_Gpresentation:"date",
-                  contact_decision:"date",
-                  contact_finishedFU:"date",
-                  contact_HSpresentation:"date",
-                  contact_engaged:"date",
-                  contact_ministering:"date",
-                  contact_multiplying:"date"
+                  contact_notes:"text"
 
             },
             lookupLabels: {
@@ -205,23 +174,41 @@
             });
         },
 
+        // Return an array of the Step models associated with this contact
+        getSteps: function() {
+            return AD.Models.ContactStep.cache.query({
+                contact_guid: this.attr('contact_guid')
+            });
+        },
+
+        // Return a Step model with the specified step_guid associated with this contact
+        getStep: function(step_guid) {
+            var contact_guid = this.attr('contact_guid');
+            var steps = AD.Models.ContactStep.cache.query({
+                contact_guid: contact_guid,
+                step_guid: step_guid
+            });
+            return steps.length > 0 ? steps[0] : new AD.Models.ContactStep({
+                contact_guid: contact_guid,
+                step_guid: step_guid,
+                step_label: AD.Models.Step.cache.getById(step_guid).getLabel(),
+                step_date: null
+            });
+        },
+
         // Return the last completed step of this contact
         getLastStep: function() {
             var self = this;
-            var lastStepName = null; 
+            var lastStep = null;
             var lastStepCompletionDate = null;
-            AD.jQuery.each(this.constructor.steps, function(stepName, fieldName) {
-                var stepCompletionDate = self.attr(fieldName);
+            this.getSteps().forEach(function(step) {
+                var stepCompletionDate = step.attr('step_date');
                 if (stepCompletionDate !== null && (lastStepCompletionDate === null || stepCompletionDate >= lastStepCompletionDate)) {
-                    lastStepName = stepName;
+                    lastStep = step;
                     lastStepCompletionDate = stepCompletionDate;
                 }
             });
-            return lastStepName ? {
-                stepName: lastStepName,
-                fieldName: this.constructor.steps[lastStepName],
-                completionDate: lastStepCompletionDate
-            } : null;
+            return lastStep;
         },
         
         // Return a boolean indicating whether the contact matches the specified filter

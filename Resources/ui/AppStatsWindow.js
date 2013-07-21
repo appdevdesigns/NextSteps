@@ -34,7 +34,9 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         // The stats view is the view's view
         this._super({view: statsView});
         
-        this.smartBind(AD.Models.Contact, 'updated', this.update);
+        this.smartBind(AD.Models.Contact, '*', this.update);
+        this.smartBind(AD.Models.Step, '*', this.update);
+        this.smartBind(AD.Models.ContactStep, '*', this.update);
     },
     
     // Create the child views
@@ -92,11 +94,11 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         // Create the stats rows, one for each step
         var stats = AD.Models.Contact.getStats(startDate, null);
         var statRowIndex = 0;
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
+        AD.Models.Step.cache.getArray().forEach(function(step) {
             $statsTable.add(new StatRow({
                 index: statRowIndex,
-                label: 'step_'+stepName,
-                count: stats[stepFieldName]
+                label: step.getLabel(),
+                count: stats[step.getId()]
             }));
             statRowIndex += 1;
         });
@@ -131,7 +133,7 @@ var StatRow = $.View('AppDev.UI.StatRow', {
         }));
         this.add(Ti.UI.createLabel({
             left: 40,
-            textid: this.options.label,
+            text: this.options.label,
             font: font
         }));
         this.add(Ti.UI.createLabel({
@@ -218,10 +220,8 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
             if (sendStatsReportEmail) {
                 var stats = AD.Models.Contact.getStats(lastStatsReport, yesterday);
                 var steps = '';
-                $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-                    var statLabel = AD.Localize('step_'+stepName);
-                    var statValue = stats[stepFieldName];
-                    var line = statLabel+': '+statValue;
+                AD.Models.Step.cache.getArray(function(step) {
+                    var line = step.getValue()+': '+stats[step.getId()];
                     steps += line+'\n';
                 });
                 var messageBody = $.formatString('statsMessageBody', Ti.Platform.username, $.formatDate(today), steps);
