@@ -20,6 +20,13 @@
     <string name="correct">Correct</string>
     <string name="incorrect">Incorrect</string>
     
+    <!-- DatePicker labels -->
+    <string name="datePickerTitle">Choose Date</string>
+    <!-- ChooseOption labels -->
+    <string name="chooseOptionTitle">Choose {0}</string>
+    <string name="addOptionTitle">Add {0}</string>
+    <string name="newOptionTitle">Enter the name of the new {0}.</string>
+    
     <string name="returnToApp">Return to app?</string>
     
     <!-- Tab group labels -->
@@ -85,10 +92,6 @@
     <string name="notes">Notes</string>
     
     <string name="sortOrderTitle">Set Sort Order</string>
-    <string name="datePickerTitle">Choose Date</string>
-    <string name="chooseOptionTitle">Choose {0}</string>
-    <string name="addOptionTitle">Add {0}</string>
-    <string name="newOptionTitle">New {0} name:</string>
     
     <!-- ImportContacts labels -->
     <string name="importContactsTitle">Mass Import</string>
