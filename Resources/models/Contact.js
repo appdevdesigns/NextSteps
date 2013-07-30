@@ -55,6 +55,26 @@
                     });
                     return matchesProperty;
                 }
+            },
+            steps: {
+                value: function() {
+                    // Return a dictionary of step completion dates
+                    var completionDates = {};
+                    this.getSteps().forEach(function(step) {
+                        completionDates[step.attr('step_guid')] = step.attr('step_date');
+                    });
+                    return completionDates;
+                },
+                matches: function(completionDates, steps) {
+                    // Calculate whether the steps match
+                    var matchesProperty = true;
+                    AD.jQuery.each(steps, function(step_guid, value) {
+                        var completedStep = completionDates[step_guid] ? true : false;
+                        var matchesElement = completedStep === value;
+                        matchesProperty = matchesProperty && matchesElement;
+                    });
+                    return matchesProperty;
+                }
             }
         },
 
@@ -221,11 +241,6 @@
                 if (filterField) {
                     // The filter defines whether the two values match
                     matchesProperty = filterField.matches.call(this, contactValue, value);
-                }
-                else if (typeof value === 'boolean' && this.constructor.attributes[key] === 'date') {
-                    // Special case when value is a boolean and contactValue is a date
-                    // 'true' in value refers to a valid date, and 'false' refers to null 
-                    matchesProperty = value === (contactValue !== null);
                 }
                 else {
                     // General case where the two values are directly compared to determine equality

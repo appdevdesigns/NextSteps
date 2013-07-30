@@ -316,6 +316,7 @@ var installDatabases = function(dbVersion) {
         // Update the group filters because of database normalization introduced in version 1.5
         query("SELECT group_guid,group_filter FROM nextsteps_group").done(function(groupArgs) {
             var indexedCampuses = $.indexArray(campuses, 'campus_label');
+            var indexedStepFields = $.indexArray(stepFields, 'field');
             var indexedYears = $.indexArray(years, 'year_label');
             var groups = groupArgs[0];
             groups.forEach(function(group) {
@@ -331,6 +332,18 @@ var installDatabases = function(dbVersion) {
                     filter.year_id = indexedYears[filter.year_label].year_id;
                     delete filter.year_label;
                 }
+
+                // All steps are now contained in a new "steps" filter field
+                // and are referenced by guid, rather than by field name
+                var steps = filter.steps = {};
+                $.each(filter, function(key, value) {
+                    if (indexedStepFields[key]) {
+                        steps[indexedStepFields[key].step_guid] = value;
+                        delete filter[key];
+                    }
+                });
+                // This step field was removed completely
+                delete filter.contact_ministering;
 
                 query("UPDATE nextsteps_group SET group_filter = ? WHERE group_guid = ?", [JSON.stringify(filter), group.group_guid]);
             });
