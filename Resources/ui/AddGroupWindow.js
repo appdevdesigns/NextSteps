@@ -201,10 +201,9 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         });
         
         // Create the field name label
-        $fieldRow.add(Ti.UI.createLabel({
+        var nameLabel = $fieldRow.add(Ti.UI.createLabel({
             left: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
             top: 0,
-            width: Ti.UI.SIZE,
             height: Ti.UI.FILL,
             text: AD.Localize(fieldDefinition.name),
             font: AD.UI.Fonts.medium
@@ -310,6 +309,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 }
             });
         }
+        
+        nameLabel.right = $valueView.getView().width + AD.UI.padding * 2;
 
         $valueView.setEnabled(field.enabled);
         $fieldRow.fieldDefinition = fieldDefinition;

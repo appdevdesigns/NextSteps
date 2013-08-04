@@ -187,13 +187,13 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             var $newRow = $.View.create(createRow());
             
             // Create the step title
-            $newRow.add(Ti.UI.createLabel({
+            var stepLabel = $newRow.add(Ti.UI.createLabel({
                 left: AD.UI.padding,
+                right: AD.UI.padding,
                 top: 0,
-                width: AD.UI.useableScreenWidth,
                 height: Ti.UI.FILL,
                 text: step.getLabel(),
-                font: AD.UI.Fonts.medium
+                font: AD.UI.Fonts.mediumSmall
             }));
             
             var stepCompletedDate = contactStep.attr('step_date');
@@ -247,6 +247,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                 else {
                     dateButton.visible = false;
                 }
+                stepLabel.right = AD.UI.padding + (dateButton.visible ? (dateButton.right + dateButton.width) : (completedCheckbox.right + completedCheckbox.width));
             };
             updateRow();
             

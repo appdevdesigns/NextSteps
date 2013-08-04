@@ -106,8 +106,8 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
 });
 
 var StatRow = $.View('AppDev.UI.StatRow', {
-    rowHeight: 30,
-    font: AD.UI.Fonts.medium
+    rowHeight: 40,
+    font: AD.UI.Fonts.mediumSmall
 }, {
     init: function(options) {
         // Create the stat row containing view
@@ -132,7 +132,8 @@ var StatRow = $.View('AppDev.UI.StatRow', {
             font: font
         }));
         this.add(Ti.UI.createLabel({
-            left: 40,
+            left: 30,
+            right: 30,
             text: this.options.label,
             font: font
         }));
