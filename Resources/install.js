@@ -107,7 +107,7 @@ var installDatabases = function(dbVersion) {
     // Empty the tables and recreate the year labels
     query("DELETE FROM nextsteps_year_data");
     query("DELETE FROM nextsteps_year_trans");
-    var yearLabels = ['Unknown', 'Freshman', 'Sophmore', 'Junior', 'Senior', 'Graduated', 'Teacher', 'Other'];
+    var yearLabels = ['Unknown', 'Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduated', 'Teacher', 'Other'];
     yearLabels.forEach(function(yearLabel, index) {
         var id = index + 1;
         query("INSERT INTO nextsteps_year_data (year_id) VALUES (?)", [id]);
