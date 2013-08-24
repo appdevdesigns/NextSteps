@@ -2,6 +2,7 @@
 .settings/
 build.log
 build/
+Resources/GoogleAPISettings.js
 # AppDev resources start
 Resources/appdev
 Resources/AppDev.js
@@ -21,6 +22,8 @@ Resources/ui/Checkbox.js
 Resources/ui/ChooseOptionWindow.js
 Resources/ui/DatePickerWindow.js
 Resources/ui/ErrorWindow.js
+Resources/ui/GoogleAuthWindow.js
+Resources/ui/GoogleDriveChooseFileWindow.js
 Resources/ui/LoginWindow.js
 Resources/ui/ModelTable.js
 Resources/ui/PasswordPromptWindow.js

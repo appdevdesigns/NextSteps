@@ -20,5 +20,5 @@
 var AD = require('AppDev');
 AD.init({
     models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
-    windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppInfoWindow']
+    windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppToolsWindow', 'AppInfoWindow']
 });
