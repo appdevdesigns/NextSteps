@@ -218,16 +218,31 @@ var installDatabases = function(dbVersion) {
         });
         AD.PropertyStore.remove('campuses');
 
-        // Update the group filters to reference campuses by guid, rather than by label
+        // Load all of the year definitions
+        var years = [];
+        query("SELECT year_label FROM nextsteps_year_trans WHERE language_code = 'en'").done(function(yearArgs) {
+            years = yearArgs[0];
+        });
+
+        // Update the group filters because of database normalization introduced in version 1.5
         query("SELECT group_guid,group_filter FROM nextsteps_group").done(function(groupArgs) {
             var indexedCampuses = $.indexArray(campuses, 'campus_label');
+            var indexedYears = $.indexArray(years, 'year_label');
             var groups = groupArgs[0];
             groups.forEach(function(group) {
                 var filter = JSON.parse(group.group_filter);
                 if (filter.contact_campus) {
+                    // Make the filter reference campuses by guid, rather than by label
                     filter.campus_guid = indexedCampuses[filter.contact_campus].campus_guid;
                     delete filter.contact_campus;
                 }
+
+                if (filter.year_label) {
+                    // Make the filter reference years by id, rather than by label
+                    filter.year_id = indexedYears[filter.year_label].year_id;
+                    delete filter.year_label;
+                }
+
                 query("UPDATE nextsteps_group SET group_filter = ? WHERE group_guid = ?", [JSON.stringify(filter), group.group_guid]);
             });
         });
