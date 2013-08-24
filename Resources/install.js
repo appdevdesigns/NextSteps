@@ -57,16 +57,7 @@ var installDatabases = function(dbVersion) {
                    contact_phoneId TEXT,\
                    contact_email TEXT,\
                    contact_emailId TEXT,\
-                   contact_notes TEXT,\
-                   contact_preEv TEXT DEFAULT NULL,\
-                   contact_conversation TEXT DEFAULT NULL,\
-                   contact_Gpresentation TEXT DEFAULT NULL,\
-                   contact_decision TEXT DEFAULT NULL,\
-                   contact_finishedFU TEXT DEFAULT NULL,\
-                   contact_HSpresentation TEXT DEFAULT NULL,\
-                   contact_engaged TEXT DEFAULT NULL,\
-                   contact_ministering TEXT DEFAULT NULL,\
-                   contact_multiplying TEXT DEFAULT NULL\
+                   contact_notes TEXT\
                )");
         query("CREATE TRIGGER IF NOT EXISTS contact_guid AFTER INSERT ON nextsteps_contact FOR EACH ROW\
                BEGIN\
@@ -141,6 +132,61 @@ var installDatabases = function(dbVersion) {
                    UPDATE nextsteps_contact_tag SET contacttag_guid = NEW.contacttag_id||'.'||NEW.device_id WHERE contacttag_id=NEW.contacttag_id;\
                END");
         
+        var stepsTableExists;
+        query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='nextsteps_step'").done(function(tablesArgs) {
+            stepsTableExists = tablesArgs[0][0]['COUNT(*)'] === 1;
+        });
+        query("CREATE TABLE IF NOT EXISTS nextsteps_step (\
+                   step_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   step_guid TEXT DEFAULT NULL UNIQUE,\
+                   viewer_id INTEGER NOT NULL,\
+                   device_id TEXT NOT NULL,\
+                   step_label TEXT NOT NULL\
+               )");
+        query("CREATE TRIGGER IF NOT EXISTS step_guid AFTER INSERT ON nextsteps_step FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_step SET step_guid = NEW.step_id||'.'||NEW.device_id WHERE step_id=NEW.step_id;\
+               END");
+        if (!stepsTableExists) {
+            // Only populate the steps table if it was just created
+            var stepLabels = [
+                'Pre-ev',
+                'G Conversation',
+                'G Presentation',
+                'Decision',
+                'Finished Following Up',
+                'HS Presentation',
+                'Trained for Action',
+                'Challenged as Lifetime Laborer',
+                'Challenged to Develop Local Resources',
+                'Engaged Disciple',
+                'Multiplying Disciple',
+                'Movement Leader',
+                'New Lifetime Laborer',
+                'People Giving Resource',
+                'Domestic Project',
+                'Cross-Cultural Project',
+                'International Project'
+            ];
+            stepLabels.forEach(function(stepLabel) {
+                query("INSERT INTO nextsteps_step (viewer_id, device_id, step_label) VALUES (?, ?, ?)",
+                    [AD.Defaults.viewerId, Ti.Platform.id, stepLabel]);
+            });
+        }
+        query("CREATE TABLE IF NOT EXISTS nextsteps_contact_step (\
+                   contactstep_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   contactstep_guid TEXT DEFAULT NULL UNIQUE,\
+                   viewer_id INTEGER NOT NULL,\
+                   device_id TEXT NOT NULL,\
+                   contact_guid TEXT NOT NULL REFERENCES nextsteps_contact(contact_guid) ON DELETE CASCADE,\
+                   step_guid TEXT NOT NULL REFERENCES nextsteps_step(step_guid) ON DELETE CASCADE,\
+                   step_date TEXT DEFAULT NULL\
+               )");
+        query("CREATE TRIGGER IF NOT EXISTS contactstep_guid AFTER INSERT ON nextsteps_contact_step FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_contact_step SET contactstep_guid = NEW.contactstep_id||'.'||NEW.device_id WHERE contactstep_id=NEW.contactstep_id;\
+               END");
+        
         installed = true;
     };
     
@@ -191,7 +237,7 @@ var installDatabases = function(dbVersion) {
         install();
         
         // After recreating the nextsteps_contact and nextsteps_group tables, copy contact and group data back in
-        var fields = 'contact_id, contact_guid, viewer_id, device_id, contact_recordId, contact_firstName, contact_lastName, contact_nickname, year_id, contact_phone, contact_phoneId, contact_email, contact_emailId, contact_notes, contact_preEv, contact_conversation, contact_Gpresentation, contact_decision, contact_finishedFU, contact_HSpresentation, contact_engaged, contact_ministering, contact_multiplying';
+        var fields = 'contact_id, contact_guid, viewer_id, device_id, contact_recordId, contact_firstName, contact_lastName, contact_nickname, year_id, contact_phone, contact_phoneId, contact_email, contact_emailId, contact_notes';
         query("INSERT INTO nextsteps_contact ("+fields+") SELECT "+fields+" FROM nextsteps_contact_temp");
         query("INSERT INTO nextsteps_group SELECT * FROM nextsteps_group_temp");
 
@@ -224,9 +270,53 @@ var installDatabases = function(dbVersion) {
             years = yearArgs[0];
         });
 
+        // Migrate the contact steps into the nextsteps_step and nextsteps_contact_step tables
+        var stepFields = [{
+            field: 'contact_preEv',
+            label: 'Pre-ev'
+        }, {
+            field: 'contact_conversation',
+            label: 'G Conversation'
+        }, {
+            field: 'contact_Gpresentation',
+            label: 'G Presentation'
+        }, {
+            field: 'contact_decision',
+            label: 'Decision'
+        }, {
+            field: 'contact_finishedFU',
+            label: 'Finished Following Up'
+        }, {
+            field: 'contact_HSpresentation',
+            label: 'HS Presentation'
+        }, {
+            field: 'contact_engaged',
+            label: 'Engaged Disciple'
+        }, {
+            field: 'contact_multiplying',
+            label: 'Multiplying Disciple'
+        }];
+        stepFields.forEach(function(stepField) {
+            // Determine the step_guid of all the steps that must be migrated
+            query("SELECT step_guid FROM nextsteps_step WHERE step_label=?", [stepField.label]).done(function(stepArgs) {
+                stepField.step_guid = stepArgs[0][0].step_guid;
+            });
+        });
+        query("SELECT contact_guid,"+stepFields.map(function(stepField) { return stepField.field; }).join(',')+" FROM nextsteps_contact_temp").done(function(contactArgs) {
+            var contacts = contactArgs[0];
+            contacts.forEach(function(contact) {
+                // Recreate the steps associated with each contact
+                stepFields.forEach(function(stepField) {
+                    query("INSERT INTO nextsteps_contact_step (viewer_id, device_id, contact_guid, step_guid, step_date) VALUES (?, ?, ?, ?, ?)",
+                        [AD.Defaults.viewerId, Ti.Platform.id, contact.contact_guid, stepField.step_guid, contact[stepField.field]]);
+                });
+            });
+        });
+
         // Update the group filters because of database normalization introduced in version 1.5
         query("SELECT group_guid,group_filter FROM nextsteps_group").done(function(groupArgs) {
             var indexedCampuses = $.indexArray(campuses, 'campus_label');
+            var indexedStepFields = $.indexArray(stepFields, 'field');
             var indexedYears = $.indexArray(years, 'year_label');
             var groups = groupArgs[0];
             groups.forEach(function(group) {
@@ -242,6 +332,18 @@ var installDatabases = function(dbVersion) {
                     filter.year_id = indexedYears[filter.year_label].year_id;
                     delete filter.year_label;
                 }
+
+                // All steps are now contained in a new "steps" filter field
+                // and are referenced by guid, rather than by field name
+                var steps = filter.steps = {};
+                $.each(filter, function(key, value) {
+                    if (indexedStepFields[key]) {
+                        steps[indexedStepFields[key].step_guid] = value;
+                        delete filter[key];
+                    }
+                });
+                // This step field was removed completely
+                delete filter.contact_ministering;
 
                 query("UPDATE nextsteps_group SET group_filter = ? WHERE group_guid = ?", [JSON.stringify(filter), group.group_guid]);
             });

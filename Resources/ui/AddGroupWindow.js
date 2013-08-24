@@ -35,9 +35,10 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             type: 'choice',
             Model: 'Year'
         });
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-            defineField(stepFieldName, {
-                name: 'step_'+stepName,
+
+        AD.Models.Step.cache.getArray().forEach(function(step) {
+            defineField('steps '+step.getId(), {
+                name: step.getLabel(),
                 type: 'bool'
             });
         });
@@ -150,8 +151,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         // Create a field row for each group field
         var filter = this.group.attr('group_filter');
         $.each(this.constructor.fieldDefinitions, this.proxy(function(name, definition) {
-            var enabled = typeof filter[name] !== 'undefined';
-            var value = filter[name];
+            var value = findProperty(filter, name);
+            var enabled = typeof value !== 'undefined';
             var title = value || AD.Localize('unspecified');
             if (value && definition.isChoice) {
                 // "value" refers to the primary key of the model, so lookup the associated model instance
@@ -200,10 +201,9 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         });
         
         // Create the field name label
-        $fieldRow.add(Ti.UI.createLabel({
+        var nameLabel = $fieldRow.add(Ti.UI.createLabel({
             left: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
             top: 0,
-            width: Ti.UI.SIZE,
             height: Ti.UI.FILL,
             text: AD.Localize(fieldDefinition.name),
             font: AD.UI.Fonts.medium
@@ -309,6 +309,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 }
             });
         }
+        
+        nameLabel.right = $valueView.getView().width + AD.UI.padding * 2;
 
         $valueView.setEnabled(field.enabled);
         $fieldRow.fieldDefinition = fieldDefinition;
@@ -343,7 +345,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 return false; // stop looping
             }
             if (fieldData.enabled) {
-                filter[fieldName] = fieldData.value;
+                findProperty(filter, fieldName, fieldData.value);
             }
         });
         
@@ -357,3 +359,27 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         }
     }
 });
+
+// Find a property on object, optionally setting its value
+// This function supports multi-level properties:
+//    findProperty({ a: { b: { c: 'd' } } }, 'a b c') === 'd';
+//    findProperty({}, 'a b c', 'd') === { a: { b: { c: 'd' } } };
+var findProperty = function(object, property, value) {
+    var parts = property.split(' ');
+    var propertyName = parts.pop();
+    var source = object;
+    parts.forEach(function(partName) {
+        if (!source[partName]) {
+            source[partName] = {};
+        }
+        source = source[partName];
+    });
+    if (typeof value !== 'undefined') {
+        // Set the value of the property
+        return source[propertyName] = value;
+    }
+    else {
+        // Get the value of the property
+        return source[propertyName];
+    }
+};

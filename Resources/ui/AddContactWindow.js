@@ -64,9 +64,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             contact_emailId: defaultEmail.id,
             contact_notes: note
         };
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-            baseAttrs[stepFieldName] = null;
-        });
         var mergedAttrs = $.extend(baseAttrs, attrs);
         mergedAttrs.campus_label = mergedAttrs.campus_guid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_guid).getLabel() : '';
         mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).getLabel();
