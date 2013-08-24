@@ -93,8 +93,11 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             left: AD.UI.padding,
             right: AD.UI.padding * 2 + dateWidth,
             top: nameRowHeight,
+            width: Ti.UI.FILL,
             height: Ti.UI.SIZE,
             text: '', // will be set by 'update'
+            wordWrap: false,
+            ellipsize: true,
             color: 'gray',
             font: AD.UI.Fonts.mediumSmall
         });
