@@ -13,7 +13,11 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         title: 'edit',
         callback: function() {
             // Open the EditContact window
-            var $winAddContactWindow = new AD.UI.AddContactWindow({tab: this.tab, operation: 'edit', existingContact: this.contact});
+            var $winAddContactWindow = new AD.UI.AddContactWindow({
+                tab: this.tab,
+                operation: 'edit',
+                existingContact: this.contact
+            });
         },
         rightNavButton: true
     }, {
@@ -76,7 +80,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             }));
         }
         
-        // Create the contact label 
+        // Create the contact label
         this.add('nameLabel', Ti.UI.createLabel({
             left: AD.UI.padding + (imageExists ? AD.UI.contactImageSize.width : 0),
             top: AD.UI.padding,
@@ -135,33 +139,67 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             }, this);
         }
         
+        var _this = this;
+
         // Create the steps view
         var $stepsView = $.View.create(Ti.UI.createScrollView({
-            top: bodyTop + AD.UI.buttonHeight + AD.UI.padding,
             left: 0,
+            top: bodyTop + AD.UI.buttonHeight + AD.UI.padding,
+            layout: 'vertical',
             scrollType: 'vertical',
             contentHeight: 'auto',
             showVerticalScrollIndicator: true
         }));
-        var rowHeight = AD.UI.buttonHeight;
-        var rowCount = 0;
-        var _this = this;
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-            var $newRow = $.View.create(Ti.UI.createView({
+        var createRow = function() {
+            return Ti.UI.createView({
                 left: 0,
-                top: rowCount * rowHeight,
-                height: rowHeight,
+                top: 0,
+                height: AD.UI.buttonHeight,
                 borderWidth: 1,
                 borderColor: 'black'
-            }));
-            ++rowCount;
+            });
+        };
+
+        // Create the tags row
+        var tagsRow = $stepsView.add('tags', createRow());
+        var tagsLabel = Ti.UI.createLabel({
+            left: AD.UI.padding,
+            top: 0,
+            width: AD.UI.useableScreenWidth,
+            height: Ti.UI.FILL,
+            font: AD.UI.Fonts.mediumSmall
+        });
+        var updateTagLabel = function() {
+            // Get an array of the lab
+            var tagLabels = contact.getTags().map(function(tag) { return tag.attr('tag_label'); });
+            tagsLabel.text = AD.Localize('tags')+': '+(tagLabels.join(', ') || AD.Localize('none'));
+        };
+        updateTagLabel();
+        tagsRow.add(tagsLabel);
+        tagsRow.addEventListener('click', function() {
+            var $winChooseTags = new AD.UI.ChooseOptionsWindow({
+                tab: _this.tab,
+                groupName: 'tag',
+                Model: 'Tag',
+                initial: contact.getTags().map(function(tag) { return tag.attr('tag_guid'); }),
+                editable: true
+            });
+            $winChooseTags.getDeferred().done(function(options) {
+                contact.setTags(options);
+                updateTagLabel();
+                _this.contactModified = true;
+            });
+        });
+
+        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
+            var $newRow = $.View.create(createRow());
             
             // Create the step title
             $newRow.add(Ti.UI.createLabel({
                 left: AD.UI.padding,
-                top: AD.UI.padding,
+                top: 0,
                 width: AD.UI.useableScreenWidth,
-                height: Ti.UI.SIZE,
+                height: Ti.UI.FILL,
                 textid: 'step_'+stepName,
                 font: AD.UI.Fonts.medium
             }));

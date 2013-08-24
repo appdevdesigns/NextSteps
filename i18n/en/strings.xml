@@ -85,6 +85,9 @@
     <string name="nickname">Nickname</string>
     <string name="campus">Campus</string>
     <string name="year">Year</string>
+    <string name="tag">Tag</string>
+    <string name="tags">Tags</string>
+    <string name="none">none</string>
     <string name="phone">Phone</string>
     <string name="phoneNumber">Phone number</string>
     <string name="email">Email</string>
@@ -103,14 +106,13 @@
     <string name="importWarning">You have not specified a {0}.  Would you like to import anyway?</string>
     <string name="or">or</string>
     
-    <string name="chooseContactsTitle">Choose Contacts</string>
-    
     <!-- Groups labels -->
     <string name="addGroup">Add Group</string>
     <string name="editGroup">Edit Group</string>
     <string name="groupName">Group name</string>
     <string name="groupDeleteConfirmation">Are you sure you want to delete the group?</string>
     <string name="unspecified">Choose...</string>
+    <string name="all">All</string>
     <string name="invalidGroupName">Please specify a group name</string>
     <string name="invalidOptionChoice">Please choose a {0}</string>
     

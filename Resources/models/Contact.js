@@ -50,6 +50,36 @@
             contact_ministering: 'date',
             contact_multiplying: 'date'
         },
+
+        // An array of the conditions supported by matchesFilter
+        filterConditions: ['OR', 'AND'],
+        // This object defines custom filter fields
+        filterFields: {
+            tags: {
+                value: function() {
+                    // Return an array of tag ids
+                    return this.getTags().map(function(tag) { return tag.attr('tag_guid'); });
+                },
+                matches: function(contactTags, filterTags) {
+                    // Calculate whether the tags sets match, using the given condition
+                    var condition = filterTags.condition;
+                    var matchesProperty = condition === 'AND';
+                    filterTags.ids.forEach(function(tag_guid) {
+                        var matchesElement = contactTags.indexOf(tag_guid) !== -1;
+                        if (condition === 'OR') {
+                            // Starts false and remains false until one tag matches
+                            matchesProperty = matchesProperty || matchesElement;
+                        }
+                        else if (condition === 'AND') {
+                            // Starts true and remains true until one tag does not match
+                            matchesProperty = matchesProperty && matchesElement;
+                        }
+                    });
+                    return matchesProperty;
+                }
+            }
+        },
+
         // Calculate the stats information between startDate and endDate inclusive
         // The parameters can be set to null to remove that bound
         // Return an object whose keys represent fieldnames and values represents the number of contacts who have completed the step
@@ -102,7 +132,7 @@
                   contact_firstName:"text",
                   contact_lastName:"text",
                   contact_nickname:"text",
-                  contact_campus:"text",
+                  campus_guid:"varchar(60)",
                   year_id:"int(11)",
                   contact_phone:"text",
                   contact_phoneId:"text",
@@ -121,6 +151,13 @@
 
             },
             lookupLabels: {
+                campus_guid: {
+                    tableName: 'nextsteps_campus',
+                    foreignKey: 'campus_guid',
+                    referencedKey: 'campus_guid',
+                    label: 'campus_label',
+                    hasLanguageCode: false
+                },
                 year_id: {
                     tableName: 'nextsteps_year_trans',
                     foreignKey: 'year_id',
@@ -143,6 +180,31 @@
             return this.contact_firstName+' '+this.contact_lastName+(this.contact_nickName ? ' ('+this.contact_nickName+')' : '');
         },
         
+        // Return an array of the Tag models associated with this contact
+        getTags: function() {
+            return AD.Models.ContactTag.cache.query({
+                contact_guid: this.attr('contact_guid')
+            });
+        },
+
+        // Set the tags associated with this contact
+        setTags: function(newTags) {
+            var contact_guid = this.attr('contact_guid');
+            var oldTags = this.getTags();
+            newTags.forEach(function(newTag, index) {
+                // newTag can be a Tag instance or a plain object
+                var newTagAttrs = AD.jQuery.isFunction(newTag.attrs) ? newTag.attrs() : newTag;
+                // Reuse the existing tag if possible, but create a new tag instance if necessary
+                var tagInstance = oldTags[index] || new AD.Models.ContactTag({ contact_guid: contact_guid });
+                tagInstance.attrs(newTagAttrs);
+                tagInstance.save();
+            });
+            // Delete any remaining tags that were not reused
+            oldTags.slice(newTags.length).forEach(function(oldTag) {
+                oldTag.destroy();
+            });
+        },
+
         // Return the last completed step of this contact
         getLastStep: function() {
             var self = this;
@@ -166,13 +228,23 @@
         matchesFilter: function(filter) {
             var matches = true;
             AD.jQuery.each(filter, this.proxy(function(key, value) {
-                var contactValue = this.attr(key);
-                var matchesProperty = contactValue === value;
-                if (typeof value === 'boolean' && this.constructor.attributes[key] === 'date') {
+                var filterField = this.constructor.filterFields[key];
+                var contactValue = filterField ? filterField.value.call(this) : this.attr(key);
+                var matchesProperty;
+                if (filterField) {
+                    // The filter defines whether the two values match
+                    matchesProperty = filterField.matches.call(this, contactValue, value);
+                }
+                else if (typeof value === 'boolean' && this.constructor.attributes[key] === 'date') {
                     // Special case when value is a boolean and contactValue is a date
                     // 'true' in value refers to a valid date, and 'false' refers to null 
                     matchesProperty = value === (contactValue !== null);
                 }
+                else {
+                    // General case where the two values are directly compared to determine equality
+                    matchesProperty = contactValue === value;
+                }
+
                 if (!matchesProperty) {
                     // This property does not match the filter, so stop the comparison
                     matches = false;

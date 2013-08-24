@@ -10,12 +10,12 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             return key ? key[0].toUpperCase() : key;
         });
         $.ModelTable.addGroupProcessor('year', function(key) {
-            return AD.Models.Year.cache.getById(key).year_label;
+            return AD.Models.Year.cache.getById(key).getLabel();
         });
     },
     
     sortFields: [
-        {field: 'contact_campus', label: 'campus'},
+        {field: 'campus_label', label: 'campus'},
         {field: 'contact_firstName', label: 'firstName', groupProcessor: 'firstLetter'},
         {field: 'contact_lastName', label: 'lastName', groupProcessor: 'firstLetter'},
         {field: 'year_id', label: 'year', groupProcessor: 'year'}

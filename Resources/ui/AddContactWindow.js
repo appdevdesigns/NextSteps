@@ -56,7 +56,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             contact_firstName: firstName,
             contact_lastName: lastName,
             contact_nickname: nickname,
-            contact_campus: '',
+            campus_guid: null,
             year_id: defaultYear,
             contact_phone: defaultPhone.value,
             contact_phoneId: defaultPhone.id,
@@ -68,21 +68,21 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             baseAttrs[stepFieldName] = null;
         });
         var mergedAttrs = $.extend(baseAttrs, attrs);
-        mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).year_label;
+        mergedAttrs.campus_label = mergedAttrs.campus_guid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_guid).getLabel() : '';
+        mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).getLabel();
         return new AD.Models.Contact(mergedAttrs);
     },
     
     fields: [
         {name: 'firstName', type: 'text'},
         {name: 'lastName', type: 'text'},
-        {name: 'campus', type: 'choice'},
+        {name: 'campus', type: 'choice', field: 'campus_label'},
         {name: 'year', type: 'choice', field: 'year_label'},
         {name: 'phone', type: 'choice/text', keyboardType: Ti.UI.KEYBOARD_PHONE_PAD, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
         {name: 'email', type: 'choice/text', keyboardType: Ti.UI.KEYBOARD_EMAIL, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
         {name: 'notes', type: 'text', multiline: true}
     ],
     
-    years: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; }),
     actions: [{
         title: 'save',
         callback: 'save',
@@ -370,23 +370,20 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     // Handlers for allowing the user to change the contact's campus, year, phone number, and e-mail address
     changeCampus: function() {
         // Allow the user to set the contact's campus
-        var campuses = AD.PropertyStore.get('campuses');
         var $winChooseCampus = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'campus',
-            initial: campuses.indexOf(this.contact.contact_campus),
-            options: campuses,
-            editable: true,
-            onOptionsUpdate: function(campusesNew) {
-                campuses = campusesNew;
-                AD.PropertyStore.set('campuses', campusesNew);
-            }
+            Model: 'Campus',
+            initial: this.contact.campus_guid,
+            editable: true
         });
-        $winChooseCampus.getDeferred().done(this.proxy(function(campusName) {
+        $winChooseCampus.getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
-            this.contact.attr('contact_campus', campusName.label);
+            var label = campus.getLabel();
+            this.contact.attr('campus_guid', campus.getId());
+            this.contact.attr('campus_label', label);
             var campusLabel = this.getChild('campusLabel');
-            campusLabel.text = campusLabel.title = campusName.label;
+            campusLabel.text = campusLabel.title = label;
         }));
     },
     changeYear: function() {
@@ -394,15 +391,16 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         var $winChooseYear = new AD.UI.ChooseOptionWindow({
             tab: this.tab,
             groupName: 'year',
-            initial: this.contact.year_id - 1,
-            options: this.constructor.years
+            Model: 'Year',
+            initial: this.contact.year_id
         });
-        $winChooseYear.getDeferred().done(this.proxy(function(yearData) {
+        $winChooseYear.getDeferred().done(this.proxy(function(year) {
             // A year was chosen
-            this.contact.attr('year_id', yearData.index + 1);
-            this.contact.attr('year_label', yearData.label);
+            var label = year.getLabel();
+            this.contact.attr('year_id', year.getId());
+            this.contact.attr('year_label', label);
             var yearLabel = this.getChild('yearLabel');
-            yearLabel.text = yearLabel.title = yearData.label;
+            yearLabel.text = yearLabel.title = label;
         }));
     },
     changePhone: function() {
