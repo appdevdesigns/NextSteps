@@ -133,44 +133,57 @@ var installDatabases = function(dbVersion) {
                END");
         
         var stepsTableExists;
-        query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='nextsteps_step'").done(function(tablesArgs) {
+        query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='nextsteps_step_data'").done(function(tablesArgs) {
             stepsTableExists = tablesArgs[0][0]['COUNT(*)'] === 1;
         });
-        query("CREATE TABLE IF NOT EXISTS nextsteps_step (\
+        query("CREATE TABLE IF NOT EXISTS nextsteps_step_data (\
                    step_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
                    step_guid TEXT DEFAULT NULL UNIQUE,\
                    viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
+                   device_id TEXT NOT NULL\
+               )");
+        query("CREATE TRIGGER IF NOT EXISTS step_guid AFTER INSERT ON nextsteps_step_data FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_step_data SET step_guid = NEW.step_id||'.'||NEW.device_id WHERE step_id=NEW.step_id;\
+               END");
+        query("CREATE TABLE IF NOT EXISTS nextsteps_step_trans (\
+                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   step_guid TEXT NOT NULL,\
+                   language_code TEXT NOT NULL DEFAULT '',\
                    step_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS step_guid AFTER INSERT ON nextsteps_step FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_step SET step_guid = NEW.step_id||'.'||NEW.device_id WHERE step_id=NEW.step_id;\
-               END");
         if (!stepsTableExists) {
             // Only populate the steps table if it was just created
             var stepLabels = [
-                'Pre-ev',
-                'G Conversation',
-                'G Presentation',
-                'Decision',
-                'Finished Following Up',
-                'HS Presentation',
-                'Trained for Action',
-                'Challenged as Lifetime Laborer',
-                'Challenged to Develop Local Resources',
-                'Engaged Disciple',
-                'Multiplying Disciple',
-                'Movement Leader',
-                'New Lifetime Laborer',
-                'People Giving Resource',
-                'Domestic Project',
-                'Cross-Cultural Project',
-                'International Project'
+                { en: 'Pre-ev' },
+                { en: 'G Conversation' },
+                { en: 'G Presentation' },
+                { en: 'Decision' },
+                { en: 'Finished Following Up' },
+                { en: 'HS Presentation' },
+                { en: 'Trained for Action' },
+                { en: 'Challenged as Lifetime Laborer' },
+                { en: 'Challenged to Develop Local Resources' },
+                { en: 'Engaged Disciple' },
+                { en: 'Multiplying Disciple' },
+                { en: 'Movement Leader' },
+                { en: 'New Lifetime Laborer' },
+                { en: 'People Giving Resource' },
+                { en: 'Domestic Project' },
+                { en: 'Cross-Cultural Project' },
+                { en: 'International Project' }
             ];
             stepLabels.forEach(function(stepLabel) {
-                query("INSERT INTO nextsteps_step (viewer_id, device_id, step_label) VALUES (?, ?, ?)",
-                    [AD.Defaults.viewerId, Ti.Platform.id, stepLabel]);
+                query("INSERT INTO nextsteps_step_data (viewer_id, device_id) VALUES (?, ?)",
+                    [AD.Defaults.viewerId, Ti.Platform.id]).done(function(step_id) {
+                    query("SELECT step_guid FROM nextsteps_step_data WHERE (step_id = ?)", [step_id]).done(function(stepArgs) {
+                        var step_guid = stepArgs[0][0].step_guid;
+                        $.each(stepLabel, function(language, label) {
+                            query("INSERT INTO nextsteps_step_trans (step_guid, language_code, step_label) VALUES (?, ?, ?)",
+                                [step_guid, language, label]);
+                        });
+                    });
+                });
             });
         }
         query("CREATE TABLE IF NOT EXISTS nextsteps_contact_step (\
@@ -179,7 +192,7 @@ var installDatabases = function(dbVersion) {
                    viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL,\
                    contact_guid TEXT NOT NULL REFERENCES nextsteps_contact(contact_guid) ON DELETE CASCADE,\
-                   step_guid TEXT NOT NULL REFERENCES nextsteps_step(step_guid) ON DELETE CASCADE,\
+                   step_guid TEXT NOT NULL REFERENCES nextsteps_step_data(step_guid) ON DELETE CASCADE,\
                    step_date TEXT DEFAULT NULL\
                )");
         query("CREATE TRIGGER IF NOT EXISTS contactstep_guid AFTER INSERT ON nextsteps_contact_step FOR EACH ROW\
@@ -298,7 +311,7 @@ var installDatabases = function(dbVersion) {
         }];
         stepFields.forEach(function(stepField) {
             // Determine the step_guid of all the steps that must be migrated
-            query("SELECT step_guid FROM nextsteps_step WHERE step_label=?", [stepField.label]).done(function(stepArgs) {
+            query("SELECT step_guid FROM nextsteps_step_trans WHERE step_label=?", [stepField.label]).done(function(stepArgs) {
                 stepField.step_guid = stepArgs[0][0].step_guid;
             });
         });

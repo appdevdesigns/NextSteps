@@ -1,7 +1,7 @@
 ////
 //// Step
 ////
-//// This model is the interface to the nextsteps_step table.
+//// This model is the interface to the nextsteps_step_data table.
 
 
 (function () {
@@ -18,12 +18,13 @@
         id:'step_guid',
         autoIncrementKey:'step_id',
         labelKey:'step_label',
-        _isMultilingual:false,
+        _isMultilingual:true,
         //connectionType:'server', // optional field
         cache:true,
 
         attributes: {
             step_id: 'integer',
+            trans_id: 'integer',
             viewer_id: 'integer'
         }
     };
@@ -31,17 +32,25 @@
     if (extendedDefinition) {
         // Extended model attributes
         AD.jQuery.extend(attr, {
-            type:'single',  // 'single' | 'multilingual'
-            dbTable:'nextsteps_step',
-            modelFields: {
-                  step_id:"int(11) unsigned",
-                  step_guid:"varchar(60)",
-                  viewer_id:"int(11) unsigned",
-                  device_id:"text",
-                  step_label:"varchar(40)"
-
+            type:'multilingual',  // 'single' | 'multilingual'
+            tables:{
+                data:'nextsteps_step_data',
+                trans:'nextsteps_step_trans'
             },
-            primaryKey:'step_guid'
+            fields: {
+                data: {
+                    step_id:"int(11) unsigned",
+                    step_guid:"varchar(60)",
+                    viewer_id:"int(11) unsigned",
+                    device_id:"text",
+                },
+                trans: {
+                    trans_id:"int(11) unsigned",
+                    step_label:"varchar(40)"
+                }
+            },
+            primaryKey:'step_guid',
+            multilingualFields: ['step_label']
         });
     }
 
