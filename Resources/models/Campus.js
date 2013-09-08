@@ -1,7 +1,7 @@
 ////
 //// Campus
 ////
-//// This model is the interface to the nextsteps_campus table.
+//// This model is the interface to the nextsteps_campus_data table.
 
 
 (function () {
@@ -18,12 +18,13 @@
         id:'campus_guid',
         autoIncrementKey:'campus_id',
         labelKey:'campus_label',
-        _isMultilingual:false,
+        _isMultilingual:true,
         //connectionType:'server', // optional field
         cache:true,
 
         attributes: {
             campus_id: 'integer',
+            trans_id: 'integer',
             viewer_id: 'integer'
         }
     };
@@ -31,17 +32,25 @@
     if (extendedDefinition) {
         // Extended model attributes
         AD.jQuery.extend(attr, {
-            type:'single',  // 'single' | 'multilingual'
-            dbTable:'nextsteps_campus',
-            modelFields: {
-                  campus_id:"int(11) unsigned",
-                  campus_guid:"varchar(60)",
-                  viewer_id:"int(11) unsigned",
-                  device_id:"text",
-                  campus_label:"varchar(40)"
-
+            type:'multilingual',  // 'single' | 'multilingual'
+            tables:{
+                data:'nextsteps_campus_data',
+                trans:'nextsteps_campus_trans'
             },
-            primaryKey:'campus_guid'
+            fields: {
+                data: {
+                    campus_id:"int(11) unsigned",
+                    campus_guid:"varchar(60)",
+                    viewer_id:"int(11) unsigned",
+                    device_id:"text",
+                },
+                trans: {
+                    trans_id:"int(11) unsigned",
+                    campus_label:"varchar(40)"
+                }
+            },
+            primaryKey:'campus_guid',
+            multilingualFields: ['campus_label']
         });
     }
 

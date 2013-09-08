@@ -141,11 +141,10 @@
             },
             lookupLabels: {
                 campus_guid: {
-                    tableName: 'nextsteps_campus',
+                    tableName: 'nextsteps_campus_trans',
                     foreignKey: 'campus_guid',
                     referencedKey: 'campus_guid',
-                    label: 'campus_label',
-                    hasLanguageCode: false
+                    label: 'campus_label'
                 },
                 year_id: {
                     tableName: 'nextsteps_year_trans',

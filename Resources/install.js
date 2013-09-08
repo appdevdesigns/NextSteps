@@ -51,7 +51,7 @@ var installDatabases = function(dbVersion) {
                    contact_firstName TEXT NOT NULL,\
                    contact_lastName TEXT NOT NULL,\
                    contact_nickname TEXT,\
-                   campus_guid TEXT DEFAULT NULL REFERENCES nextsteps_campus(campus_guid) ON DELETE SET DEFAULT,\
+                   campus_guid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_guid) ON DELETE SET DEFAULT,\
                    year_id INTEGER NOT NULL DEFAULT 1,\
                    contact_phone TEXT,\
                    contact_phoneId TEXT,\
@@ -77,17 +77,22 @@ var installDatabases = function(dbVersion) {
                    UPDATE nextsteps_group SET group_guid = NEW.group_id||'.'||NEW.device_id WHERE group_id=NEW.group_id;\
                END");
         
-        query("CREATE TABLE IF NOT EXISTS nextsteps_campus (\
+        query("CREATE TABLE IF NOT EXISTS nextsteps_campus_data (\
                    campus_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
                    campus_guid TEXT DEFAULT NULL UNIQUE,\
                    viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
+                   device_id TEXT NOT NULL\
+               )");
+        query("CREATE TRIGGER IF NOT EXISTS campus_guid AFTER INSERT ON nextsteps_campus_data FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_campus_data SET campus_guid = NEW.campus_id||'.'||NEW.device_id WHERE campus_id=NEW.campus_id;\
+               END");
+        query("CREATE TABLE IF NOT EXISTS nextsteps_campus_trans (\
+                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   campus_guid TEXT NOT NULL,\
+                   language_code TEXT NOT NULL DEFAULT '',\
                    campus_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS campus_guid AFTER INSERT ON nextsteps_campus FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_campus SET campus_guid = NEW.campus_id||'.'||NEW.device_id WHERE campus_id=NEW.campus_id;\
-               END");
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_year_data (\
                    year_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE\
@@ -263,13 +268,20 @@ var installDatabases = function(dbVersion) {
         // Fill the nextsteps_campus table with the defined campuses
         campuses.forEach(function(campus) {
             // Create a new campus
-            query("INSERT INTO nextsteps_campus (viewer_id, device_id, campus_label) VALUES (?, ?, ?)", [AD.Defaults.viewerId, Ti.Platform.id, campus.campus_label]).done(function(campus_id) {
+            
+            // Create the campus "data" row
+            query("INSERT INTO nextsteps_campus_data (viewer_id, device_id) VALUES (?, ?)",
+                [AD.Defaults.viewerId, Ti.Platform.id]).done(function(campus_id) {
                 // Get the campus_guid of the campus just created and find all the contacts that reference this campus
-                var getCampusGuid = query("SELECT campus_guid FROM nextsteps_campus WHERE campus_id=?", [campus_id]);
+                var getCampusGuid = query("SELECT campus_guid FROM nextsteps_campus_data WHERE campus_id=?", [campus_id]);
                 var getContacts = query("SELECT contact_id FROM nextsteps_contact_temp WHERE contact_campus=?", [campus.campus_label]);
                 $.when(getCampusGuid, getContacts).done(function(campusArgs, contactArgs) {
-                    // Now update all the contacts that referenced this campus
+                    // Create the campus "trans" row
                     var campus_guid = campus.campus_guid = campusArgs[0][0].campus_guid;
+                    query("INSERT INTO nextsteps_campus_trans (campus_guid, viewer_id, device_id, language_code, campus_label) VALUES (?, ?, ?, ?, ?)",
+                        [campus.campus_guid, AD.Defaults.viewerId, Ti.Platform.id, AD.Defaults.languageKey, campus.campus_label]);
+                    
+                    // Now update all the contacts that referenced this campus
                     var contact_ids = contactArgs[0].map(function(row) { return row.contact_id; });
                     query("UPDATE nextsteps_contact SET campus_guid=? WHERE contact_id IN ("+contact_ids.join(',')+")", [campus_guid]);
                 });
