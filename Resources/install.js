@@ -83,16 +83,23 @@ var installDatabases = function(dbVersion) {
                    viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS campus_guid AFTER INSERT ON nextsteps_campus_data FOR EACH ROW\
+        query("CREATE TRIGGER IF NOT EXISTS campus_data_guid AFTER INSERT ON nextsteps_campus_data FOR EACH ROW\
                BEGIN\
                    UPDATE nextsteps_campus_data SET campus_guid = NEW.campus_id||'.'||NEW.device_id WHERE campus_id=NEW.campus_id;\
                END");
         query("CREATE TABLE IF NOT EXISTS nextsteps_campus_trans (\
                    trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   trans_guid TEXT DEFAULT NULL UNIQUE,\
+                   viewer_id INTEGER NOT NULL,\
+                   device_id TEXT NOT NULL,\
                    campus_guid TEXT NOT NULL,\
                    language_code TEXT NOT NULL DEFAULT '',\
                    campus_label TEXT NOT NULL\
                )");
+        query("CREATE TRIGGER IF NOT EXISTS campus_trans_guid AFTER INSERT ON nextsteps_campus_trans FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_campus_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
+               END");
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_year_data (\
                    year_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE\
@@ -113,16 +120,28 @@ var installDatabases = function(dbVersion) {
             query("INSERT INTO nextsteps_year_trans (trans_id, year_id, language_code, year_label) VALUES (?, ?, 'en', ?)", [id, id, yearLabel]);
         });
         
-        query("CREATE TABLE IF NOT EXISTS nextsteps_tag (\
+        query("CREATE TABLE IF NOT EXISTS nextsteps_tag_data (\
                    tag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
                    tag_guid TEXT DEFAULT NULL UNIQUE,\
                    viewer_id INTEGER NOT NULL,\
+                   device_id TEXT NOT NULL\
+               )");
+        query("CREATE TRIGGER IF NOT EXISTS tag_data_guid AFTER INSERT ON nextsteps_tag_data FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_tag_data SET tag_guid = NEW.tag_id||'.'||NEW.device_id WHERE tag_id=NEW.tag_id;\
+               END");
+        query("CREATE TABLE IF NOT EXISTS nextsteps_tag_trans (\
+                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   trans_guid TEXT DEFAULT NULL UNIQUE,\
+                   viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL,\
+                   tag_guid TEXT NOT NULL,\
+                   language_code TEXT NOT NULL DEFAULT '',\
                    tag_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS tag_guid AFTER INSERT ON nextsteps_tag FOR EACH ROW\
+        query("CREATE TRIGGER IF NOT EXISTS tag_trans_guid AFTER INSERT ON nextsteps_tag_trans FOR EACH ROW\
                BEGIN\
-                   UPDATE nextsteps_tag SET tag_guid = NEW.tag_id||'.'||NEW.device_id WHERE tag_id=NEW.tag_id;\
+                   UPDATE nextsteps_tag_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
                END");
         query("CREATE TABLE IF NOT EXISTS nextsteps_contact_tag (\
                    contacttag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
@@ -130,7 +149,7 @@ var installDatabases = function(dbVersion) {
                    viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL,\
                    contact_guid TEXT NOT NULL REFERENCES nextsteps_contact(contact_guid) ON DELETE CASCADE,\
-                   tag_guid TEXT NOT NULL REFERENCES nextsteps_tag(tag_guid) ON DELETE CASCADE\
+                   tag_guid TEXT NOT NULL REFERENCES nextsteps_tag_data(tag_guid) ON DELETE CASCADE\
                )");
         query("CREATE TRIGGER IF NOT EXISTS contacttag_guid AFTER INSERT ON nextsteps_contact_tag FOR EACH ROW\
                BEGIN\
@@ -147,16 +166,23 @@ var installDatabases = function(dbVersion) {
                    viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS step_guid AFTER INSERT ON nextsteps_step_data FOR EACH ROW\
+        query("CREATE TRIGGER IF NOT EXISTS step_data_guid AFTER INSERT ON nextsteps_step_data FOR EACH ROW\
                BEGIN\
                    UPDATE nextsteps_step_data SET step_guid = NEW.step_id||'.'||NEW.device_id WHERE step_id=NEW.step_id;\
                END");
         query("CREATE TABLE IF NOT EXISTS nextsteps_step_trans (\
                    trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   trans_guid TEXT DEFAULT NULL UNIQUE,\
+                   viewer_id INTEGER NOT NULL,\
+                   device_id TEXT NOT NULL,\
                    step_guid TEXT NOT NULL,\
                    language_code TEXT NOT NULL DEFAULT '',\
                    step_label TEXT NOT NULL\
                )");
+        query("CREATE TRIGGER IF NOT EXISTS step_trans_guid AFTER INSERT ON nextsteps_step_trans FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_step_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
+               END");
         if (!stepsTableExists) {
             // Only populate the steps table if it was just created
             var stepLabels = [
@@ -184,8 +210,8 @@ var installDatabases = function(dbVersion) {
                     query("SELECT step_guid FROM nextsteps_step_data WHERE (step_id = ?)", [step_id]).done(function(stepArgs) {
                         var step_guid = stepArgs[0][0].step_guid;
                         $.each(stepLabel, function(language, label) {
-                            query("INSERT INTO nextsteps_step_trans (step_guid, language_code, step_label) VALUES (?, ?, ?)",
-                                [step_guid, language, label]);
+                            query("INSERT INTO nextsteps_step_trans (step_guid, viewer_id, device_id, language_code, step_label) VALUES (?, ?, ?, ?, ?)",
+                                [step_guid, AD.Defaults.viewerId, Ti.Platform.id, language, label]);
                         });
                     });
                 });

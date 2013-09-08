@@ -46,6 +46,9 @@
                 },
                 trans: {
                     trans_id:"int(11) unsigned",
+                    trans_guid:"varchar(60)",
+                    viewer_id:"int(11) unsigned",
+                    device_id:"text",
                     step_label:"varchar(40)"
                 }
             },
