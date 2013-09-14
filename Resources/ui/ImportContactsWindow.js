@@ -216,7 +216,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             tab: this.tab,
             groupName: 'tag',
             Model: 'Tag',
-            initial: this.tags.map(function(tag) { return tag.getId() }),
+            initial: $.Model.getIds(this.tags),
             editable: true
         });
         return $winChooseTags.getDeferred().done(function(tags) {

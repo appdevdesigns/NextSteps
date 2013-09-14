@@ -285,8 +285,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                     var $winChooseOptions = new AD.UI.ChooseOptionsWindow(params);
                     $winChooseOptions.getDeferred().done(function(options) {
                         // An option was chosen, so set the value of the field in the filter
-                        var ids = options.map(function(model) { return model.getId() });
-                        field.value.ids = ids;
+                        field.value.ids = $.Model.getIds(options);
                     });
                 }
             });
