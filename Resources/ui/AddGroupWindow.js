@@ -63,9 +63,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     
     actions: [{
         title: 'save',
-        callback: function() {
-            this.save();
-        },
+        callback: 'save',
         rightNavButton: true
     }, {
         title: 'del',
