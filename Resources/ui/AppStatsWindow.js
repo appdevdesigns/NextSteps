@@ -93,14 +93,12 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         
         // Create the stats rows, one for each step
         var stats = AD.Models.Contact.getStats(startDate, null);
-        var statRowIndex = 0;
-        AD.Models.Step.cache.getArray().forEach(function(step) {
+        AD.Models.Step.cache.getArray().forEach(function(step, index) {
             $statsTable.add(new StatRow({
-                index: statRowIndex,
+                index: index,
                 label: step.getLabel(),
                 count: stats[step.getId()]
             }));
-            statRowIndex += 1;
         });
     }
 });
