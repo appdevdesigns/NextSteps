@@ -113,16 +113,31 @@ var installDatabases = function(dbVersion) {
         // Empty the tables and recreate the year labels
         query("DELETE FROM nextsteps_year_data");
         query("DELETE FROM nextsteps_year_trans");
-        var yearLabels = [
-            { en: 'Unknown' },
-            { en: 'Freshman' },
-            { en: 'Sophomore' },
-            { en: 'Junior' },
-            { en: 'Senior' },
-            { en: 'Graduated' },
-            { en: 'Teacher' },
-            { en: 'Other' }
-        ];
+        var yearLabels = [{
+            en: 'Unknown',
+            'zh-Hans': '未知'
+        }, {
+            en: 'Freshman',
+            'zh-Hans': '大一学生'
+        }, {
+            en: 'Sophomore',
+            'zh-Hans': '大二学生'
+        }, {
+            en: 'Junior',
+            'zh-Hans': '大三学生'
+        }, {
+            en: 'Senior',
+            'zh-Hans': '大四学生'
+        }, {
+            en: 'Graduated',
+            'zh-Hans': '毕业生'
+        }, {
+            en: 'Teacher',
+            'zh-Hans': '老师'
+        }, {
+            en: 'Other',
+            'zh-Hans': '其他'
+        }];
         yearLabels.forEach(function(yearLabel, index) {
             var id = index + 1;
             query("INSERT INTO nextsteps_year_data (year_id) VALUES (?)", [id]);
@@ -196,25 +211,58 @@ var installDatabases = function(dbVersion) {
                END");
         if (!stepsTableExists) {
             // Only populate the steps table if it was just created
-            var stepLabels = [
-                { en: 'Pre-ev' },
-                { en: 'G Conversation' },
-                { en: 'G Presentation' },
-                { en: 'Decision' },
-                { en: 'Finished Following Up' },
-                { en: 'HS Presentation' },
-                { en: 'Trained for Action' },
-                { en: 'Challenged as Lifetime Laborer' },
-                { en: 'Challenged to Develop Local Resources' },
-                { en: 'Engaged Disciple' },
-                { en: 'Multiplying Disciple' },
-                { en: 'Movement Leader' },
-                { en: 'New Lifetime Laborer' },
-                { en: 'People Giving Resource' },
-                { en: 'Domestic Project' },
-                { en: 'Cross-Cultural Project' },
-                { en: 'International Project' }
-            ];
+            var stepLabels = [{
+                en: 'Pre-ev',
+                'zh-Hans': '福音预工'
+            }, {
+                en: 'G Conversation',
+                'zh-Hans': '福音会话'
+            }, {
+                en: 'G Presentation',
+                'zh-Hans': '福音传讲'
+            }, {
+                en: 'Decision',
+                'zh-Hans': '做决定'
+            }, {
+                en: 'Finished Following Up',
+                'zh-Hans': '跟进结束'
+            }, {
+                en: 'HS Presentation',
+                'zh-Hans': '传讲圣灵'
+            }, {
+                en: 'Trained for Action',
+                'zh-Hans': '培训传讲福音'
+            }, {
+                en: 'Challenged as Lifetime Laborer',
+                'zh-Hans': '挑战成为一生服事主的工人'
+            }, {
+                en: 'Challenged to Develop Local Resources',
+                'zh-Hans': '挑战培养当地教会资源'
+            }, {
+                en: 'Engaged Disciple',
+                'zh-Hans': '参加门徒训练'
+            }, {
+                en: 'Multiplying Disciple',
+                'zh-Hans': '门徒倍增'
+            }, {
+                en: 'Movement Leader',
+                'zh-Hans': '运动领袖'
+            }, {
+                en: 'New Lifetime Laborer',
+                'zh-Hans': '成为一生服事主的工人'
+            }, {
+                en: 'People Giving Resource',
+                'zh-Hans': '服事他人的人'
+            }, {
+                en: 'Domestic Project',
+                'zh-Hans': '国内宣教'
+            }, {
+                en: 'Cross-Cultural Project',
+                'zh-Hans': '跨文化宣教'
+            }, {
+                en: 'International Project',
+                'zh-Hans': '国际宣教'
+            }];
             stepLabels.forEach(function(stepLabel) {
                 query("INSERT INTO nextsteps_step_data (viewer_id, device_id) VALUES (?, ?)",
                     [AD.Defaults.viewerId, Ti.Platform.id]).done(function(step_id) {
