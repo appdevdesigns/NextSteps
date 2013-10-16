@@ -113,11 +113,22 @@ var installDatabases = function(dbVersion) {
         // Empty the tables and recreate the year labels
         query("DELETE FROM nextsteps_year_data");
         query("DELETE FROM nextsteps_year_trans");
-        var yearLabels = ['Unknown', 'Freshman', 'Sophmore', 'Junior', 'Senior', 'Graduated', 'Teacher', 'Other'];
+        var yearLabels = [
+            { en: 'Unknown' },
+            { en: 'Freshman' },
+            { en: 'Sophomore' },
+            { en: 'Junior' },
+            { en: 'Senior' },
+            { en: 'Graduated' },
+            { en: 'Teacher' },
+            { en: 'Other' }
+        ];
         yearLabels.forEach(function(yearLabel, index) {
             var id = index + 1;
             query("INSERT INTO nextsteps_year_data (year_id) VALUES (?)", [id]);
-            query("INSERT INTO nextsteps_year_trans (trans_id, year_id, language_code, year_label) VALUES (?, ?, 'en', ?)", [id, id, yearLabel]);
+            $.each(yearLabel, function(language, label) {
+                query("INSERT INTO nextsteps_year_trans (year_id, language_code, year_label) VALUES (?, ?, ?)", [id, language, label]);
+            });
         });
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_tag_data (\
