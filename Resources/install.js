@@ -10,9 +10,9 @@ module.exports.install = function() {
 };
 
 // Called when the app is installed or updated
-var onInstall = function(previousVersion) {
+var onInstall = function(installData) {
     var sortOrder = AD.PropertyStore.get('sort_order');
-    if (sortOrder && ADinstall.compareVersions(previousVersion, '1.5') < 0) {
+    if (sortOrder && ADinstall.compareVersions(installData.previousVersion, '1.5') < 0) {
         // The "contact_campus" sort order field was renamed to "campus_label" in version 1.5
         AD.PropertyStore.set('sort_order', sortOrder.map(function(field) {
             return field === 'contact_campus' ? 'campus_label' : field;
@@ -21,13 +21,9 @@ var onInstall = function(previousVersion) {
 };
 
 // Create the necessary databases for the application
-var installDatabases = function(dbVersion) {
+var installDatabases = function(installData) {
     // Create the necessary database tables
-    var DataStore = require('appdev/db/DataStoreSQLite');
-    var dbName = AD.Defaults.dbName;
-    var query = function(query, values) {
-        return DataStore.execute(dbName, query, values);
-    };
+    var query = installData.query;
 
     // This keeps track of whether "install" has been called yet
     var installed = false;
@@ -295,7 +291,7 @@ var installDatabases = function(dbVersion) {
     
     
     // Installed, but pre-1.1
-    if (ADinstall.compareVersions(dbVersion, '0') > 0 && ADinstall.compareVersions(dbVersion, '1.1') < 0) {
+    if (ADinstall.compareVersions(installData.previousVersion, '0') > 0 && ADinstall.compareVersions(installData.previousVersion, '1.1') < 0) {
         // Upgrade pre-1.1 databases
         
         // Rename the nextsteps_contact and nextsteps_group tables so they will be recreated
@@ -328,7 +324,7 @@ var installDatabases = function(dbVersion) {
         query("DROP TABLE nextsteps_group_temp");
     }
     // Installed, but pre-1.5
-    if (ADinstall.compareVersions(dbVersion, '0') > 0 && ADinstall.compareVersions(dbVersion, '1.5') < 0) {
+    if (ADinstall.compareVersions(installData.previousVersion, '0') > 0 && ADinstall.compareVersions(installData.previousVersion, '1.5') < 0) {
         // Upgrade pre-1.5 databases
         
         // Rename the nextsteps_contact and nextsteps_group tables so they will be recreated
