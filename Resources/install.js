@@ -97,6 +97,8 @@ var installDatabases = function(installData) {
                    UPDATE nextsteps_campus_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
                END");
         
+        query("DROP TABLE IF EXISTS nextsteps_year_data");
+        query("DROP TABLE IF EXISTS nextsteps_year_trans");
         query("CREATE TABLE IF NOT EXISTS nextsteps_year_data (\
                    year_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE\
                )");
@@ -106,41 +108,8 @@ var installDatabases = function(installData) {
                    language_code TEXT NOT NULL DEFAULT '',\
                    year_label TEXT NOT NULL\
                )");
-        // Empty the tables and recreate the year labels
-        query("DELETE FROM nextsteps_year_data");
-        query("DELETE FROM nextsteps_year_trans");
-        var yearLabels = [{
-            en: 'Unknown',
-            'zh-Hans': '未知'
-        }, {
-            en: 'Freshman',
-            'zh-Hans': '大一学生'
-        }, {
-            en: 'Sophomore',
-            'zh-Hans': '大二学生'
-        }, {
-            en: 'Junior',
-            'zh-Hans': '大三学生'
-        }, {
-            en: 'Senior',
-            'zh-Hans': '大四学生'
-        }, {
-            en: 'Graduated',
-            'zh-Hans': '毕业生'
-        }, {
-            en: 'Teacher',
-            'zh-Hans': '老师'
-        }, {
-            en: 'Other',
-            'zh-Hans': '其他'
-        }];
-        yearLabels.forEach(function(yearLabel, index) {
-            var id = index + 1;
-            query("INSERT INTO nextsteps_year_data (year_id) VALUES (?)", [id]);
-            $.each(yearLabel, function(language, label) {
-                query("INSERT INTO nextsteps_year_trans (year_id, language_code, year_label) VALUES (?, ?, ?)", [id, language, label]);
-            });
-        });
+        // Install the year labels
+        installData.installLabels('nextsteps_year');
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_tag_data (\
                    tag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
@@ -206,71 +175,8 @@ var installDatabases = function(installData) {
                    UPDATE nextsteps_step_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
                END");
         if (!stepsTableExists) {
-            // Only populate the steps table if it was just created
-            var stepLabels = [{
-                en: 'Pre-ev',
-                'zh-Hans': '福音预工'
-            }, {
-                en: 'G Conversation',
-                'zh-Hans': '福音会话'
-            }, {
-                en: 'G Presentation',
-                'zh-Hans': '福音传讲'
-            }, {
-                en: 'Decision',
-                'zh-Hans': '做决定'
-            }, {
-                en: 'Finished Following Up',
-                'zh-Hans': '跟进结束'
-            }, {
-                en: 'HS Presentation',
-                'zh-Hans': '传讲圣灵'
-            }, {
-                en: 'Trained for Action',
-                'zh-Hans': '培训传讲福音'
-            }, {
-                en: 'Challenged as Lifetime Laborer',
-                'zh-Hans': '挑战成为一生服事主的工人'
-            }, {
-                en: 'Challenged to Develop Local Resources',
-                'zh-Hans': '挑战培养当地教会资源'
-            }, {
-                en: 'Engaged Disciple',
-                'zh-Hans': '参加门徒训练'
-            }, {
-                en: 'Multiplying Disciple',
-                'zh-Hans': '门徒倍增'
-            }, {
-                en: 'Movement Leader',
-                'zh-Hans': '运动领袖'
-            }, {
-                en: 'New Lifetime Laborer',
-                'zh-Hans': '成为一生服事主的工人'
-            }, {
-                en: 'People Giving Resource',
-                'zh-Hans': '服事他人的人'
-            }, {
-                en: 'Domestic Project',
-                'zh-Hans': '国内宣教'
-            }, {
-                en: 'Cross-Cultural Project',
-                'zh-Hans': '跨文化宣教'
-            }, {
-                en: 'International Project',
-                'zh-Hans': '国际宣教'
-            }];
-            stepLabels.forEach(function(stepLabel) {
-                query("INSERT INTO nextsteps_step_data (viewer_id, device_id) VALUES (?, ?)",
-                    [AD.Defaults.viewerId, Ti.Platform.id]).done(function(step_id) {
-                    query("SELECT step_guid FROM nextsteps_step_data WHERE (step_id = ?)", [step_id]).done(function(stepArgs) {
-                        var step_guid = stepArgs[0][0].step_guid;
-                        $.each(stepLabel, function(language, label) {
-                            query("INSERT INTO nextsteps_step_trans (step_guid, viewer_id, device_id, language_code, step_label) VALUES (?, ?, ?, ?, ?)",
-                                [step_guid, AD.Defaults.viewerId, Ti.Platform.id, language, label]);
-                        });
-                    });
-                });
-            });
+            // Only install the steps labels if the table was just created
+            installData.installLabels('nextsteps_step');
         }
         query("CREATE TABLE IF NOT EXISTS nextsteps_contact_step (\
                    contactstep_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
