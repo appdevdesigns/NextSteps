@@ -29,6 +29,7 @@ Resources/ui/ModelTable.js
 Resources/ui/PasswordPromptWindow.js
 Resources/ui/SortOrderWindow.js
 Resources/ui/StringPromptWindow.js
+Resources/ui/UIBase.js
 Resources/ui/View.js
 Resources/ui/Window.js
 # AppDev resources end
