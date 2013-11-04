@@ -38,7 +38,10 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         // Initialize the base $.Window object
         this._super({
             title: 'viewContact',
-            autoOpen: true
+            autoOpen: true,
+            createParams: {
+                layout: 'vertical'
+            }
         });
         
         this.smartBind(this.contact, 'updated.attr', function(property, value) {
@@ -54,15 +57,22 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     create: function() {
         var contact = this.contact;
         
+        // Create a container to hold the label and optional image
+        var headerView = this.add(Ti.UI.createView({
+            left: AD.UI.padding,
+            top: AD.UI.padding,
+            width: AD.UI.useableScreenWidth,
+            height: Ti.UI.SIZE
+        }));
+        
         // Show the contact's image if it exists
         var localContact = contact.contact_recordId === null ? null : Ti.Contacts.getPersonByID(contact.contact_recordId);
         var contactImage = localContact && localContact.getImage();
-        var imageExists = contactImage ? true : false;
-        if (imageExists) {
+        var hasImage = contactImage ? true : false;
+        if (hasImage) {
             var dimensions = AD.UI.getImageScaledDimensions(contactImage, AD.UI.contactImageSize);
-            this.add('contactImage', Ti.UI.createImageView({
-                left: AD.UI.padding,
-                top: AD.UI.padding,
+            headerView.add(Ti.UI.createImageView({
+                left: 0,
                 width: dimensions.width,
                 height: dimensions.height,
                 image: contactImage
@@ -70,18 +80,14 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         }
         
         // Create the contact label
-        this.add('nameLabel', Ti.UI.createLabel({
-            left: AD.UI.padding + (imageExists ? AD.UI.contactImageSize.width : 0),
-            top: AD.UI.padding,
-            width: AD.UI.useableScreenWidth - (imageExists ? AD.UI.contactImageSize.width : 0),
-            height: Ti.UI.SIZE,
+        headerView.add(this.record('nameLabel', Ti.UI.createLabel({
+            left: hasImage ? AD.UI.contactImageSize.width : 0,
+            top: 0,
             text: null,
-            textAlign: 'center',
+            textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+            width: Ti.UI.FILL,
             font: AD.UI.Fonts.header
-        }));
-        
-        var headerHeight = imageExists ? AD.UI.contactImageSize.height : 40;
-        var bodyTop = headerHeight + AD.UI.padding * 2;
+        })));
         
         // Create the contact button bar which allows the user to call, SMS, or e-mail the contact
         if (AD.Platform.isiOS) {
@@ -93,7 +99,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             });
             var contactBB = this.add('contactBB', Ti.UI.createButtonBar({
                 left: AD.UI.padding,
-                top: bodyTop,
+                top: AD.UI.padding * 2,
                 width: AD.UI.useableScreenWidth,
                 height: AD.UI.buttonHeight,
                 style: Ti.UI.iPhone.SystemButtonStyle.BAR,
@@ -116,14 +122,21 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             // The buttons are spaced evenly and horizontally with AD.UI.padding units of padding between them
             var buttonCount = this.constructor.contactMethods.length;
             var buttonWidth = (AD.UI.useableScreenWidth - (buttonCount - 1) * AD.UI.padding) / buttonCount;
+            var contactButtonView = this.add(Ti.UI.createView({
+                left: AD.UI.padding,
+                top: AD.UI.padding * 2,
+                width: AD.UI.useableScreenWidth,
+                height: AD.UI.buttonHeight
+            }));
             this.constructor.contactMethods.forEach(function(method, index) {
-                var button = this.add(method.label, Ti.UI.createButton($.extend({
-                    left: AD.UI.padding + (buttonWidth + AD.UI.padding) * index,
-                    top: bodyTop,
+                var buttonParams = $.extend({
+                    left: (buttonWidth + AD.UI.padding) * index,
                     width: buttonWidth,
                     height: AD.UI.buttonHeight,
                     titleid: method.label
-                }, method)));
+                }, method);
+                var button = this.record(method.label, Ti.UI.createButton(buttonParams));
+                contactButtonView.add(button);
                 button.addEventListener('click', this.proxy(method.callback));
             }, this);
         }
@@ -133,7 +146,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         // Create the steps view
         var $stepsView = $.View.create(Ti.UI.createScrollView({
             left: 0,
-            top: bodyTop + AD.UI.buttonHeight + AD.UI.padding,
+            top: AD.UI.padding,
             layout: 'vertical',
             scrollType: 'vertical',
             contentHeight: 'auto',
