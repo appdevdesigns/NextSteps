@@ -106,6 +106,8 @@
     <string name="all">All</string>
     <string name="invalidGroupName">Please specify a group name</string>
     <string name="invalidOptionChoice">Please choose a {0}</string>
+    <string name="invalidOptionMultichoice">Please choose one or more {0}</string>
+    <string name="invalidOptionMultichoiceAnd">To use the "ALL" option, please choose two or more {0}</string>
     
     <!-- Stats labels -->
     <string name="statsHeaderSince">Stats accumulated since\n{0}:</string>

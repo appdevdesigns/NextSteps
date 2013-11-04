@@ -334,12 +334,26 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         var fieldDefinitions = this.constructor.fieldDefinitions;
         var filter = {};
         $.each(this.fields, function(fieldName, fieldData) {
+            var fieldValue = fieldData.value;
             var fieldDefinition = fieldDefinitions[fieldName];
-            if (fieldDefinition.isChoice && fieldData.enabled && fieldData.value === null) {
-                // No option has been chosen
-                alert($.formatString('invalidOptionChoice', fieldDefinition.name.toLowerCase()));
-                valid = false;
-                return false; // stop looping
+            if (fieldData.enabled) {
+                var errorTemplate = null;
+                if (fieldDefinition.isChoice && fieldValue === null) {
+                    errorTemplate = 'invalidOptionChoice';
+                }
+                else if (fieldDefinition.isMultichoice && fieldValue.ids.length === 0) {
+                    errorTemplate = 'invalidOptionMultichoice';
+                }
+                else if (fieldDefinition.isMultichoice && fieldValue.condition === 'AND' && fieldValue.ids.length <= 1) {
+                    errorTemplate = 'invalidOptionMultichoiceAnd';
+                }
+                
+                if (errorTemplate) {
+                    // This field is not valid, so display the error message
+                    alert($.formatString(errorTemplate, fieldDefinition.name.toLowerCase()));
+                    valid = false;
+                    return false; // stop looping
+                }
             }
             if (fieldData.enabled) {
                 findProperty(filter, fieldName, fieldData.value);

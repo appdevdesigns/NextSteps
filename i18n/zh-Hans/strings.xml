@@ -106,6 +106,8 @@
     <string name="all">所有</string>
     <string name="invalidGroupName">请确定一个小组名称</string>
     <string name="invalidOptionChoice">请选择一个 {0}</string>
+    <string name="invalidOptionMultichoice">请选择一个或多个 {0}</string>
+    <string name="invalidOptionMultichoiceAnd">要使用"所有"请选择两个或两个以上 {0}</string>
     
     <!-- Stats labels -->
     <string name="statsHeaderSince">统计从\n{0}开始:</string>
