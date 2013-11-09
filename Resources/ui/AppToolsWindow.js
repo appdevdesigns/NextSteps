@@ -47,7 +47,8 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             var $winStringPrompt = new AD.UI.StringPromptWindow({
                 title: 'stringPromptBackupTitle',
                 message: 'stringPromptBackupMessage',
-                initial: defaultTitle
+                initial: defaultTitle,
+                tab: tab
             });
             $winStringPrompt.getDeferred().done(function(backupTitle) {
                 AD.Database.export(AD.Defaults.dbName).done(function(dump) {
