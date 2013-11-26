@@ -134,14 +134,6 @@
     <!-- Info labels -->
     <string name="infoTitle">信息</string>
     <string name="aboutVersion">版本{0}</string>
-    <string name="aboutLicense">
-版权 © 2013 AppDev 设计, 部分版权属于 Jeff Mott。  所有版权得到保护。\n
-\n
-只要符合下边的条件，我们将允许在修改或没有修改的情况下重新发布或使用源代码和二维表:\n
-    * 重新发布源代码必须包括以上的版权申明，下列条款和免责信息。\n
-    * 以二维表的形式重新发布必须包含以上版权申明，下列条款和文档中的免责信息和/或其他提供的材料。\n
-    * 未经过前边的允许 供稿者的名字不能被用于签署或者宣传这个软件的衍伸产品。\n
-    </string>
     <string name="preferences">选项</string>
     
     <!-- Feedback labels -->
