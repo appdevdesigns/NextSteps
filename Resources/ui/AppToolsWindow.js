@@ -74,15 +74,17 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             titleid: 'restoreDatabase'
         }));
         restoreButton.addEventListener('click', function() {
-            // Let the user choose the file to restore from
-            var $winChooseFile = new AD.UI.GoogleDriveChooseFileWindow({
-                tab: tab,
-                type: 'file',
-                folder: null
-            });
-            $winChooseFile.getDeferred().done(function(fileId) {
-                AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
-                    AD.Database.import(AD.Defaults.dbName, JSON.parse(dump));
+            AD.UI.yesNoAlert('restoreDatabaseWarning').done(function() {
+                // Let the user choose the file to restore from
+                var $winChooseFile = new AD.UI.GoogleDriveChooseFileWindow({
+                    tab: tab,
+                    type: 'file',
+                    folder: null
+                });
+                $winChooseFile.getDeferred().done(function(fileId) {
+                    AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
+                        AD.Database.import(AD.Defaults.dbName, JSON.parse(dump));
+                    });
                 });
             });
         });

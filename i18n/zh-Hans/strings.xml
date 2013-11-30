@@ -126,6 +126,7 @@
     <string name="backupTitleFormat">下一步的数据转存 {0}/{1}/{2}</string>
     <string name="stringPromptBackupTitle">下一步的数据备份</string>
     <string name="stringPromptBackupMessage">为下一步数据库的备份选择文价夹名。</string>
+    <string name="restoreDatabaseWarning">从备份恢复数据库将替换所有现有的数据。你确定要继续？</string>
 
     <!-- Password protection labels -->
     <string name="passwordProtectOptional">你的 设备似乎启用全设备加密。你仍然想用密码来保护应用吗？</string>
