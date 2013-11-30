@@ -172,7 +172,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     // Choose which contacts to import
     chooseContacts: function() {
         var _this = this;
-        var $winChooseContacts = new AD.UI.ChooseContactsWindow({ tab: this.options.tab, contacts: this.contacts });
+        var $winChooseContacts = new AD.UI.ChooseContactsWindow({ contacts: this.contacts });
         $winChooseContacts.getDeferred().done(function(contacts) {
             _this.contacts = contacts;
             _this.updateContactsView();
@@ -184,7 +184,6 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         var _this = this;
         // Allow the user to choose the contacts' campus
         var $winChooseCampus = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
             groupName: 'campus',
             Model: 'Campus',
             initial: this.campus_guid,
@@ -199,7 +198,6 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         var _this = this;
         // Allow the user to choose the contacts' year
         var $winChooseYear = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
             groupName: 'year',
             Model: 'Year',
             initial: this.year_id
@@ -213,7 +211,6 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         var _this = this;
         // Allow the user to choose the contacts' associated tags
         var $winChooseTags = new AD.UI.ChooseOptionsWindow({
-            tab: this.tab,
             groupName: 'tag',
             Model: 'Tag',
             initial: $.Model.getIds(this.tags),

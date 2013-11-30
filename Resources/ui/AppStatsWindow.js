@@ -174,7 +174,6 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
         var headerLabel = $statsView.children.headerLabel;
         var statsTable = $statsView.children.statsTable;
         var footerView = $statsView.children.footerView;
-        var tab = this.tab;
         
         // Create the view totals button
         var viewTotalsButton = this.record('viewTotals', Ti.UI.createButton({
@@ -186,7 +185,7 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
             visible: AD.PropertyStore.get(this.constructor.lastUpdatePropertyName) ? true : false
         }));
         viewTotalsButton.addEventListener('click', function(event) {
-            var winViewTotals = new ViewTotalsWindow({tab: tab});
+            var winViewTotals = new ViewTotalsWindow();
         });
         footerView.add(viewTotalsButton);
         

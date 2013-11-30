@@ -49,10 +49,10 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     
     // Quick function to display the add group window in a single function call
     // Add a new group or update an existing group
-    addGroup: function(tab, existingGroup) {
-        // Open the 'Add Group' window in the current tab
+    addGroup: function(existingGroup) {
+        // Open the 'Add Group' window
         var AddGroupWindow = this;
-        var $winAddGroup = new AddGroupWindow({tab: tab, existingGroup: existingGroup});
+        var $winAddGroup = new AddGroupWindow({ existingGroup: existingGroup });
         $winAddGroup.getDeferred().done(function(group) {
             // 'group' is an AD.Models.Group model instance
             
@@ -86,8 +86,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     }]
 }, {
     init: function(options) {
-        var _this = this;
-        
         // If existingGroup is a 'truthy' value, we are editing, otherwise we are adding
         this.adding = this.options.existingGroup ? false : true;
         
@@ -207,7 +205,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             font: AD.UI.Fonts.medium
         }));
         
-        var _this = this;
         var $valueView = null;
         
         if (fieldDefinition.isBool) {
@@ -265,7 +262,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             valueButton.addEventListener('click', function() {
                 // Assume that all choices are model instances
                 var params = $.extend({
-                    tab: _this.tab,
                     groupName: fieldDefinition.name,
                     Model: fieldDefinition.Model,
                 }, fieldDefinition.params);

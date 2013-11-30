@@ -368,7 +368,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     changeCampus: function() {
         // Allow the user to set the contact's campus
         var $winChooseCampus = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
             groupName: 'campus',
             Model: 'Campus',
             initial: this.contact.campus_guid,
@@ -386,7 +385,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     changeYear: function() {
         // Allow the user to choose the year of this contact
         var $winChooseYear = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
             groupName: 'year',
             Model: 'Year',
             initial: this.contact.year_id
@@ -403,7 +401,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     changePhone: function() {
         // Allow the user to choose the phone number to associate with this contact
         var $winChoosePhone = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
             groupName: 'phone',
             initial: this.contact.contact_phoneId,
             options: this.phoneNumbers
@@ -419,7 +416,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     changeEmail: function() {
         // Allow the user to choose the email address to associate with this contact
         var $winChooseEmail = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
             groupName: 'email',
             initial: this.contact.contact_emailId,
             options: this.emailAddresses

@@ -16,8 +16,6 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
 
     // Create the child views
     create: function() {
-        var tab = this.tab;
-
         this.add(Ti.UI.createLabel({
             left: AD.UI.padding,
             top: AD.UI.padding,
@@ -47,8 +45,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             var $winStringPrompt = new AD.UI.StringPromptWindow({
                 title: 'stringPromptBackupTitle',
                 message: 'stringPromptBackupMessage',
-                initial: defaultTitle,
-                tab: tab
+                initial: defaultTitle
             });
             $winStringPrompt.getDeferred().done(function(backupTitle) {
                 AD.Database.export(AD.Defaults.dbName).done(function(dump) {
@@ -77,7 +74,6 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             AD.UI.yesNoAlert('restoreDatabaseWarning').done(function() {
                 // Let the user choose the file to restore from
                 var $winChooseFile = new AD.UI.GoogleDriveChooseFileWindow({
-                    tab: tab,
                     type: 'file',
                     folder: null
                 });
