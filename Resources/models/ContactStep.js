@@ -46,11 +46,10 @@
             },
             lookupLabels: {
                 step_label: {
-                    tableName: 'nextsteps_step',
+                    tableName: 'nextsteps_step_trans',
                     foreignKey: 'step_guid',
                     referencedKey: 'step_guid',
-                    label: 'step_label',
-                    hasLanguageCode: false
+                    label: 'step_label'
                 }
             },
             primaryKey:'contactstep_guid'

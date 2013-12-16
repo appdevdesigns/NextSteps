@@ -10,9 +10,9 @@ module.exports.install = function() {
 };
 
 // Called when the app is installed or updated
-var onInstall = function(previousVersion) {
+var onInstall = function(installData) {
     var sortOrder = AD.PropertyStore.get('sort_order');
-    if (sortOrder && ADinstall.compareVersions(previousVersion, '1.5') < 0) {
+    if (sortOrder && ADinstall.compareVersions(installData.previousVersion, '1.5') < 0) {
         // The "contact_campus" sort order field was renamed to "campus_label" in version 1.5
         AD.PropertyStore.set('sort_order', sortOrder.map(function(field) {
             return field === 'contact_campus' ? 'campus_label' : field;
@@ -21,13 +21,9 @@ var onInstall = function(previousVersion) {
 };
 
 // Create the necessary databases for the application
-var installDatabases = function(dbVersion) {
+var installDatabases = function(installData) {
     // Create the necessary database tables
-    var DataStore = require('appdev/db/DataStoreSQLite');
-    var dbName = AD.Defaults.dbName;
-    var query = function(query, values) {
-        return DataStore.execute(dbName, query, values);
-    };
+    var query = installData.query;
 
     // This keeps track of whether "install" has been called yet
     var installed = false;
@@ -51,7 +47,7 @@ var installDatabases = function(dbVersion) {
                    contact_firstName TEXT NOT NULL,\
                    contact_lastName TEXT NOT NULL,\
                    contact_nickname TEXT,\
-                   campus_guid TEXT DEFAULT NULL REFERENCES nextsteps_campus(campus_guid) ON DELETE SET DEFAULT,\
+                   campus_guid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_guid) ON DELETE SET DEFAULT,\
                    year_id INTEGER NOT NULL DEFAULT 1,\
                    contact_phone TEXT,\
                    contact_phoneId TEXT,\
@@ -77,18 +73,32 @@ var installDatabases = function(dbVersion) {
                    UPDATE nextsteps_group SET group_guid = NEW.group_id||'.'||NEW.device_id WHERE group_id=NEW.group_id;\
                END");
         
-        query("CREATE TABLE IF NOT EXISTS nextsteps_campus (\
+        query("CREATE TABLE IF NOT EXISTS nextsteps_campus_data (\
                    campus_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
                    campus_guid TEXT DEFAULT NULL UNIQUE,\
                    viewer_id INTEGER NOT NULL,\
+                   device_id TEXT NOT NULL\
+               )");
+        query("CREATE TRIGGER IF NOT EXISTS campus_data_guid AFTER INSERT ON nextsteps_campus_data FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_campus_data SET campus_guid = NEW.campus_id||'.'||NEW.device_id WHERE campus_id=NEW.campus_id;\
+               END");
+        query("CREATE TABLE IF NOT EXISTS nextsteps_campus_trans (\
+                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   trans_guid TEXT DEFAULT NULL UNIQUE,\
+                   viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL,\
+                   campus_guid TEXT NOT NULL,\
+                   language_code TEXT NOT NULL DEFAULT '',\
                    campus_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS campus_guid AFTER INSERT ON nextsteps_campus FOR EACH ROW\
+        query("CREATE TRIGGER IF NOT EXISTS campus_trans_guid AFTER INSERT ON nextsteps_campus_trans FOR EACH ROW\
                BEGIN\
-                   UPDATE nextsteps_campus SET campus_guid = NEW.campus_id||'.'||NEW.device_id WHERE campus_id=NEW.campus_id;\
+                   UPDATE nextsteps_campus_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
                END");
         
+        query("DROP TABLE IF EXISTS nextsteps_year_data");
+        query("DROP TABLE IF EXISTS nextsteps_year_trans");
         query("CREATE TABLE IF NOT EXISTS nextsteps_year_data (\
                    year_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE\
                )");
@@ -98,26 +108,31 @@ var installDatabases = function(dbVersion) {
                    language_code TEXT NOT NULL DEFAULT '',\
                    year_label TEXT NOT NULL\
                )");
-        // Empty the tables and recreate the year labels
-        query("DELETE FROM nextsteps_year_data");
-        query("DELETE FROM nextsteps_year_trans");
-        var yearLabels = ['Unknown', 'Freshman', 'Sophmore', 'Junior', 'Senior', 'Graduated', 'Teacher', 'Other'];
-        yearLabels.forEach(function(yearLabel, index) {
-            var id = index + 1;
-            query("INSERT INTO nextsteps_year_data (year_id) VALUES (?)", [id]);
-            query("INSERT INTO nextsteps_year_trans (trans_id, year_id, language_code, year_label) VALUES (?, ?, 'en', ?)", [id, id, yearLabel]);
-        });
+        // Install the year labels
+        installData.installLabels('nextsteps_year');
         
-        query("CREATE TABLE IF NOT EXISTS nextsteps_tag (\
+        query("CREATE TABLE IF NOT EXISTS nextsteps_tag_data (\
                    tag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
                    tag_guid TEXT DEFAULT NULL UNIQUE,\
                    viewer_id INTEGER NOT NULL,\
+                   device_id TEXT NOT NULL\
+               )");
+        query("CREATE TRIGGER IF NOT EXISTS tag_data_guid AFTER INSERT ON nextsteps_tag_data FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_tag_data SET tag_guid = NEW.tag_id||'.'||NEW.device_id WHERE tag_id=NEW.tag_id;\
+               END");
+        query("CREATE TABLE IF NOT EXISTS nextsteps_tag_trans (\
+                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   trans_guid TEXT DEFAULT NULL UNIQUE,\
+                   viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL,\
+                   tag_guid TEXT NOT NULL,\
+                   language_code TEXT NOT NULL DEFAULT '',\
                    tag_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS tag_guid AFTER INSERT ON nextsteps_tag FOR EACH ROW\
+        query("CREATE TRIGGER IF NOT EXISTS tag_trans_guid AFTER INSERT ON nextsteps_tag_trans FOR EACH ROW\
                BEGIN\
-                   UPDATE nextsteps_tag SET tag_guid = NEW.tag_id||'.'||NEW.device_id WHERE tag_id=NEW.tag_id;\
+                   UPDATE nextsteps_tag_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
                END");
         query("CREATE TABLE IF NOT EXISTS nextsteps_contact_tag (\
                    contacttag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
@@ -125,7 +140,7 @@ var installDatabases = function(dbVersion) {
                    viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL,\
                    contact_guid TEXT NOT NULL REFERENCES nextsteps_contact(contact_guid) ON DELETE CASCADE,\
-                   tag_guid TEXT NOT NULL REFERENCES nextsteps_tag(tag_guid) ON DELETE CASCADE\
+                   tag_guid TEXT NOT NULL REFERENCES nextsteps_tag_data(tag_guid) ON DELETE CASCADE\
                )");
         query("CREATE TRIGGER IF NOT EXISTS contacttag_guid AFTER INSERT ON nextsteps_contact_tag FOR EACH ROW\
                BEGIN\
@@ -133,45 +148,35 @@ var installDatabases = function(dbVersion) {
                END");
         
         var stepsTableExists;
-        query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='nextsteps_step'").done(function(tablesArgs) {
+        query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='nextsteps_step_data'").done(function(tablesArgs) {
             stepsTableExists = tablesArgs[0][0]['COUNT(*)'] === 1;
         });
-        query("CREATE TABLE IF NOT EXISTS nextsteps_step (\
+        query("CREATE TABLE IF NOT EXISTS nextsteps_step_data (\
                    step_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
                    step_guid TEXT DEFAULT NULL UNIQUE,\
                    viewer_id INTEGER NOT NULL,\
+                   device_id TEXT NOT NULL\
+               )");
+        query("CREATE TRIGGER IF NOT EXISTS step_data_guid AFTER INSERT ON nextsteps_step_data FOR EACH ROW\
+               BEGIN\
+                   UPDATE nextsteps_step_data SET step_guid = NEW.step_id||'.'||NEW.device_id WHERE step_id=NEW.step_id;\
+               END");
+        query("CREATE TABLE IF NOT EXISTS nextsteps_step_trans (\
+                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
+                   trans_guid TEXT DEFAULT NULL UNIQUE,\
+                   viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL,\
+                   step_guid TEXT NOT NULL,\
+                   language_code TEXT NOT NULL DEFAULT '',\
                    step_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS step_guid AFTER INSERT ON nextsteps_step FOR EACH ROW\
+        query("CREATE TRIGGER IF NOT EXISTS step_trans_guid AFTER INSERT ON nextsteps_step_trans FOR EACH ROW\
                BEGIN\
-                   UPDATE nextsteps_step SET step_guid = NEW.step_id||'.'||NEW.device_id WHERE step_id=NEW.step_id;\
+                   UPDATE nextsteps_step_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
                END");
         if (!stepsTableExists) {
-            // Only populate the steps table if it was just created
-            var stepLabels = [
-                'Pre-ev',
-                'G Conversation',
-                'G Presentation',
-                'Decision',
-                'Finished Following Up',
-                'HS Presentation',
-                'Trained for Action',
-                'Challenged as Lifetime Laborer',
-                'Challenged to Develop Local Resources',
-                'Engaged Disciple',
-                'Multiplying Disciple',
-                'Movement Leader',
-                'New Lifetime Laborer',
-                'People Giving Resource',
-                'Domestic Project',
-                'Cross-Cultural Project',
-                'International Project'
-            ];
-            stepLabels.forEach(function(stepLabel) {
-                query("INSERT INTO nextsteps_step (viewer_id, device_id, step_label) VALUES (?, ?, ?)",
-                    [AD.Defaults.viewerId, Ti.Platform.id, stepLabel]);
-            });
+            // Only install the steps labels if the table was just created
+            installData.installLabels('nextsteps_step');
         }
         query("CREATE TABLE IF NOT EXISTS nextsteps_contact_step (\
                    contactstep_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
@@ -179,7 +184,7 @@ var installDatabases = function(dbVersion) {
                    viewer_id INTEGER NOT NULL,\
                    device_id TEXT NOT NULL,\
                    contact_guid TEXT NOT NULL REFERENCES nextsteps_contact(contact_guid) ON DELETE CASCADE,\
-                   step_guid TEXT NOT NULL REFERENCES nextsteps_step(step_guid) ON DELETE CASCADE,\
+                   step_guid TEXT NOT NULL REFERENCES nextsteps_step_data(step_guid) ON DELETE CASCADE,\
                    step_date TEXT DEFAULT NULL\
                )");
         query("CREATE TRIGGER IF NOT EXISTS contactstep_guid AFTER INSERT ON nextsteps_contact_step FOR EACH ROW\
@@ -192,7 +197,7 @@ var installDatabases = function(dbVersion) {
     
     
     // Installed, but pre-1.1
-    if (ADinstall.compareVersions(dbVersion, '0') > 0 && ADinstall.compareVersions(dbVersion, '1.1') < 0) {
+    if (ADinstall.compareVersions(installData.previousVersion, '0') > 0 && ADinstall.compareVersions(installData.previousVersion, '1.1') < 0) {
         // Upgrade pre-1.1 databases
         
         // Rename the nextsteps_contact and nextsteps_group tables so they will be recreated
@@ -225,7 +230,7 @@ var installDatabases = function(dbVersion) {
         query("DROP TABLE nextsteps_group_temp");
     }
     // Installed, but pre-1.5
-    if (ADinstall.compareVersions(dbVersion, '0') > 0 && ADinstall.compareVersions(dbVersion, '1.5') < 0) {
+    if (ADinstall.compareVersions(installData.previousVersion, '0') > 0 && ADinstall.compareVersions(installData.previousVersion, '1.5') < 0) {
         // Upgrade pre-1.5 databases
         
         // Rename the nextsteps_contact and nextsteps_group tables so they will be recreated
@@ -243,24 +248,19 @@ var installDatabases = function(dbVersion) {
 
         // Load the campus labels from the property store
         var campuses = AD.PropertyStore.get('campuses').map(function(campusLabel) {
-            return {
-                campus_label: campusLabel
-            };
-        });
-        // Fill the nextsteps_campus table with the defined campuses
-        campuses.forEach(function(campus) {
             // Create a new campus
-            query("INSERT INTO nextsteps_campus (viewer_id, device_id, campus_label) VALUES (?, ?, ?)", [AD.Defaults.viewerId, Ti.Platform.id, campus.campus_label]).done(function(campus_id) {
-                // Get the campus_guid of the campus just created and find all the contacts that reference this campus
-                var getCampusGuid = query("SELECT campus_guid FROM nextsteps_campus WHERE campus_id=?", [campus_id]);
-                var getContacts = query("SELECT contact_id FROM nextsteps_contact_temp WHERE contact_campus=?", [campus.campus_label]);
-                $.when(getCampusGuid, getContacts).done(function(campusArgs, contactArgs) {
+            var campus = new AD.Models.Campus({
+                campus_label: campusLabel
+            });
+            campus.save().done(function() {
+                var campus_guid = campus.getGuid();
+                query("SELECT contact_id FROM nextsteps_contact_temp WHERE contact_campus=?", [campusLabel]).done(function(contactArgs) {
                     // Now update all the contacts that referenced this campus
-                    var campus_guid = campus.campus_guid = campusArgs[0][0].campus_guid;
                     var contact_ids = contactArgs[0].map(function(row) { return row.contact_id; });
                     query("UPDATE nextsteps_contact SET campus_guid=? WHERE contact_id IN ("+contact_ids.join(',')+")", [campus_guid]);
                 });
             });
+            return campus;
         });
         AD.PropertyStore.remove('campuses');
 
@@ -298,7 +298,7 @@ var installDatabases = function(dbVersion) {
         }];
         stepFields.forEach(function(stepField) {
             // Determine the step_guid of all the steps that must be migrated
-            query("SELECT step_guid FROM nextsteps_step WHERE step_label=?", [stepField.label]).done(function(stepArgs) {
+            query("SELECT step_guid FROM nextsteps_step_trans WHERE step_label=?", [stepField.label]).done(function(stepArgs) {
                 stepField.step_guid = stepArgs[0][0].step_guid;
             });
         });
@@ -307,8 +307,12 @@ var installDatabases = function(dbVersion) {
             contacts.forEach(function(contact) {
                 // Recreate the steps associated with each contact
                 stepFields.forEach(function(stepField) {
-                    query("INSERT INTO nextsteps_contact_step (viewer_id, device_id, contact_guid, step_guid, step_date) VALUES (?, ?, ?, ?, ?)",
-                        [AD.Defaults.viewerId, Ti.Platform.id, contact.contact_guid, stepField.step_guid, contact[stepField.field]]);
+                    var contactStep = new AD.Models.ContactStep({
+                        contact_guid: contact.contact_guid,
+                        step_guid: stepField.step_guid,
+                        step_date: contact[stepField.field]
+                    });
+                    contactStep.save();
                 });
             });
         });

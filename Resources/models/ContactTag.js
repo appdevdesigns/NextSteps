@@ -44,11 +44,10 @@
             },
             lookupLabels: {
                 tag_label: {
-                    tableName: 'nextsteps_tag',
+                    tableName: 'nextsteps_tag_trans',
                     foreignKey: 'tag_guid',
                     referencedKey: 'tag_guid',
-                    label: 'tag_label',
-                    hasLanguageCode: false
+                    label: 'tag_label'
                 }
             },
             primaryKey:'contacttag_guid'

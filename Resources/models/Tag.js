@@ -1,7 +1,7 @@
 ////
 //// Tag
 ////
-//// This model is the interface to the nextsteps_tag table.
+//// This model is the interface to the nextsteps_tag_data table.
 
 
 (function () {
@@ -18,12 +18,13 @@
         id:'tag_guid',
         autoIncrementKey:'tag_id',
         labelKey:'tag_label',
-        _isMultilingual:false,
+        _isMultilingual:true,
         //connectionType:'server', // optional field
         cache:true,
 
         attributes: {
             tag_id: 'integer',
+            trans_id: 'integer',
             viewer_id: 'integer'
         }
     };
@@ -31,17 +32,28 @@
     if (extendedDefinition) {
         // Extended model attributes
         AD.jQuery.extend(attr, {
-            type:'single',  // 'single' | 'multilingual'
-            dbTable:'nextsteps_tag',
-            modelFields: {
-                  tag_id:"int(11) unsigned",
-                  tag_guid:"varchar(60)",
-                  viewer_id:"int(11) unsigned",
-                  device_id:"text",
-                  tag_label:"varchar(40)"
-
+            type:'multilingual',  // 'single' | 'multilingual'
+            tables:{
+                data:'nextsteps_tag_data',
+                trans:'nextsteps_tag_trans'
             },
-            primaryKey:'tag_guid'
+            fields: {
+                data: {
+                    tag_id:"int(11) unsigned",
+                    tag_guid:"varchar(60)",
+                    viewer_id:"int(11) unsigned",
+                    device_id:"text",
+                },
+                trans: {
+                    trans_id:"int(11) unsigned",
+                    trans_guid:"varchar(60)",
+                    viewer_id:"int(11) unsigned",
+                    device_id:"text",
+                    tag_label:"varchar(40)"
+                }
+            },
+            primaryKey:'tag_guid',
+            multilingualFields: ['tag_label']
         });
     }
 
