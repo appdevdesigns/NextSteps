@@ -248,31 +248,19 @@ var installDatabases = function(installData) {
 
         // Load the campus labels from the property store
         var campuses = AD.PropertyStore.get('campuses').map(function(campusLabel) {
-            return {
-                campus_label: campusLabel
-            };
-        });
-        // Fill the nextsteps_campus table with the defined campuses
-        campuses.forEach(function(campus) {
             // Create a new campus
-            
-            // Create the campus "data" row
-            query("INSERT INTO nextsteps_campus_data (viewer_id, device_id) VALUES (?, ?)",
-                [AD.Defaults.viewerId, Ti.Platform.id]).done(function(campus_id) {
-                // Get the campus_guid of the campus just created and find all the contacts that reference this campus
-                var getCampusGuid = query("SELECT campus_guid FROM nextsteps_campus_data WHERE campus_id=?", [campus_id]);
-                var getContacts = query("SELECT contact_id FROM nextsteps_contact_temp WHERE contact_campus=?", [campus.campus_label]);
-                $.when(getCampusGuid, getContacts).done(function(campusArgs, contactArgs) {
-                    // Create the campus "trans" row
-                    var campus_guid = campus.campus_guid = campusArgs[0][0].campus_guid;
-                    query("INSERT INTO nextsteps_campus_trans (campus_guid, viewer_id, device_id, language_code, campus_label) VALUES (?, ?, ?, ?, ?)",
-                        [campus.campus_guid, AD.Defaults.viewerId, Ti.Platform.id, AD.Defaults.languageKey, campus.campus_label]);
-                    
+            var campus = new AD.Models.Campus({
+                campus_label: campusLabel
+            });
+            campus.save().done(function() {
+                var campus_guid = campus.getGuid();
+                query("SELECT contact_id FROM nextsteps_contact_temp WHERE contact_campus=?", [campusLabel]).done(function(contactArgs) {
                     // Now update all the contacts that referenced this campus
                     var contact_ids = contactArgs[0].map(function(row) { return row.contact_id; });
                     query("UPDATE nextsteps_contact SET campus_guid=? WHERE contact_id IN ("+contact_ids.join(',')+")", [campus_guid]);
                 });
             });
+            return campus;
         });
         AD.PropertyStore.remove('campuses');
 
@@ -319,8 +307,12 @@ var installDatabases = function(installData) {
             contacts.forEach(function(contact) {
                 // Recreate the steps associated with each contact
                 stepFields.forEach(function(stepField) {
-                    query("INSERT INTO nextsteps_contact_step (viewer_id, device_id, contact_guid, step_guid, step_date) VALUES (?, ?, ?, ?, ?)",
-                        [AD.Defaults.viewerId, Ti.Platform.id, contact.contact_guid, stepField.step_guid, contact[stepField.field]]);
+                    var contactStep = new AD.Models.ContactStep({
+                        contact_guid: contact.contact_guid,
+                        step_guid: stepField.step_guid,
+                        step_date: contact[stepField.field]
+                    });
+                    contactStep.save();
                 });
             });
         });
