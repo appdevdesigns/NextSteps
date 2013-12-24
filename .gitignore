@@ -15,6 +15,8 @@ Resources/images/checkbox-checked.png
 Resources/images/checkbox-unchecked.png
 Resources/images/info.png
 Resources/images/info@2x.png
+i18n/en/appdev-strings.xml
+i18n/zh-rCN/appdev-strings.xml
 Resources/models/Viewer.js
 Resources/ui/AppInfoWindow.js
 Resources/ui/AppTabGroup.js

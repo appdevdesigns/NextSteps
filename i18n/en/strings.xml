@@ -1,32 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <!-- StringPrompt labels -->
-    <string name="stringPromptDefaultTitle">String Prompt</string>
-    <string name="stringPromptDefaultMessage">Please enter a string.</string>
-    <string name="stringPromptEncryptionTitle">Database Encryption Setup</string>
-    <string name="stringPromptEncryptionMessage">Please enter at least 30 random characters.  You are NOT required to remember the sequence; it is used internally to increase the security of your information.</string>
-    <string name="stringPromptEncryptionLengthConstraint">Input must be at least 30 characters long!</string>
-    <string name="stringPromptPasswordTitle">Login Password</string>
-    <string name="stringPromptPasswordMessage">Please choose a secure login password to prevent unathorized access.</string>
-    <string name="stringPromptPasswordLengthConstraint">Login password must be at least 30 characters long!</string>
-    <string name="stringPromptInvalidInput">Invalid input!</string>
-    
-    <!-- PasswordPrompt labels -->
-    <string name="passwordPromptDefaultTitle">Password</string>
-    <string name="passwordPromptDefaultMessage">Please enter your password</string>
-    <string name="passwordPromptLoginTitle">Login</string>
-    <string name="passwordPromptLoginMessage">Please enter your login password</string>
-    <string name="verifying">Verifying</string>
-    <string name="correct">Correct</string>
-    <string name="incorrect">Incorrect</string>
-    
-    <!-- DatePicker labels -->
-    <string name="datePickerTitle">Choose Date</string>
-    <!-- ChooseOption labels -->
-    <string name="chooseOptionTitle">Choose {0}</string>
-    <string name="addOptionTitle">Add {0}</string>
-    <string name="newOptionTitle">Enter the name of the new {0}.</string>
-    
     <string name="returnToApp">Return to app?</string>
     
     <!-- Tab group labels -->
@@ -34,22 +7,6 @@
     <string name="groupsTitle">Groups</string>
     <string name="statsTitle">Stats Reporting</string>
     <string name="toolsTitle">Tools</string>
-    
-    <!-- Button labels used throughout the app -->
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="ok">OK</string>
-    <string name="add">Add</string>
-    <string name="edit">Edit</string>
-    <string name="del">Delete</string>
-    <string name="save">Save</string>
-    <string name="submit">Submit</string>
-    <string name="done">Done</string>
-    <string name="cancel">Cancel</string>
-    <string name="back">Back</string>
-    <string name="reset">Reset</string>
-    <string name="sort">Sort</string>
-    <string name="choose">Choose</string>
     
     <!-- Contacts labels -->
     <string name="addMethod">Add method</string>
@@ -127,39 +84,4 @@
     <string name="stringPromptBackupTitle">NextSteps Database Backup</string>
     <string name="stringPromptBackupMessage">Please choose the name of the NextSteps database backup file.</string>
     <string name="restoreDatabaseWarning">Restoring the database from a backup will replace all of your current data. Are you sure you want to proceed?</string>
-
-    <!-- Password protection labels -->
-    <string name="passwordProtectOptional">Your device appears to have full-device encryption enabled.  Would you like to pasword-protect the application anyway?</string>
-    <string name="passwordProtectRequired">Your device does not appear to have full-device encryption enabled.  The application will be password-protected.</string>
-    
-    <!-- Info labels -->
-    <string name="infoTitle">Info</string>
-    <string name="aboutVersion">Version {0}</string>
-    <string name="preferences">Preferences</string>
-    
-    <!-- Feedback labels -->
-    <string name="feedback">Feedback</string>
-    <string name="feedbackTitle">{0} Feedback</string>
-    <string name="feedbackText">Thank you for taking the time to tell us what you think about {0}!  Your suggestions and bug reports are greatly appreciated and will be incorporated into a future release if possible.  You can also e-mail us directly at appdev.feedback@gmail.com.  If you are submitting a bug report, please mention your {0} version ({1}) and your OS ({2} {3}).</string>
-    <string name="feedbackWarning">WARNING:  Feedback sent from this app will be transmitted over an unsecured connection.  If you would normally use a VPN for your communication, please send your feedback to appdev.feedback@gmail.com using your VPN secured e-mail.</string>
-    <string name="suggestion">Suggestion</string>
-    <string name="bugReport">Bug report</string>
-    <string name="feedbackSubject">{0} feedback: {1}</string>
-    <string name="suggestionTemplate">I really like {0}, but this feature would make it even better:\n\n</string>
-    <string name="bugReportTemplate">I really like {0}, but I am experiencing problems.\n\nWhenever I do this:\n\n\nThis happens:\n\n\n{0} version: {1}\n{2} version: {3}</string>
-    
-    <!-- Google APIs labels -->
-    <string name="googleDrive">Google Drive</string>
-    <string name="chooseFileTitle">Choose file</string>
-    <string name="chooseFolderTitle">Choose folder</string>
-    <string name="chooseFile">Please choose a file</string>
-
-    <!-- LoginWindow labels -->
-    <string name="login">Login</string>
-    <string name="userId">User ID</string>
-    <string name="password">Password</string>
-    
-    <!-- ErrorWindow labels -->
-    <string name="startupErrorTitle">Startup Error</string>
-    <string name="retry">Retry</string>
 </resources>

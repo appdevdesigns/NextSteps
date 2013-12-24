@@ -1,32 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <!-- StringPrompt labels -->
-    <string name="stringPromptDefaultTitle">字符串提示</string>
-    <string name="stringPromptDefaultMessage">请输入一个字符串。</string>
-    <string name="stringPromptEncryptionTitle">数据库加密设置</string>
-    <string name="stringPromptEncryptionMessage">请随意填入至少30个字符。你无须记住这些字符的具体顺序，它们只是用来提高你信息的安全性。</string>
-    <string name="stringPromptEncryptionLengthConstraint">填入至少30个字符!</string>
-    <string name="stringPromptPasswordTitle">登录密码</string>
-    <string name="stringPromptPasswordMessage">为避免未经授权的访问，请选择安全的登录密码。</string>
-    <string name="stringPromptPasswordLengthConstraint">登录密码至少长达30个字符!</string>
-    <string name="stringPromptInvalidInput">输入无效!</string>
-    
-    <!-- PasswordPrompt labels -->
-    <string name="passwordPromptDefaultTitle">密码</string>
-    <string name="passwordPromptDefaultMessage">请输入你的登陆密码</string>
-    <string name="passwordPromptLoginTitle">登录</string>
-    <string name="passwordPromptLoginMessage">请登陆自己的密码</string>
-    <string name="verifying">验证中</string>
-    <string name="correct">正确</string>
-    <string name="incorrect">错误</string>
-    
-    <!-- DatePicker labels -->
-    <string name="datePickerTitle">选择数据</string>
-    <!-- ChooseOption labels -->
-    <string name="chooseOptionTitle">选择{0}</string>
-    <string name="addOptionTitle">添加{0}</string>
-    <string name="newOptionTitle">输入新的{0}名字。</string>
-    
     <string name="returnToApp">返回到应用程序?</string>
     
     <!-- Tab group labels -->
@@ -127,39 +100,4 @@
     <string name="stringPromptBackupTitle">下一步的数据备份</string>
     <string name="stringPromptBackupMessage">为下一步数据库的备份选择文价夹名。</string>
     <string name="restoreDatabaseWarning">从备份恢复数据库将替换所有现有的数据。你确定要继续？</string>
-
-    <!-- Password protection labels -->
-    <string name="passwordProtectOptional">你的 设备似乎启用全设备加密。你仍然想用密码来保护应用吗？</string>
-    <string name="passwordProtectRequired">你的 设备似乎没有启用全设备加密。应用将会被密码保护。</string>
-    
-    <!-- Info labels -->
-    <string name="infoTitle">信息</string>
-    <string name="aboutVersion">版本{0}</string>
-    <string name="preferences">选项</string>
-    
-    <!-- Feedback labels -->
-    <string name="feedback">反馈</string>
-    <string name="feedbackTitle">{0} 反馈</string>
-    <string name="feedbackText">谢谢花时间告诉我们你的想法 {0}! 非常感激你提供的建议和错误报告，如果可能的话他们会被纳入未来的新版本发布。 你可以直接通过 appdev.feedback@gmail.com这个邮箱地址和我们联系。如果你想提交一个错误报告， 你可以提交自己的 {0} 版本 ({1}) 和你的 OS ({2} {3})。</string>
-    <string name="feedbackWarning">警告: 从这个应用程序中发送出来的反馈会处在不安全的连接发送中，如果你选择用 VPN 来交流，请把你的反馈通过VPN的安全邮箱发送到appdev.feedback@gmail.com这个邮箱中。</string>
-    <string name="suggestion">建议</string>
-    <string name="bugReport">错误报告</string>
-    <string name="feedbackSubject">{0} 反馈: {1}</string>
-    <string name="suggestionTemplate">我真的喜欢 {0}, 但是这个功能将会让它更好:\n\n</string>
-    <string name="bugReportTemplate">我确实喜欢 {0}, 但我遇到了问题\n\n当我们做这个时:\n\n\n这发生了\n\n\n{0} 版本: {1}\n{2} 版本: {3}</string>
-    
-    <!-- Google APIs labels -->
-    <string name="googleDrive">谷歌驱动器</string>
-    <string name="chooseFileTitle">选择文件</string>
-    <string name="chooseFolderTitle">选择文件夹</string>
-    <string name="chooseFile">选择一个文件夹</string>
-
-    <!-- LoginWindow labels -->
-    <string name="login">登陆</string>
-    <string name="userId">用户ID</string>
-    <string name="password">密码</string>
-    
-    <!-- ErrorWindow labels -->
-    <string name="startupErrorTitle">启动错误</string>
-    <string name="retry">重试</string>
 </resources>
