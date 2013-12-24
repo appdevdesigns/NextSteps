@@ -13,7 +13,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         title: 'edit',
         callback: function() {
             // Open the EditContact window
-            var $winAddContactWindow = new AD.UI.AddContactWindow({
+            this.createWindow('AddContactWindow', {
                 operation: 'edit',
                 existingContact: this.contact
             });
@@ -160,6 +160,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         };
 
         // Create the tags row
+        var _this = this;
         var tagsRow = $stepsView.add('tags', createRow());
         var tagsLabel = Ti.UI.createLabel({
             left: AD.UI.padding,
@@ -176,13 +177,12 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         updateTagLabel();
         tagsRow.add(tagsLabel);
         tagsRow.addEventListener('click', function() {
-            var $winChooseTags = new AD.UI.ChooseOptionsWindow({
+            _this.createWindow('ChooseOptionsWindow', {
                 groupName: 'tag',
                 Model: 'Tag',
                 initial: contact.getTags().map(function(tag) { return tag.attr('tag_guid'); }),
                 editable: true
-            });
-            $winChooseTags.getDeferred().done(function(options) {
+            }).getDeferred().done(function(options) {
                 contact.setTags(options);
                 updateTagLabel();
             });
@@ -234,11 +234,11 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             });
             dateButton.addEventListener('click', function() {
                 // Set the completion date of the step
-                AD.UI.DatePickerWindow.datePicker({
+                _this.createWindow('DatePickerWindow', {
                     minDate: new Date(2012, 0, 1), // January 1, 2012
                     maxDate: $.today(),
                     initialDate: stepCompletedDate
-                }).done(function(completedDate) {
+                }).getDeferred().done(function(completedDate) {
                     stepCompletedDate = completedDate;
                     contactStep.attr('step_date', stepCompletedDate).save();
                     updateRow();

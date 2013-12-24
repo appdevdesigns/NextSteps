@@ -47,20 +47,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     
     fieldDefinitions: {},
     
-    // Quick function to display the add group window in a single function call
-    // Add a new group or update an existing group
-    addGroup: function(existingGroup) {
-        // Open the 'Add Group' window
-        var AddGroupWindow = this;
-        var $winAddGroup = new AddGroupWindow({ existingGroup: existingGroup });
-        $winAddGroup.getDeferred().done(function(group) {
-            // 'group' is an AD.Models.Group model instance
-            
-            // Create/update the group's record in the database 
-            group.save();
-        });
-    },
-    
     actions: [{
         title: 'save',
         callback: 'save',
@@ -250,7 +236,9 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 });
                 $fieldRow.add('condition', $conditionCheckbox);
             }
-
+            
+            var _this = this;
+            
             var valueButton = Ti.UI.createButton({
                 right: AD.UI.padding,
                 top: AD.UI.padding / 2,
@@ -268,7 +256,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 if (fieldDefinition.isChoice) {
                     // This is a single choice field
                     params.initial = field.value;
-                    var $winChooseOption = new AD.UI.ChooseOptionWindow(params);
+                    var $winChooseOption = _this.createWindow('ChooseOptionWindow', params);
                     $winChooseOption.getDeferred().done(function(option) {
                         // An option was chosen, so set the value of the field in the filter
                         field.value = option.getId();
@@ -278,7 +266,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 else {
                     // This is a multi choice field
                     params.initial = field.value.ids || [];
-                    var $winChooseOptions = new AD.UI.ChooseOptionsWindow(params);
+                    var $winChooseOptions = _this.createWindow('ChooseOptionsWindow', params);
                     $winChooseOptions.getDeferred().done(function(options) {
                         // An option was chosen, so set the value of the field in the filter
                         field.value.ids = $.Model.getIds(options);
@@ -362,6 +350,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 group_name: this.getChild('name').value,
                 group_filter: filter
             });
+            this.group.save();
             this.dfd.resolve(this.group);
         }
     }

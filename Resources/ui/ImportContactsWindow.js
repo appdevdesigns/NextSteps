@@ -172,8 +172,9 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     // Choose which contacts to import
     chooseContacts: function() {
         var _this = this;
-        var $winChooseContacts = new AD.UI.ChooseContactsWindow({ contacts: this.contacts });
-        $winChooseContacts.getDeferred().done(function(contacts) {
+        this.createWindow('ChooseContactsWindow', {
+            contacts: this.contacts
+        }).getDeferred().done(function(contacts) {
             _this.contacts = contacts;
             _this.updateContactsView();
         });
@@ -183,13 +184,12 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     changeCampus: function() {
         var _this = this;
         // Allow the user to choose the contacts' campus
-        var $winChooseCampus = new AD.UI.ChooseOptionWindow({
+        return this.createWindow('ChooseOptionWindow', {
             groupName: 'campus',
             Model: 'Campus',
             initial: this.campus_guid,
             editable: true
-        });
-        return $winChooseCampus.getDeferred().done(function(campus) {
+        }).getDeferred().done(function(campus) {
             // A campus was chosen
             _this.campus_guid = campus.getId();
         });
@@ -197,12 +197,11 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     changeYear: function() {
         var _this = this;
         // Allow the user to choose the contacts' year
-        var $winChooseYear = new AD.UI.ChooseOptionWindow({
+        return this.createWindow('ChooseOptionWindow', {
             groupName: 'year',
             Model: 'Year',
             initial: this.year_id
-        });
-        return $winChooseYear.getDeferred().done(function(year) {
+        }).getDeferred().done(function(year) {
             // A year was chosen
             _this.year_id = year.getId();
         });
@@ -210,13 +209,12 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     changeTags: function() {
         var _this = this;
         // Allow the user to choose the contacts' associated tags
-        var $winChooseTags = new AD.UI.ChooseOptionsWindow({
+        return this.createWindow('ChooseOptionsWindow', {
             groupName: 'tag',
             Model: 'Tag',
             initial: $.Model.getIds(this.tags),
             editable: true
-        });
-        return $winChooseTags.getDeferred().done(function(tags) {
+        }).getDeferred().done(function(tags) {
             _this.tags = tags;
         });
     },

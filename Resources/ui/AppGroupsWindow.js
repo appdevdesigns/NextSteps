@@ -30,12 +30,13 @@ var GroupTable = $.ModelTable('AppDev.UI.GroupTable', {
     // Called when a group row is selected
     onSelect: function(group) {
         // View the filtered contact list specified by the selected group
-        var $winContacts = new AD.UI.AppContactsWindow({
+        var $window = this.$window;
+        $window.createWindow('AppContactsWindow', {
             group: group,
             actions: [{
                 title: 'edit',
                 callback: function() {
-                    AD.UI.AddGroupWindow.addGroup(group);
+                    $window.createWindow('AddGroupWindow', { existingGroup: group });
                 },
                 rightNavButton: true
             }]
@@ -49,7 +50,7 @@ module.exports = $.Window('AppDev.UI.AppGroupsWindow', {
         title: 'add',
         callback: function() {
             // Create a new group
-            AD.UI.AddGroupWindow.addGroup();
+            this.createWindow('AddGroupWindow');
         },
         rightNavButton: true
     }]

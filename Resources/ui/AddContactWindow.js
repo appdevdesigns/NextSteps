@@ -367,13 +367,12 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     // Handlers for allowing the user to change the contact's campus, year, phone number, and e-mail address
     changeCampus: function() {
         // Allow the user to set the contact's campus
-        var $winChooseCampus = new AD.UI.ChooseOptionWindow({
+        this.createWindow('ChooseOptionWindow', {
             groupName: 'campus',
             Model: 'Campus',
             initial: this.contact.campus_guid,
             editable: true
-        });
-        $winChooseCampus.getDeferred().done(this.proxy(function(campus) {
+        }).getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
             var label = campus.getLabel();
             this.contact.attr('campus_guid', campus.getId());
@@ -384,12 +383,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     },
     changeYear: function() {
         // Allow the user to choose the year of this contact
-        var $winChooseYear = new AD.UI.ChooseOptionWindow({
+        this.createWindow('ChooseOptionWindow', {
             groupName: 'year',
             Model: 'Year',
             initial: this.contact.year_id
-        });
-        $winChooseYear.getDeferred().done(this.proxy(function(year) {
+        }).getDeferred().done(this.proxy(function(year) {
             // A year was chosen
             var label = year.getLabel();
             this.contact.attr('year_id', year.getId());
@@ -400,12 +398,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     },
     changePhone: function() {
         // Allow the user to choose the phone number to associate with this contact
-        var $winChoosePhone = new AD.UI.ChooseOptionWindow({
+        this.createWindow('ChooseOptionWindow', {
             groupName: 'phone',
             initial: this.contact.contact_phoneId,
             options: this.phoneNumbers
-        });
-        $winChoosePhone.getDeferred().done(this.proxy(function(phoneNumber) {
+        }).getDeferred().done(this.proxy(function(phoneNumber) {
             // A phone number was chosen
             this.contact.attr('contact_phone', phoneNumber.value);
             this.contact.attr('contact_phoneId', phoneNumber.id);
@@ -415,12 +412,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     },
     changeEmail: function() {
         // Allow the user to choose the email address to associate with this contact
-        var $winChooseEmail = new AD.UI.ChooseOptionWindow({
+        this.createWindow('ChooseOptionWindow', {
             groupName: 'email',
             initial: this.contact.contact_emailId,
             options: this.emailAddresses
-        });
-        $winChooseEmail.getDeferred().done(this.proxy(function(emailAddress) {
+        }).getDeferred().done(this.proxy(function(emailAddress) {
             // An email address was chosen
             this.contact.attr('contact_email', emailAddress.value);
             this.contact.attr('contact_emailId', emailAddress.id);

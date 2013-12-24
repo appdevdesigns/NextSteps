@@ -24,6 +24,8 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             textid: 'backupRestoreInfoText',
             font: AD.UI.Fonts.mediumSmall
         }));
+
+        var _this = this;
         var backupButton = this.add('backup', Ti.UI.createButton({
             top: AD.UI.padding,
             center: {
@@ -42,12 +44,11 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 today.getFullYear());
 
             // Prompt the user for the name of the database backup file
-            var $winStringPrompt = new AD.UI.StringPromptWindow({
+            _this.createWindow('StringPromptWindow', {
                 title: 'stringPromptBackupTitle',
                 message: 'stringPromptBackupMessage',
                 initial: defaultTitle
-            });
-            $winStringPrompt.getDeferred().done(function(backupTitle) {
+            }).getDeferred().done(function(backupTitle) {
                 AD.Database.export(AD.Defaults.dbName).done(function(dump) {
                     AD.Comm.GoogleDriveFileAPI.write({
                         content: JSON.stringify(dump),
@@ -73,11 +74,10 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
         restoreButton.addEventListener('click', function() {
             AD.UI.yesNoAlert('restoreDatabaseWarning').done(function() {
                 // Let the user choose the file to restore from
-                var $winChooseFile = new AD.UI.GoogleDriveChooseFileWindow({
+                _this.createWindow('GoogleDriveChooseFileWindow', {
                     type: 'file',
                     folder: null
-                });
-                $winChooseFile.getDeferred().done(function(fileId) {
+                }).getDeferred().done(function(fileId) {
                     AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
                         AD.Database.import(AD.Defaults.dbName, JSON.parse(dump));
                     });

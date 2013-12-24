@@ -134,7 +134,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
     
     // Called when a contact row is selected
     onSelect: function(contact) {
-        var $winViewContact = new AD.UI.ViewContactWindow({ contact: contact });
+        var $winViewContact = this.$window.createWindow('ViewContactWindow', { contact: contact });
     },
     
     // Filter out all contacts that do not match the group filter
@@ -166,13 +166,13 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
     
     addContactMethods: [
         {title: 'create', callback: function() {
-            var $winAddContactWindow = new AD.UI.AddContactWindow({ operation: 'create' });
+            var $winAddContactWindow = this.createWindow('AddContactWindow', { operation: 'create' });
         }},
         {title: 'importTitle', callback: function() {
-            var $winAddContactWindow = new AD.UI.AddContactWindow({ operation: 'import' });
+            var $winAddContactWindow = this.createWindow('AddContactWindow', { operation: 'import' });
         }},
         {title: 'massImport', callback: function() {
-            var $winImportContactsWindow = new AD.UI.ImportContactsWindow();
+            var $winImportContactsWindow = this.createWindow('ImportContactsWindow');
         }},
         {title: 'cancel'}
     ],
@@ -189,7 +189,7 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
         title: 'sort',
         callback: function() {
             // Allow the user to specify the contact sort order
-            var $winSortOrder = new AD.UI.SortOrderWindow({
+            var $winSortOrder = this.createWindow('SortOrderWindow', {
                 fields: ContactTable.sortFields,
                 order: AD.PropertyStore.get('sort_order')
             });
