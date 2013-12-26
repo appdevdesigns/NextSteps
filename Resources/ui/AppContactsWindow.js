@@ -210,6 +210,8 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
         });
         
         this.smartBind(AD.Models.Contact, '*', this.updateTitle);
+        this.smartBind(AD.Models.ContactStep, '*', this.updateTitle);
+        this.smartBind(AD.Models.ContactTag, '*', this.updateTitle);
         if (this.options.group) {
             this.updateTitle();
             this.open();
