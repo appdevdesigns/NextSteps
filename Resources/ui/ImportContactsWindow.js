@@ -191,7 +191,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             editable: true
         }).getDeferred().done(function(campus) {
             // A campus was chosen
-            _this.campus_guid = campus.getId();
+            _this.campus_guid = campus ? campus.getId() : null;
         });
     },
     changeYear: function() {

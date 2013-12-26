@@ -259,8 +259,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                     var $winChooseOption = _this.createWindow('ChooseOptionWindow', params);
                     $winChooseOption.getDeferred().done(function(option) {
                         // An option was chosen, so set the value of the field in the filter
-                        field.value = option.getId();
-                        valueButton.title = option.getLabel();
+                        field.value = option ? option.getId() : null;
+                        valueButton.title = option ? option.getLabel() : AD.Localize('unspecified');
                     });
                 }
                 else {

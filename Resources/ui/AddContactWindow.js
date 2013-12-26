@@ -374,8 +374,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             editable: true
         }).getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
-            var label = campus.getLabel();
-            this.contact.attr('campus_guid', campus.getId());
+            var label = campus ? campus.getLabel() : null;
+            this.contact.attr('campus_guid', campus ? campus.getId() : null);
             this.contact.attr('campus_label', label);
             var campusLabel = this.getChild('campusLabel');
             campusLabel.text = campusLabel.title = label;
