@@ -10,7 +10,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         name: 'year'
     }, {
         name: 'tags',
-        noButton: true
+        icon: '/images/tags.png'
     }],
     actions: [{
         title: 'cancel',
@@ -89,12 +89,6 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
                 width: Ti.UI.SIZE,
                 height: fieldHeight
             });
-            fieldView.add(Ti.UI.createLabel({
-                left: 0,
-                width: labelWidth,
-                height: Ti.UI.SIZE,
-                textid: field.name
-            }));
 
             var changeCallback = function() {
                 // Calculate the names of the change and update field functions
@@ -107,10 +101,18 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
                 });
             };
             var valueField = null;
-            if (field.noButton) {
+            if (field.icon) {
+                // Create an icon to identify the field
+                fieldView.add(Ti.UI.createImageView({
+                    left: AD.UI.padding,
+                    width: Ti.UI.SIZE,
+                    height: Ti.UI.SIZE,
+                    image: field.icon
+                }));
+                
                 // Create a label that can be clicked to change the field value
                 valueField = Ti.UI.createLabel({
-                    left: labelWidth + AD.UI.padding,
+                    left: AD.UI.padding * 2 + 25,
                     right: AD.UI.padding,
                     top: 0,
                     height: Ti.UI.FILL,
@@ -119,6 +121,14 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
                 fieldView.addEventListener('click', changeCallback);
             }
             else {
+                // Create a static label to identify the field
+                fieldView.add(Ti.UI.createLabel({
+                    left: 0,
+                    width: labelWidth,
+                    height: Ti.UI.SIZE,
+                    textid: field.name
+                }));
+                
                 // Create a button that can be clicked to change the field value
                 var chooseButton = valueField = Ti.UI.createButton({
                     left: labelWidth + AD.UI.padding,

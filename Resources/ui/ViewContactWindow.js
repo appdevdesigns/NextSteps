@@ -162,17 +162,23 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         // Create the tags row
         var _this = this;
         var tagsRow = $stepsView.add('tags', createRow());
-        var tagsLabel = Ti.UI.createLabel({
+        tagsRow.add(Ti.UI.createImageView({
             left: AD.UI.padding,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
+            image: '/images/tags.png'
+        }));
+        var tagsLabel = Ti.UI.createLabel({
+            left: AD.UI.padding * 2 + 25,
+            right: AD.UI.padding,
             top: 0,
-            width: AD.UI.useableScreenWidth,
             height: Ti.UI.FILL,
             font: AD.UI.Fonts.mediumSmall
         });
         var updateTagLabel = function() {
             // Get an array of the lab
             var tagLabels = contact.getTags().map(function(tag) { return tag.attr('tag_label'); });
-            tagsLabel.text = AD.Localize('tags')+': '+(tagLabels.join(', ') || AD.Localize('none'));
+            tagsLabel.text = (tagLabels.join(', ') || AD.Localize('none'));
         };
         updateTagLabel();
         tagsRow.add(tagsLabel);
