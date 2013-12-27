@@ -150,32 +150,39 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
         // Add the Android actions for adding contacts method
         this.addContactMethods.forEach(function(method) {
             if ($.isFunction(method.callback)) {
-                this.actions.push({
-                    title: method.title,
-                    callback: method.callback,
+                this.actions.push($.extend({
                     enabled: function() {
                         // The add menu items are only available if the contacts window is not displaying a group
                         return this.options.group ? false : true;
                     },
                     platform: 'Android'
-                });
+                }, method));
             }
         }, this);
         this._super.apply(this, arguments);
     },
     
-    addContactMethods: [
-        {title: 'create', callback: function() {
+    addContactMethods: [{
+        title: 'create',
+        callback: function() {
             var $winAddContactWindow = this.createWindow('AddContactWindow', { operation: 'create' });
-        }},
-        {title: 'importTitle', callback: function() {
+        },
+        showAsAction: true,
+        icon: '/images/ic_action_new.png'
+    }, {
+        title: 'importTitle',
+        callback: function() {
             var $winAddContactWindow = this.createWindow('AddContactWindow', { operation: 'import' });
-        }},
-        {title: 'massImport', callback: function() {
+        },
+        showAsAction: true,
+        icon: '/images/arrow-up.png'
+    }, {
+        title: 'massImport', callback: function() {
             var $winImportContactsWindow = this.createWindow('ImportContactsWindow');
-        }},
-        {title: 'cancel'}
-    ],
+        }
+    }, {
+        title: 'cancel'
+    }],
     actions: [{
         title: 'add',
         callback: 'addContact',

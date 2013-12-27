@@ -83,7 +83,9 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     actions: [{
         title: 'save',
         callback: 'save',
-        rightNavButton: true
+        rightNavButton: true,
+        showAsAction: true,
+        icon: '/images/ic_action_save.png'
     }, {
         callback: function() {
             if (this.operation === 'edit') {

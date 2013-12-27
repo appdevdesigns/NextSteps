@@ -10,16 +10,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         {label: 'contact_email', callback: 'emailContact', field: 'contact_email'}
     ],
     actions: [{
-        title: 'edit',
-        callback: function() {
-            // Open the EditContact window
-            this.createWindow('AddContactWindow', {
-                operation: 'edit',
-                existingContact: this.contact
-            });
-        },
-        rightNavButton: true
-    }, {
         title: 'del',
         callback: function() {
             AD.UI.yesNoAlert('contactDeleteConfirmation').done(this.proxy(function() {
@@ -28,7 +18,21 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                 this.contact.destroy();
             }));
         },
-        platform: 'Android'
+        platform: 'Android',
+        showAsAction: true,
+        icon: '/images/ic_action_discard.png'
+    }, {
+        title: 'edit',
+        callback: function() {
+            // Open the EditContact window
+            this.createWindow('AddContactWindow', {
+                operation: 'edit',
+                existingContact: this.contact
+            });
+        },
+        rightNavButton: true,
+        showAsAction: true,
+        icon: '/images/ic_action_edit.png'
     }]
 }, {
     init: function(options) {

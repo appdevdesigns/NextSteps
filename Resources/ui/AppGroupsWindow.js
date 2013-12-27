@@ -38,7 +38,9 @@ var GroupTable = $.ModelTable('AppDev.UI.GroupTable', {
                 callback: function() {
                     $window.createWindow('AddGroupWindow', { existingGroup: group });
                 },
-                rightNavButton: true
+                rightNavButton: true,
+                showAsAction: true,
+                icon: '/images/ic_action_edit.png'
             }]
         });
     }
@@ -52,7 +54,9 @@ module.exports = $.Window('AppDev.UI.AppGroupsWindow', {
             // Create a new group
             this.createWindow('AddGroupWindow');
         },
-        rightNavButton: true
+        rightNavButton: true,
+        showAsAction: true,
+        icon: '/images/ic_action_new.png'
     }]
 }, {
     init: function(options) {
