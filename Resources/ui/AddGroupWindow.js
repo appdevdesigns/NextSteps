@@ -54,19 +54,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         showAsAction: true,
         icon: '/images/ic_action_save.png'
     }, {
-        title: 'del',
-        callback: function() {
-            AD.UI.yesNoAlert('groupDeleteConfirmation').done(this.proxy(function() {
-                // The user chose "Yes", so close the window and delete the group
-                this.dfd.reject();
-                this.group.destroy();
-            }));
-        },
-        enabled: function() {
-            return !this.adding;
-        },
-        platform: 'Android'
-    }, {
         title: 'cancel',
         callback: 'cancel', // special pre-defined callback to reject the deferred
         leftNavButton: true,

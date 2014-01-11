@@ -41,6 +41,19 @@ var GroupTable = $.ModelTable('AppDev.UI.GroupTable', {
                 rightNavButton: true,
                 showAsAction: true,
                 icon: '/images/ic_action_edit.png'
+            }, {
+                title: 'del',
+                callback: function() {
+                    var _this = this;
+                    AD.UI.yesNoAlert('groupDeleteConfirmation').done(function() {
+                        // The user chose "Yes", so close the window and delete the group
+                        _this.dfd.reject();
+                        group.destroy();
+                    });
+                },
+                platform: 'Android',
+                showAsAction: true,
+                icon: '/images/ic_action_discard.png'
             }]
         });
     }
