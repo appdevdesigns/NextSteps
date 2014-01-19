@@ -16,7 +16,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         title: 'cancel',
         callback: 'cancel',
         leftNavButton: true,
-        backButton: true
+        onClose: true
     }]
 }, {
     init: function(options) {

@@ -81,25 +81,13 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     ],
     
     actions: [{
-        title: 'save',
         callback: 'save',
-        rightNavButton: true,
-        showAsAction: true,
-        icon: '/images/ic_action_save.png'
-    }, {
-        callback: function() {
-            if (this.operation === 'edit') {
-                // Changes to contacts are automatically saved during editing
-                this.save();
-            }
-            else {
-                // Closing the window cancels the add or create operation
-                this.dfd.reject();
-            }
-        },
         menuItem: false,
-        onClose: true,
-        backButton: true
+        onClose: true
+    }, {
+        title: 'cancel',
+        callback: 'cancel',
+        rightNavButton: true
     }]
 }, {
     init: function(options) {
@@ -128,6 +116,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 return $.extend({}, field, {type: type, callback: callback});
             }, this);
             
+            this.attrs = {}; // the changed contact attrs
             this.contact = contactData.contact;
             this.localContact = contactData.localContact;
             this.window.title = AD.Localize(this.operation+'Contact');
@@ -345,17 +334,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             this.window.addEventListener('click', function(event) {
                 hideKeyboard();
             });
-            
-            // Create the save button on the screen
-            var saveButton = Ti.UI.createButton({
-                left: AD.UI.padding,
-                top: AD.UI.padding,
-                width: AD.UI.useableScreenWidth,
-                height: AD.UI.buttonHeight * 1.5,
-                titleid: 'save'
-            });
-            table.add(saveButton);
-            saveButton.addEventListener('click', this.proxy('save'));
         }
     },
     
@@ -377,8 +355,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         }).getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
             var label = campus ? campus.getLabel() : null;
-            this.contact.attr('campus_guid', campus ? campus.getId() : null);
-            this.contact.attr('campus_label', label);
+            this.attrs['campus_guid'] = campus ? campus.getId() : null;
+            this.attrs['campus_label'] = label;
             var campusLabel = this.getChild('campusLabel');
             campusLabel.text = campusLabel.title = label;
         }));
@@ -392,8 +370,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         }).getDeferred().done(this.proxy(function(year) {
             // A year was chosen
             var label = year.getLabel();
-            this.contact.attr('year_id', year.getId());
-            this.contact.attr('year_label', label);
+            this.attrs['year_id'] = year.getId();
+            this.attrs['year_label'] = label;
             var yearLabel = this.getChild('yearLabel');
             yearLabel.text = yearLabel.title = label;
         }));
@@ -406,8 +384,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             options: this.phoneNumbers
         }).getDeferred().done(this.proxy(function(phoneNumber) {
             // A phone number was chosen
-            this.contact.attr('contact_phone', phoneNumber.value);
-            this.contact.attr('contact_phoneId', phoneNumber.id);
+            this.attrs['contact_phone'] = phoneNumber.value;
+            this.attrs['contact_phoneId'] = phoneNumber.id;
             var phoneLabel = this.getChild('phoneLabel');
             phoneLabel.text = phoneLabel.title = phoneNumber.value;
         }));
@@ -420,8 +398,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             options: this.emailAddresses
         }).getDeferred().done(this.proxy(function(emailAddress) {
             // An email address was chosen
-            this.contact.attr('contact_email', emailAddress.value);
-            this.contact.attr('contact_emailId', emailAddress.id);
+            this.attrs['contact_email'] = emailAddress.value;
+            this.attrs['contact_emailId'] = emailAddress.id;
             var emailLabel = this.getChild('emailLabel');
             emailLabel.text = emailLabel.title = emailAddress.value;
         }));
@@ -432,9 +410,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         // Read the values of the text fields
         this.fields.forEach(function(field) {
             if (field.type === 'text') {
-                this.contact.attr(field.field, this.children[field.labelId].value);
+                this.attrs[field.field] = this.children[field.labelId].value;
             }
         }, this);
+        // Apply the changes
+        this.contact.attrs(this.attrs);
         this.dfd.resolve(this.contact);
         if (this.options.autoSave !== false) {
             // Create/update the contact's record in the database unless

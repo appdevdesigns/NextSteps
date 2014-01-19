@@ -6,7 +6,7 @@ module.exports = $.Window('AppDev.UI.ChooseContactWindow', {
         title: 'cancel',
         callback: 'cancel', // special pre-defined callback to reject the deferred
         rightNavButton: true,
-        backButton: true
+        onClose: true
     }]
 }, {
     init: function(options) {

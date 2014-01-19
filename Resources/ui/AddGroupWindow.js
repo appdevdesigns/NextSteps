@@ -51,13 +51,13 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         title: 'save',
         callback: 'save',
         rightNavButton: true,
+        onClose: true,
         showAsAction: true,
         icon: '/images/ic_action_save.png'
     }, {
         title: 'cancel',
         callback: 'cancel', // special pre-defined callback to reject the deferred
-        leftNavButton: true,
-        backButton: true
+        leftNavButton: true
     }]
 }, {
     init: function(options) {
@@ -299,7 +299,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     save: function() {
         if (!this.getChild('name').value) {
             alert(AD.Localize('invalidGroupName'));
-            return;
+            return false;
         }
         
         // Build the filter object that will be stringified and inserted into the database
@@ -342,6 +342,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             this.group.save();
             this.dfd.resolve(this.group);
         }
+        return valid;
     }
 });
 
