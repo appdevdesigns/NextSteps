@@ -33,14 +33,15 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     // Return a new contact model instance
     createContact: function(attrs) {
         var localContact = attrs.contact_recordId === null ? null : Ti.Contacts.getPersonByID(attrs.contact_recordId);
-        var firstName = '', lastName = '', nickname = '', defaultPhone = {value: null, id: null}, defaultEmail = {value: null, id: null}, note = '';
+        var fullName = '', firstName = '', lastName = '', nickname = '', defaultPhone = {value: null, id: null}, defaultEmail = {value: null, id: null}, note = '';
         if (localContact) {
+            fullName = localContact.fullName || '';
             firstName = localContact.firstName || '';
             lastName = localContact.lastName || '';
             nickname = localContact.nickname || '';
             if (AD.Platform.isAndroid) {
                 // Android does not allow access to the firstName, lastName, or nickname properties, so attempt to guess them
-                var nameParts = localContact.fullName.split(' ');
+                var nameParts = fullName.split(' ');
                 firstName = firstName || nameParts[0];
                 lastName = lastName || (nameParts.length === 1 ? '' : nameParts[nameParts.length - 1]);
                 nickname = nickname || firstName;

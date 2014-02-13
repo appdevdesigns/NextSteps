@@ -19,7 +19,7 @@ module.exports = AD.UI.ChooseOptionsWindow('AppDev.UI.ChooseContactsWindow', {},
             return {
                 title: contact.fullName,
                 // Android does not allow access to the lastName property, so assume that it is the last word of the full name
-                sortKey: (contact.lastName || contact.fullName.split(' ').pop() || '').toUpperCase(),
+                sortKey: (contact.lastName || (contact.fullName && contact.fullName.split(' ').pop()) || '').toUpperCase(),
                 selected: typeof chosenContacts[contact.recordId || contact.id] !== 'undefined',
                 recordId: contact.recordId || contact.id
             };

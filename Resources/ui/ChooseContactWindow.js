@@ -23,7 +23,7 @@ module.exports = $.Window('AppDev.UI.ChooseContactWindow', {
             if (!options.filterExisting || usedRecordIds.indexOf(contactRecordId) === -1) {
                 // This contact is not already in the database 
                 contactsData.push({
-                    title: contact.getFullName(),
+                    title: contact.fullName || '',
                     contact: contact
                 });
             }
