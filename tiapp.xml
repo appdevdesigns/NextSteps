@@ -11,7 +11,7 @@
     <sdk-version>3.2.1.GA</sdk-version>
     <id>net.appdevdesigns.nextsteps</id>
     <name>NextSteps</name>
-    <version>1.1.1</version>
+    <version>1.5.0</version>
     <publisher>AppDev Designs</publisher>
     <url>http://www.appdevdesigns.net</url>
     <description>A contact management app to help you create a logical workflow for organizing your contacts.</description>
@@ -38,7 +38,7 @@
         </orientations>
     </iphone>
     <android xmlns:android="http://schemas.android.com/apk/res/android">
-        <manifest android:versionCode="111" android:versionName="1.1.1">
+        <manifest android:versionCode="150" android:versionName="1.5.0">
             <application android:theme="@android:style/Theme.Holo.Light"/>
             <uses-sdk targetSdkVersion="19"/>
             <supports-screens android:anyDensity="false"/>
