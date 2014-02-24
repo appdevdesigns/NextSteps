@@ -16,9 +16,24 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
 
     // Create the child views
     create: function() {
+        if (AD.Platform.isAndroid) {
+            var preferencesButton = this.add(Ti.UI.createButton({
+                top: AD.UI.padding,
+                center: {
+                    x: AD.UI.screenWidth / 2
+                },
+                width: 120,
+                height: AD.UI.SIZE,
+                titleid: 'preferences'
+            }));
+            preferencesButton.addEventListener('click', function() {
+                Ti.UI.Android.openPreferences();
+            });
+        }
+
         this.add(Ti.UI.createLabel({
             left: AD.UI.padding,
-            top: AD.UI.padding,
+            top: AD.Platform.isAndroid ? AD.UI.padding * 2 : AD.UI.padding,
             width: AD.UI.SIZE,
             height: AD.UI.SIZE,
             textid: 'backupRestoreInfoText',
