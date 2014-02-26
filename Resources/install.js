@@ -107,7 +107,8 @@ var installDatabases = function(installData) {
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_step_data (\
                    step_uuid TEXT PRIMARY KEY UNIQUE,\
-                   user_id INTEGER NOT NULL\
+                   user_id INTEGER NOT NULL,\
+                   campus_uuid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_uuid) DEFAULT NULL\
                )");
         query("CREATE TABLE IF NOT EXISTS nextsteps_step_trans (\
                    trans_uuid TEXT PRIMARY KEY UNIQUE,\
