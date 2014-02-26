@@ -18,7 +18,66 @@
 
 // Initialize the AppDev framework
 var AD = require('AppDev');
+var $ = require('jquery');
 AD.init({
     models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
     windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppToolsWindow', 'AppInfoWindow']
+}).done(function() {
+    // Application-specific communications functions will be in app/
+    require('app/comm');
+    
+    if (!AD.Config.hasServer()) {
+        console.log('Does not have server specified.');
+        return;
+    }
+    
+    var serverURL = AD.Config.getServer();
+    console.log('Server URL: ' + serverURL);
+    var prevSync = AD.PropertyStore.get('lastSync');
+    if (prevSync && serverURL === prevSync.server) {
+        //return;
+    }
+    
+    var ping = function(callback) {
+        serverURL = AD.Config.getServer();
+        AD.Comm.HTTP.get({
+            url: 'http://'+serverURL+'/nsserver/ping'
+        }).done(callback).fail(function() {
+            AD.UI.yesNoAlert('Could not access the server. Please ensure that the server URL is correct and that you are connected to your VPN. Do you want to try again?').done(function() {
+                // Try again
+                ping(callback);
+            });
+        });
+    };
+    ping(function() {
+        console.log('Successfully contacted server: ' + serverURL);
+        
+        // Show login window
+        var $winLoginWindow = new AD.UI.LoginWindow({
+            validateCredentials: function(username, password) {
+                console.log('Validating credentials...');
+                return AD.Comm.validateCredentials(serverURL, username, password);
+            }
+        });
+        $winLoginWindow.open();
+        $winLoginWindow.getDeferred().done(function() {
+            console.log('Login credentials are valid');
+            
+            require('ui/ProgressWindow');
+            var $winDownloadingWindow = new AD.UI.ProgressWindow({
+                title: 'Downloading',
+                message: 'Downloading data from the server...'
+            });
+            $winDownloadingWindow.open(); 
+            setTimeout(function() {
+                $winDownloadingWindow.close();
+            }, 5000);
+            $winDownloadingWindow.getDeferred().done(function() {
+                AD.PropertyStore.set('lastSync', {
+                    server: serverURL,
+                    time: Date.now()
+                });
+            });
+        });
+    });
 });
