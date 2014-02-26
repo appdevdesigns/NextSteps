@@ -3,6 +3,6 @@ var config = module.exports = {
         return Ti.App.Properties.getString('server_url_preference');
     },
     hasServer: function() {
-        return config.getServer() !== '';
+        return config.getServer();
     }
 };
