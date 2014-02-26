@@ -15,16 +15,15 @@
         // Shared model attributes
         _adModule:'nextSteps',
         _adModel:'Contact',
-        id:'contact_guid',
-        autoIncrementKey:'contact_id',
+        id:'contact_uuid',
+        hasUuid:true,
         labelKey:'contact_firstName',
         _isMultilingual:false,
         //connectionType:'server', // optional field
         cache:true,
         
         attributes: {
-            contact_id: 'integer',
-            viewer_id: 'integer',
+            user_id: 'integer',
             contact_recordId: 'integer',
             year_id: 'integer'
         },
@@ -36,14 +35,14 @@
             tags: {
                 value: function() {
                     // Return an array of tag ids
-                    return this.getTags().map(function(tag) { return tag.attr('tag_guid'); });
+                    return this.getTags().map(function(tag) { return tag.attr('tag_uuid'); });
                 },
                 matches: function(contactTags, filterTags) {
                     // Calculate whether the tags sets match, using the given condition
                     var condition = filterTags.condition;
                     var matchesProperty = condition === 'AND';
-                    filterTags.ids.forEach(function(tag_guid) {
-                        var matchesElement = contactTags.indexOf(tag_guid) !== -1;
+                    filterTags.ids.forEach(function(tag_uuid) {
+                        var matchesElement = contactTags.indexOf(tag_uuid) !== -1;
                         if (condition === 'OR') {
                             // Starts false and remains false until one tag matches
                             matchesProperty = matchesProperty || matchesElement;
@@ -61,15 +60,15 @@
                     // Return a dictionary of step completion dates
                     var completionDates = {};
                     this.getSteps().forEach(function(step) {
-                        completionDates[step.attr('step_guid')] = step.attr('step_date');
+                        completionDates[step.attr('step_uuid')] = step.attr('step_date');
                     });
                     return completionDates;
                 },
                 matches: function(completionDates, steps) {
                     // Calculate whether the steps match
                     var matchesProperty = true;
-                    AD.jQuery.each(steps, function(step_guid, value) {
-                        var completedStep = completionDates[step_guid] ? true : false;
+                    AD.jQuery.each(steps, function(step_uuid, value) {
+                        var completedStep = completionDates[step_uuid] ? true : false;
                         var matchesElement = completedStep === value;
                         matchesProperty = matchesProperty && matchesElement;
                     });
@@ -122,15 +121,13 @@
             type:'single',  // 'single' | 'multilingual'
             dbTable:'nextsteps_contact',
             modelFields: {
-                  contact_id:"int(11) unsigned",
-                  contact_guid:"varchar(60)",
-                  viewer_id:"int(11) unsigned",
-                  device_id:"text",
+                  contact_uuid:"varchar(36)",
+                  user_id:"int(11) unsigned",
                   contact_recordId:"int(11) unsigned",
                   contact_firstName:"text",
                   contact_lastName:"text",
                   contact_nickname:"text",
-                  campus_guid:"varchar(60)",
+                  campus_uuid:"varchar(36)",
                   year_id:"int(11)",
                   contact_phone:"text",
                   contact_phoneId:"text",
@@ -140,10 +137,10 @@
 
             },
             lookupLabels: {
-                campus_guid: {
+                campus_uuid: {
                     tableName: 'nextsteps_campus_trans',
-                    foreignKey: 'campus_guid',
-                    referencedKey: 'campus_guid',
+                    foreignKey: 'campus_uuid',
+                    referencedKey: 'campus_uuid',
                     label: 'campus_label'
                 },
                 year_id: {
@@ -153,7 +150,7 @@
                     label: 'year_label'
                 }
             },
-            primaryKey:'contact_guid'
+            primaryKey:'contact_uuid'
         });
     }
     
@@ -171,19 +168,19 @@
         // Return an array of the Tag models associated with this contact
         getTags: function() {
             return AD.Models.ContactTag.cache.query({
-                contact_guid: this.attr('contact_guid')
+                contact_uuid: this.getId()
             });
         },
 
         // Set the tags associated with this contact
         setTags: function(newTags) {
-            var contact_guid = this.attr('contact_guid');
+            var contact_uuid = this.getId();
             var oldTags = this.getTags();
             newTags.forEach(function(newTag, index) {
                 // newTag can be a Tag instance or a plain object
                 var newTagAttrs = AD.jQuery.isFunction(newTag.attrs) ? newTag.attrs() : newTag;
                 // Reuse the existing tag if possible, but create a new tag instance if necessary
-                var tagInstance = oldTags[index] || new AD.Models.ContactTag({ contact_guid: contact_guid });
+                var tagInstance = oldTags[index] || new AD.Models.ContactTag({ contact_uuid: contact_uuid });
                 tagInstance.attrs(newTagAttrs);
                 tagInstance.save();
             });
@@ -196,21 +193,21 @@
         // Return an array of the Step models associated with this contact
         getSteps: function() {
             return AD.Models.ContactStep.cache.query({
-                contact_guid: this.attr('contact_guid')
+                contact_uuid: this.getId()
             });
         },
 
-        // Return a Step model with the specified step_guid associated with this contact
-        getStep: function(step_guid) {
-            var contact_guid = this.attr('contact_guid');
+        // Return a Step model with the specified step_uuid associated with this contact
+        getStep: function(step_uuid) {
+            var contact_guid = this.getId();
             var steps = AD.Models.ContactStep.cache.query({
-                contact_guid: contact_guid,
-                step_guid: step_guid
+                contact_uuid: contact_uuid,
+                step_uuid: step_uuid
             });
             return steps.length > 0 ? steps[0] : new AD.Models.ContactStep({
-                contact_guid: contact_guid,
-                step_guid: step_guid,
-                step_label: AD.Models.Step.cache.getById(step_guid).getLabel(),
+                contact_uuid: contact_uuid,
+                step_uuid: step_uuid,
+                step_label: AD.Models.Step.cache.getById(step_uuid).getLabel(),
                 step_date: null
             });
         },

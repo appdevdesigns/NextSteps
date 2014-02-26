@@ -22,7 +22,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     init: function(options) {
         this.contacts = [];
         
-        this.campus_guid = null;
+        this.campus_uuid = null;
         this.year_id = 1;
         this.tags = []; // an array of Tag model instances
         
@@ -197,11 +197,11 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         return this.createWindow('ChooseOptionWindow', {
             groupName: 'campus',
             Model: 'Campus',
-            initial: this.campus_guid,
+            initial: this.campus_uuid,
             editable: true
         }).getDeferred().done(function(campus) {
             // A campus was chosen
-            _this.campus_guid = campus ? campus.getId() : null;
+            _this.campus_uuid = campus ? campus.getId() : null;
         });
     },
     changeYear: function() {
@@ -236,7 +236,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
 
     // Update the field labels
     updateCampus: function() {
-        this.getChild('campus').title = this.campus_guid ? AD.Models.Campus.cache.getById(this.campus_guid).getLabel() : AD.Localize('unspecified');
+        this.getChild('campus').title = this.campus_uuid ? AD.Models.Campus.cache.getById(this.campus_uuid).getLabel() : AD.Localize('unspecified');
     },
     updateYear: function() {
         this.getChild('year').title = AD.Models.Year.cache.getById(this.year_id).getLabel();
@@ -249,7 +249,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     validate: function() {
         var warnDfd = $.Deferred();
         var missingFields = [];
-        if (!this.campus_guid) {
+        if (!this.campus_uuid) {
             missingFields.push('campus');
         }
         if (this.year_id === 1) {
@@ -289,12 +289,12 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             
             var contactModel = AD.UI.AddContactWindow.createContact({
                 contact_recordId: contact.recordId,
-                campus_guid: this.campus_guid,
+                campus_uuid: this.campus_uuid,
                 year_id: this.year_id,
             });
             var tags = this.tags;
             contactModel.save().done(function() {
-                // Set the tags AFTER saving the contact so that contact_guid will be available
+                // Set the tags AFTER saving the contact so that contact_uuid will be available
                 contactModel.setTags(tags);
             });
         }, this);

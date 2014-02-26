@@ -22,7 +22,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 editable: true
             }
         });
-        defineField('campus_guid', {
+        defineField('campus_uuid', {
             name: 'campus',
             type: 'choice',
             Model: 'Campus',

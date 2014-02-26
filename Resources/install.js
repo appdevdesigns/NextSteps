@@ -39,15 +39,13 @@ var installDatabases = function(installData) {
                )");
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_contact (\
-                   contact_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   contact_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
+                   contact_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL,\
                    contact_recordId INTEGER,\
                    contact_firstName TEXT NOT NULL,\
                    contact_lastName TEXT NOT NULL,\
                    contact_nickname TEXT,\
-                   campus_guid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_guid) ON DELETE SET DEFAULT,\
+                   campus_uuid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_uuid) ON DELETE SET DEFAULT,\
                    year_id INTEGER NOT NULL DEFAULT 1,\
                    contact_phone TEXT,\
                    contact_phoneId TEXT,\
@@ -55,47 +53,25 @@ var installDatabases = function(installData) {
                    contact_emailId TEXT,\
                    contact_notes TEXT\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS contact_guid AFTER INSERT ON nextsteps_contact FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_contact SET contact_guid = NEW.contact_id||'.'||NEW.device_id WHERE contact_id=NEW.contact_id;\
-               END");
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_group (\
-                   group_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   group_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
+                   group_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL,\
                    group_name TEXT NOT NULL,\
                    group_filter TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS group_guid AFTER INSERT ON nextsteps_group FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_group SET group_guid = NEW.group_id||'.'||NEW.device_id WHERE group_id=NEW.group_id;\
-               END");
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_campus_data (\
-                   campus_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   campus_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL\
+                   campus_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS campus_data_guid AFTER INSERT ON nextsteps_campus_data FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_campus_data SET campus_guid = NEW.campus_id||'.'||NEW.device_id WHERE campus_id=NEW.campus_id;\
-               END");
         query("CREATE TABLE IF NOT EXISTS nextsteps_campus_trans (\
-                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   trans_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
-                   campus_guid TEXT NOT NULL,\
+                   trans_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL,\
+                   campus_uuid TEXT NOT NULL REFERENCES nextsteps_campus_data(campus_uuid) ON DELETE CASCADE,\
                    language_code TEXT NOT NULL DEFAULT '',\
                    campus_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS campus_trans_guid AFTER INSERT ON nextsteps_campus_trans FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_campus_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
-               END");
         
         query("DROP TABLE IF EXISTS nextsteps_year_data");
         query("DROP TABLE IF EXISTS nextsteps_year_trans");
@@ -112,85 +88,41 @@ var installDatabases = function(installData) {
         installData.installLabels('nextsteps_year');
         
         query("CREATE TABLE IF NOT EXISTS nextsteps_tag_data (\
-                   tag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   tag_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL\
+                   tag_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS tag_data_guid AFTER INSERT ON nextsteps_tag_data FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_tag_data SET tag_guid = NEW.tag_id||'.'||NEW.device_id WHERE tag_id=NEW.tag_id;\
-               END");
         query("CREATE TABLE IF NOT EXISTS nextsteps_tag_trans (\
-                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   trans_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
-                   tag_guid TEXT NOT NULL,\
+                   trans_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL,\
+                   tag_uuid TEXT NOT NULL REFERENCES nextsteps_tag_data(tag_uuid) ON DELETE CASCADE,\
                    language_code TEXT NOT NULL DEFAULT '',\
                    tag_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS tag_trans_guid AFTER INSERT ON nextsteps_tag_trans FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_tag_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
-               END");
         query("CREATE TABLE IF NOT EXISTS nextsteps_contact_tag (\
-                   contacttag_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   contacttag_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
-                   contact_guid TEXT NOT NULL REFERENCES nextsteps_contact(contact_guid) ON DELETE CASCADE,\
-                   tag_guid TEXT NOT NULL REFERENCES nextsteps_tag_data(tag_guid) ON DELETE CASCADE\
+                   contacttag_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL,\
+                   contact_uuid TEXT NOT NULL REFERENCES nextsteps_contact(contact_uuid) ON DELETE CASCADE,\
+                   tag_uuid TEXT NOT NULL REFERENCES nextsteps_tag_data(tag_uuid) ON DELETE CASCADE\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS contacttag_guid AFTER INSERT ON nextsteps_contact_tag FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_contact_tag SET contacttag_guid = NEW.contacttag_id||'.'||NEW.device_id WHERE contacttag_id=NEW.contacttag_id;\
-               END");
         
-        var stepsTableExists;
-        query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='nextsteps_step_data'").done(function(tablesArgs) {
-            stepsTableExists = tablesArgs[0][0]['COUNT(*)'] === 1;
-        });
         query("CREATE TABLE IF NOT EXISTS nextsteps_step_data (\
-                   step_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   step_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL\
+                   step_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS step_data_guid AFTER INSERT ON nextsteps_step_data FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_step_data SET step_guid = NEW.step_id||'.'||NEW.device_id WHERE step_id=NEW.step_id;\
-               END");
         query("CREATE TABLE IF NOT EXISTS nextsteps_step_trans (\
-                   trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   trans_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
-                   step_guid TEXT NOT NULL,\
+                   trans_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL,\
+                   step_uuid TEXT NOT NULL REFERENCES nextsteps_step_data(step_uuid) ON DELETE CASCADE,\
                    language_code TEXT NOT NULL DEFAULT '',\
                    step_label TEXT NOT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS step_trans_guid AFTER INSERT ON nextsteps_step_trans FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_step_trans SET trans_guid = NEW.trans_id||'.'||NEW.device_id WHERE trans_id=NEW.trans_id;\
-               END");
-        if (!stepsTableExists) {
-            // Only install the steps labels if the table was just created
-            installData.installLabels('nextsteps_step');
-        }
         query("CREATE TABLE IF NOT EXISTS nextsteps_contact_step (\
-                   contactstep_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,\
-                   contactstep_guid TEXT DEFAULT NULL UNIQUE,\
-                   viewer_id INTEGER NOT NULL,\
-                   device_id TEXT NOT NULL,\
-                   contact_guid TEXT NOT NULL REFERENCES nextsteps_contact(contact_guid) ON DELETE CASCADE,\
-                   step_guid TEXT NOT NULL REFERENCES nextsteps_step_data(step_guid) ON DELETE CASCADE,\
+                   contactstep_uuid TEXT PRIMARY KEY UNIQUE,\
+                   user_id INTEGER NOT NULL,\
+                   contact_uuid TEXT NOT NULL REFERENCES nextsteps_contact(contact_uuid) ON DELETE CASCADE,\
+                   step_uuid TEXT NOT NULL REFERENCES nextsteps_step_data(step_uuid) ON DELETE CASCADE,\
                    step_date TEXT DEFAULT NULL\
                )");
-        query("CREATE TRIGGER IF NOT EXISTS contactstep_guid AFTER INSERT ON nextsteps_contact_step FOR EACH ROW\
-               BEGIN\
-                   UPDATE nextsteps_contact_step SET contactstep_guid = NEW.contactstep_id||'.'||NEW.device_id WHERE contactstep_id=NEW.contactstep_id;\
-               END");
         
         installed = true;
     };

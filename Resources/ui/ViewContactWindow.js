@@ -190,7 +190,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             _this.createWindow('ChooseOptionsWindow', {
                 groupName: 'tag',
                 Model: 'Tag',
-                initial: contact.getTags().map(function(tag) { return tag.attr('tag_guid'); }),
+                initial: contact.getTags().map(function(tag) { return tag.attr('tag_uuid'); }),
                 editable: true
             }).getDeferred().done(function(options) {
                 contact.setTags(options);

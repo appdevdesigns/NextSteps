@@ -57,7 +57,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             contact_firstName: firstName,
             contact_lastName: lastName,
             contact_nickname: nickname,
-            campus_guid: null,
+            campus_uuid: null,
             year_id: defaultYear,
             contact_phone: defaultPhone.value,
             contact_phoneId: defaultPhone.id,
@@ -66,7 +66,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             contact_notes: note
         };
         var mergedAttrs = $.extend(baseAttrs, attrs);
-        mergedAttrs.campus_label = mergedAttrs.campus_guid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_guid).getLabel() : '';
+        mergedAttrs.campus_label = mergedAttrs.campus_uuid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_uuid).getLabel() : '';
         mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).getLabel();
         return new AD.Models.Contact(mergedAttrs);
     },
@@ -351,12 +351,12 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         this.createWindow('ChooseOptionWindow', {
             groupName: 'campus',
             Model: 'Campus',
-            initial: this.contact.campus_guid,
+            initial: this.contact.campus_uuid,
             editable: true
         }).getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
             var label = campus ? campus.getLabel() : null;
-            this.attrs['campus_guid'] = campus ? campus.getId() : null;
+            this.attrs['campus_uuid'] = campus ? campus.getId() : null;
             this.attrs['campus_label'] = label;
             var campusLabel = this.getChild('campusLabel');
             campusLabel.text = campusLabel.title = label;

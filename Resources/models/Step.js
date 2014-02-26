@@ -15,15 +15,14 @@
         // Shared model attributes
         _adModule:'nextSteps',
         _adModel:'Step',
-        id:'step_guid',
-        autoIncrementKey:'step_id',
+        id:'step_uuid',
+        hasUuid:true,
         labelKey:'step_label',
         _isMultilingual:true,
         //connectionType:'server', // optional field
         cache:true,
 
         attributes: {
-            step_id: 'integer',
             trans_id: 'integer',
             viewer_id: 'integer'
         }
@@ -39,20 +38,16 @@
             },
             fields: {
                 data: {
-                    step_id:"int(11) unsigned",
-                    step_guid:"varchar(60)",
-                    viewer_id:"int(11) unsigned",
-                    device_id:"text",
+                    step_uuid:"varchar(36)",
+                    user_id:"int(11) unsigned"
                 },
                 trans: {
-                    trans_id:"int(11) unsigned",
-                    trans_guid:"varchar(60)",
-                    viewer_id:"int(11) unsigned",
-                    device_id:"text",
+                    trans_uuid:"varchar(36)",
+                    user_id:"int(11) unsigned",
                     step_label:"varchar(40)"
                 }
             },
-            primaryKey:'step_guid',
+            primaryKey:'step_uuid',
             multilingualFields: ['step_label']
         });
     }

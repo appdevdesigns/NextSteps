@@ -15,15 +15,14 @@
         // Shared model attributes
         _adModule:'nextStep',
         _adModel:'ContactStep',
-        id:'contactstep_guid',
-        autoIncrementKey:'contactstep_id',
+        id:'contactstep_uuid',
+        hasUuid:true,
         labelKey:'step_label',
         _isMultilingual:false,
         //connectionType:'server', // optional field
         cache:true,
 
         attributes: {
-            contactstep_id: 'integer',
             viewer_id: 'integer',
             step_date: 'date'
         },
@@ -35,24 +34,22 @@
             type:'single',  // 'single' | 'multilingual'
             dbTable:'nextsteps_contact_step',
             modelFields: {
-                  contactstep_id:"int(11) unsigned",
-                  contactstep_guid:"varchar(60)",
-                  viewer_id:"int(11) unsigned",
-                  device_id:"text",
-                  contact_guid:"varchar(60)",
-                  step_guid:"varchar(60)",
+                  contactstep_uuid:"varchar(36)",
+                  user_id:"int(11) unsigned",
+                  contact_uuid:"varchar(36)",
+                  step_uuid:"varchar(36)",
                   step_date:"date"
 
             },
             lookupLabels: {
                 step_label: {
                     tableName: 'nextsteps_step_trans',
-                    foreignKey: 'step_guid',
-                    referencedKey: 'step_guid',
+                    foreignKey: 'step_uuid',
+                    referencedKey: 'step_uuid',
                     label: 'step_label'
                 }
             },
-            primaryKey:'contactstep_guid'
+            primaryKey:'contactstep_uuid'
         });
     }
 

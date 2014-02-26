@@ -15,17 +15,16 @@
         // Shared model attributes
         _adModule:'nextSteps',
         _adModel:'Campus',
-        id:'campus_guid',
-        autoIncrementKey:'campus_id',
+        id:'campus_uuid',
+        hasUuid:true,
         labelKey:'campus_label',
         _isMultilingual:true,
         //connectionType:'server', // optional field
         cache:true,
 
         attributes: {
-            campus_id: 'integer',
             trans_id: 'integer',
-            viewer_id: 'integer'
+            user_id: 'integer'
         }
     };
 
@@ -39,20 +38,16 @@
             },
             fields: {
                 data: {
-                    campus_id:"int(11) unsigned",
-                    campus_guid:"varchar(60)",
-                    viewer_id:"int(11) unsigned",
-                    device_id:"text",
+                    campus_uuid:"varchar(36)",
+                    user_id:"int(11) unsigned",
                 },
                 trans: {
-                    trans_id:"int(11) unsigned",
-                    trans_guid:"varchar(60)",
-                    viewer_id:"int(11) unsigned",
-                    device_id:"text",
+                    trans_uuid:"varchar(36)",
+                    user_id:"int(11) unsigned",
                     campus_label:"varchar(40)"
                 }
             },
-            primaryKey:'campus_guid',
+            primaryKey:'campus_uuid',
             multilingualFields: ['campus_label']
         });
     }

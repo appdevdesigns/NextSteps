@@ -15,16 +15,15 @@
         // Shared model attributes
         _adModule:'nextSteps',
         _adModel:'Group',
-        id:'group_guid',
-        autoIncrementKey:'group_id',
+        id:'group_uuid',
+        hasUuid:true,
         labelKey:'group_name',
         _isMultilingual:false,
         //connectionType:'server', // optional field
         cache:true,
         
         attributes: {
-            group_id: 'integer',
-            viewer_id: 'integer',
+            user_id: 'integer',
             group_filter: 'JSON'
         }
     };
@@ -35,15 +34,13 @@
             type:'single',  // 'single' | 'multilingual'
             dbTable:'nextsteps_group',
             modelFields: {
-                  group_id:"int(11) unsigned",
-                  group_guid:"varchar(60)",
-                  viewer_id:"int(11) unsigned",
-                  device_id:"text",
+                  group_uuid:"varchar(36)",
+                  user_id:"int(11) unsigned",
                   group_name:"text",
                   group_filter:"text"
 
             },
-            primaryKey:'group_guid'
+            primaryKey:'group_uuid'
         });
     }
     

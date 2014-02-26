@@ -15,17 +15,16 @@
         // Shared model attributes
         _adModule:'nextSteps',
         _adModel:'Tag',
-        id:'tag_guid',
-        autoIncrementKey:'tag_id',
+        id:'tag_uuid',
+        hasUuid:true,
         labelKey:'tag_label',
         _isMultilingual:true,
         //connectionType:'server', // optional field
         cache:true,
 
         attributes: {
-            tag_id: 'integer',
             trans_id: 'integer',
-            viewer_id: 'integer'
+            user_id: 'integer'
         }
     };
 
@@ -39,20 +38,16 @@
             },
             fields: {
                 data: {
-                    tag_id:"int(11) unsigned",
-                    tag_guid:"varchar(60)",
-                    viewer_id:"int(11) unsigned",
-                    device_id:"text",
+                    tag_uuid:"varchar(36)",
+                    user_id:"int(11) unsigned"
                 },
                 trans: {
-                    trans_id:"int(11) unsigned",
-                    trans_guid:"varchar(60)",
-                    viewer_id:"int(11) unsigned",
-                    device_id:"text",
+                    trans_uuid:"varchar(36)",
+                    user_id:"int(11) unsigned",
                     tag_label:"varchar(40)"
                 }
             },
-            primaryKey:'tag_guid',
+            primaryKey:'tag_uuid',
             multilingualFields: ['tag_label']
         });
     }

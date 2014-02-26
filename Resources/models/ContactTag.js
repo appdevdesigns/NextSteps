@@ -15,16 +15,15 @@
         // Shared model attributes
         _adModule:'nextSteps',
         _adModel:'ContactTag',
-        id:'contacttag_guid',
-        autoIncrementKey:'contacttag_id',
+        id:'contacttag_uuid',
+        hasUuid:true,
         labelKey:'tag_label',
         _isMultilingual:false,
         //connectionType:'server', // optional field
         cache:true,
 
         attributes: {
-            contacttag_id: 'integer',
-            viewer_id: 'integer'
+            user_id: 'integer'
         }
     };
 
@@ -34,23 +33,21 @@
             type:'single',  // 'single' | 'multilingual'
             dbTable:'nextsteps_contact_tag',
             modelFields: {
-                  contacttag_id:"int(11) unsigned",
-                  contacttag_guid:"varchar(60)",
-                  viewer_id:"int(11) unsigned",
-                  device_id:"text",
-                  contact_guid:"varchar(60)",
-                  tag_guid:"varchar(60)"
+                  contacttag_uuid:"varchar(36)",
+                  user_id:"int(11) unsigned",
+                  contact_uuid:"varchar(36)",
+                  tag_uuid:"varchar(36)"
 
             },
             lookupLabels: {
                 tag_label: {
                     tableName: 'nextsteps_tag_trans',
-                    foreignKey: 'tag_guid',
-                    referencedKey: 'tag_guid',
+                    foreignKey: 'tag_uuid',
+                    referencedKey: 'tag_uuid',
                     label: 'tag_label'
                 }
             },
-            primaryKey:'contacttag_guid'
+            primaryKey:'contacttag_uuid'
         });
     }
 
