@@ -45,6 +45,7 @@ Resources/ui/GoogleDriveChooseFileWindow.js
 Resources/ui/LoginWindow.js
 Resources/ui/ModelTable.js
 Resources/ui/PasswordPromptWindow.js
+Resources/ui/ProgressWindow.js
 Resources/ui/SortOrderWindow.js
 Resources/ui/StringPromptWindow.js
 Resources/ui/UIBase.js

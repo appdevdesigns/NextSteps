@@ -38,9 +38,7 @@ AD.init({
     }
     
     var serverURL = AD.Config.getServer();
-    console.log('Server URL: ' + serverURL);
-    var prevSync = AD.PropertyStore.get('lastSync');
-    if (prevSync && serverURL === prevSync.server) {
+    if (serverURL === AD.PropertyStore.get('lastSyncServer')) {
         //return;
     }
     
@@ -74,15 +72,14 @@ AD.init({
                 title: 'Downloading',
                 message: 'Downloading data from the server...'
             });
-            $winDownloadingWindow.open(); 
-            setTimeout(function() {
+            $winDownloadingWindow.open();
+            
+            AD.Comm.syncWithServer(serverURL, transactionLog.get()).done(function() {
+                transactionLog.clear();
+            }).fail(function() {
+                alert('Could not access the server!');
+            }).always(function() {
                 $winDownloadingWindow.close();
-            }, 5000);
-            $winDownloadingWindow.getDeferred().done(function() {
-                AD.PropertyStore.set('lastSync', {
-                    server: serverURL,
-                    time: Date.now()
-                });
             });
         });
     });
