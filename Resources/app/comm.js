@@ -1,4 +1,4 @@
-var AD = require('appdev');
+var AD = require('AppDev');
 var $ = require('jquery');
 
 module.exports = $.extend(AD.Comm, {
