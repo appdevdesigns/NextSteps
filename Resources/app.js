@@ -23,6 +23,12 @@ AD.init({
     models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
     windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppToolsWindow', 'AppInfoWindow']
 }).done(function() {
+    require('app/Transactions');
+    var transactionLog = new AD.Transactions({
+        fileName: 'TransactionLog.json',
+        syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
+    });
+    
     // Application-specific communications functions will be in app/
     require('app/comm');
     
