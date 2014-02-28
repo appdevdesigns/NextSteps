@@ -29,8 +29,8 @@ module.exports = $.extend(AD.Comm, {
         AD.Comm.HTTP.post({
             url: 'http://'+server+'/nsserver/sync',
             params: {
-				username: username,
-				password: password,
+                username: username,
+                password: password,
                 lastSyncTimestamp: AD.PropertyStore.get('lastSyncTimestamp') || 0,
                 appVersion: AD.Defaults.version,
                 transactionLog: transactions
