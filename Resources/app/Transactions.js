@@ -58,5 +58,26 @@ $.Class('AppDev.Transactions', {
     // Save the transactions to the persistent file store
     save: function() {
         this.transactionStore.flush();
+    },
+    
+    // Apply an array of transactions to the database
+    apply: function (transactions) {
+        transactions.forEach(function(transaction) {
+            var Model = AD.Models[transaction.model],
+            model;
+            if (transaction.operation === 'create') {
+                model = new Model(transaction.params);
+                model.save();
+            }
+            else if (transaction.operation === 'update') {
+                model = Model.cache.getById(transaction.params[Model.primaryKey]);
+                model.attrs(transaction.params);
+                model.save();
+            }
+            else if (transaction.operation === 'destroy') {
+                model = Model.cache.getById(transaction.params[Model.primaryKey]);
+                model.destroy();
+            }
+        });
     }
 });
