@@ -22,23 +22,28 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 editable: true
             }
         });
+        defineField('year_id', {
+            name: 'year',
+            type: 'choice',
+            Model: 'Year'
+        });
         defineField('campus_uuid', {
             name: 'campus',
             type: 'choice',
             Model: 'Campus',
             params: {
                 editable: true
+            },
+            onUpdate: function() {
+                this.updateSteps();
             }
         });
-        defineField('year_id', {
-            name: 'year',
-            type: 'choice',
-            Model: 'Year'
-        });
-
+        
         AD.Models.Step.cache.getArray().forEach(function(step) {
-            defineField('steps '+step.getId(), {
+            var step_uuid = step.getId();
+            defineField('steps '+step_uuid, {
                 name: step.getLabel(),
+                step_uuid: step_uuid,
                 type: 'bool'
             });
         });
@@ -46,6 +51,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     dependencies: ['ChooseOptionWindow', 'Checkbox'],
     
     fieldDefinitions: {},
+    fieldViewHeight: AD.UI.buttonHeight + AD.UI.padding,
     
     actions: [{
         title: 'save',
@@ -149,12 +155,19 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     },
     
     createRow: function(field, fieldDefinition) {
+        var _this = this;
+        var onUpdate = function() {
+            if ($.isFunction(fieldDefinition.onUpdate)) {
+                fieldDefinition.onUpdate.call(_this, field.value);
+            }
+        };
+        
         // Create the field row container
         var $fieldRow = $.View.create(Ti.UI.createView({
             left: 0,
             top: 0,
             width: AD.UI.screenWidth,
-            height: AD.UI.buttonHeight + AD.UI.padding,
+            height: this.constructor.fieldViewHeight,
         }));
         
         // Create the checkbox to toggle whether this field is included in the group
@@ -195,6 +208,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             $valueCheckbox.addEventListener('change', function(event) {
                 // Set the value of this field
                 field.value = event.value;
+                onUpdate();
             });
             $enabledCheckbox.addEventListener('change', function(event) {
                 var enabled = event.value;
@@ -222,6 +236,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 });
                 $conditionCheckbox.addEventListener('change', function(event) {
                     field.value.condition = conditions[event.value ? 1 : 0];
+                    onUpdate();
                 });
                 $fieldRow.add('condition', $conditionCheckbox);
             }
@@ -250,6 +265,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                         // An option was chosen, so set the value of the field in the filter
                         field.value = option ? option.getId() : null;
                         valueButton.title = option ? option.getLabel() : AD.Localize('unspecified');
+                        onUpdate();
                     });
                 }
                 else {
@@ -259,6 +275,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                     $winChooseOptions.getDeferred().done(function(options) {
                         // An option was chosen, so set the value of the field in the filter
                         field.value.ids = $.Model.getIds(options);
+                        onUpdate();
                     });
                 }
             });
@@ -268,6 +285,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                     ids: [],
                     condition: 'OR'
                 } : null;
+                onUpdate();
+                
                 // Reset the button's text
                 valueButton.title = enabled ? AD.Localize('unspecified') : '';
 
@@ -293,8 +312,24 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     // Set the initial contents of the form fields
     initialize: function() {
         this.getChild('name').value = this.group.attr('group_name');
+        this.updateSteps();
     },
-
+    
+    // Show the steps fields that are associated with the selected campus and hide the others
+    updateSteps: function() {
+        var _this = this;
+        var campus_uuid = this.fields.campus_uuid.value;
+        $.each(this.get$Child('fieldsView').children, function(fieldName, fieldView) {
+            // If this field is a step, its fieldDefinition will have a step_uuid property
+            var step_uuid = fieldView.get$View().fieldDefinition.step_uuid;
+            if (step_uuid) {
+                var isVisible = AD.Models.Step.cache.getById(step_uuid).attr('campus_uuid') === campus_uuid;
+                fieldView.visible = isVisible;
+                fieldView.height = isVisible ? _this.constructor.fieldViewHeight : 0;
+            }
+        });
+    },
+    
     // Save the current group
     save: function() {
         if (!this.getChild('name').value) {
