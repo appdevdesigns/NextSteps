@@ -55,11 +55,15 @@ AD.init({
     };
     ping(function() {
         console.log('Successfully contacted server: ' + serverURL);
+        var sUsername;
+        var sPassword;
         
         // Show login window
         var $winLoginWindow = new AD.UI.LoginWindow({
             validateCredentials: function(username, password) {
                 console.log('Validating credentials...');
+                sUsername = username;
+                sPassword = password;
                 return AD.Comm.validateCredentials(serverURL, username, password);
             }
         });
@@ -74,7 +78,7 @@ AD.init({
             });
             $winDownloadingWindow.open();
             
-            AD.Comm.syncWithServer(serverURL, transactionLog.get()).done(function() {
+            AD.Comm.syncWithServer(serverURL, transactionLog.get(), sUsername, sPassword).done(function() {
                 transactionLog.clear();
             }).fail(function() {
                 alert('Could not access the server!');

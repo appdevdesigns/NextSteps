@@ -24,11 +24,13 @@ module.exports = $.extend(AD.Comm, {
     
     // Send the provided transactions to the server and return a deferred
     // that will resolve to the transaction log received from the server
-    syncWithServer: function(server, transactions) {
+    syncWithServer: function(server, transactions, username, password) {
         var syncDfd = $.Deferred();
         AD.Comm.HTTP.post({
             url: 'http://'+server+'/nsserver/sync',
             params: {
+                username: username,
+                password: password,
                 lastSyncTimestamp: AD.PropertyStore.get('lastSyncTimestamp') || 0,
                 appVersion: AD.Defaults.version,
                 transactionLog: transactions
