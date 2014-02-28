@@ -199,7 +199,7 @@
 
         // Return a Step model with the specified step_uuid associated with this contact
         getStep: function(step_uuid) {
-            var contact_guid = this.getId();
+            var contact_uuid = this.getId();
             var steps = AD.Models.ContactStep.cache.query({
                 contact_uuid: contact_uuid,
                 step_uuid: step_uuid
