@@ -25,9 +25,14 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         title: 'edit',
         callback: function() {
             // Open the EditContact window
-            this.createWindow('AddContactWindow', {
+            var _this = this;
+            var $winEditContact = this.createWindow('AddContactWindow', {
                 operation: 'edit',
                 existingContact: this.contact
+            });
+            $winEditContact.getDeferred().done(function() {
+                // Update the steps view after the contact is edited
+                _this.updateSteps();
             });
         },
         rightNavButton: true,
@@ -144,28 +149,10 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             }, this);
         }
         
-        // Create the steps view
-        var $stepsView = $.View.create(Ti.UI.createScrollView({
-            left: 0,
-            top: AD.UI.padding,
-            layout: 'vertical',
-            scrollType: 'vertical',
-            contentHeight: 'auto',
-            showVerticalScrollIndicator: true
-        }));
-        var createRow = function() {
-            return Ti.UI.createView({
-                left: 0,
-                top: 0,
-                height: AD.UI.buttonHeight,
-                borderWidth: 1,
-                borderColor: 'black'
-            });
-        };
-
         // Create the tags row
         var _this = this;
-        var tagsRow = $stepsView.add('tags', createRow());
+        var tagsRow = this.add('tags', this.createRow());
+        tagsRow.top = AD.UI.padding;
         tagsRow.add(Ti.UI.createImageView({
             left: AD.UI.padding,
             width: Ti.UI.SIZE,
@@ -197,13 +184,68 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                 updateTagLabel();
             });
         });
-
-        AD.Models.Step.cache.getArray().forEach(function(step) {
-            // Lookup the associated with the contact
-            var stepId = step.getId();
-            var contactStep = contact.getStep(stepId);
-
-            var $newRow = $.View.create(createRow());
+        
+        this.updateSteps();
+    },
+    
+    // Initialize the child views
+    initialize: function() {
+        this.getChild('nameLabel').text = this.contact.getLabel();
+        
+        // Update the enabled status of each of the contact buttons
+        
+        // Extract the button array
+        var buttons = AD.Platform.isiOS ? this.contactBBLabels : this.constructor.contactMethods.map(function(method) {
+            return this.getChild(method.label);
+        }, this);
+        buttons.forEach(function(button) {
+            button.enabled = this.contact.attr(button.field) ? true : false;
+        }, this);
+        if (AD.Platform.isiOS) {
+            // Force the button bar to recognize the new button states
+            this.getChild('contactBB').labels = buttons;
+        }
+    },
+    
+    // Create and return a basic UI element representing a row
+    createRow: function() {
+        return Ti.UI.createView({
+            left: 0,
+            top: 0,
+            height: AD.UI.buttonHeight,
+            borderWidth: 1,
+            borderColor: 'black'
+        });
+    },
+    
+    // (Re)create the steps UI
+    updateSteps: function() {
+        // Remove the steps view in order to replace it
+        var $oldStepsView = this.getChild('steps');
+        if ($oldStepsView) {
+            this.getView().remove($oldStepsView);
+        }
+        
+        // Create the steps view
+        var $stepsView = this.add('steps', $.View.create(Ti.UI.createScrollView({
+            left: 0,
+            top: 0,
+            layout: 'vertical',
+            scrollType: 'vertical',
+            contentHeight: 'auto',
+            showVerticalScrollIndicator: true
+        })));
+        
+        // Display all the steps associated with this contact's campus
+        var steps = AD.Models.Step.cache.query({
+            campus_uuid: this.contact.attr('campus_uuid')
+        });
+        steps.forEach(function(step) {
+            // Lookup the associated ContactStep
+            var step_uuid = step.getId();
+            var contactStep = this.contact.getStep(step_uuid);
+            
+            var $newRow = $stepsView.add(step_uuid, $.View.create(this.createRow()));
             
             // Create the step title
             var stepLabel = $newRow.add(Ti.UI.createLabel({
@@ -268,29 +310,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                 stepLabel.right = AD.UI.padding + (dateButton.visible ? (dateButton.right + dateButton.width) : (completedCheckbox.right + completedCheckbox.width));
             };
             updateRow();
-            
-            $stepsView.add(stepId, $newRow);
-        });
-        this.add($stepsView);
-    },
-    
-    // Initialize the child views
-    initialize: function() {
-        this.getChild('nameLabel').text = this.contact.getLabel();
-        
-        // Update the enabled status of each of the contact buttons
-        
-        // Extract the button array
-        var buttons = AD.Platform.isiOS ? this.contactBBLabels : this.constructor.contactMethods.map(function(method) {
-            return this.getChild(method.label);
         }, this);
-        buttons.forEach(function(button) {
-            button.enabled = this.contact.attr(button.field) ? true : false;
-        }, this);
-        if (AD.Platform.isiOS) {
-            // Force the button bar to recognize the new button states
-            this.getChild('contactBB').labels = buttons;
-        }
     },
     
     // Helper functions that allow the user to contact the contact via telephone, SMS, or e-mail
