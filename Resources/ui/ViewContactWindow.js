@@ -196,14 +196,14 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         });
         this.add(scrollableStepsView);
         
-        var $stepsView = this.record('steps', $.View.create(Ti.UI.createView({
+        var $campusStepsView = this.record('campusSteps', $.View.create(Ti.UI.createView({
             left: 0,
             top: 0,
             width: Ti.UI.FILL,
             height: Ti.UI.SIZE,
             layout: 'vertical'
         })));
-        scrollableStepsView.add($stepsView.getView());
+        scrollableStepsView.add($campusStepsView.getView());
         
         var personalStepsHeaderRow = Ti.UI.createView({
             left: 0,
@@ -271,10 +271,10 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     // (Re)create the steps UI
     updateSteps: function() {
         // Remove the steps view in order to replace it
-        var $stepsView = this.get$Child('steps');
+        var $campusStepsView = this.get$Child('campusSteps');
         var $personalStepsView = this.get$Child('personalSteps');
         
-        $stepsView.removeAllChildren();
+        $campusStepsView.removeAllChildren();
         $personalStepsView.removeAllChildren();
         
         // Display all the steps associated with this contact's campus
@@ -284,7 +284,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         steps.forEach(function(contactStep) {
             var $stepView = this.createStepRow(contactStep);
             if (contactStep.attr('campus_uuid')) {
-                $stepsView.add($stepView);
+                $campusStepsView.add($stepView);
             }
             else {
                 $personalStepsView.add($stepView);
