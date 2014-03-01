@@ -78,7 +78,7 @@ AD.init({
             });
             $winDownloadingWindow.open();
             
-            AD.Comm.syncWithServer(serverURL, transactionLog.get(), sUsername, sPassword).done(function() {
+            AD.Comm.syncWithServer(serverURL, transactionLog.get(), sUsername, sPassword).done(function(transactions) {
                 transactionLog.apply(transactions);
                 transactionLog.clear();
             }).fail(function() {
