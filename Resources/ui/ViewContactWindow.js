@@ -234,13 +234,13 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             layout: 'vertical'
         })));
         scrollableStepsView.add($personalStepsView.getView());
-        
-        this.updateSteps();
     },
     
     // Initialize the child views
     initialize: function() {
         this.getChild('nameLabel').text = this.contact.getLabel();
+        
+        this.updateSteps();
         
         // Update the enabled status of each of the contact buttons
         
