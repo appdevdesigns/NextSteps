@@ -4,6 +4,8 @@ var $ = require('jquery');
 module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     dependencies: ['AddContactWindow', 'DatePickerWindow', 'Checkbox'],
     
+    rowHeight: AD.UI.buttonHeight,
+    
     contactMethods: [
         {label: 'contact_call', callback: 'callContact', field: 'contact_phone'},
         {label: 'contact_SMS', callback: 'SMSContact', field: 'contact_phone'},
@@ -151,7 +153,11 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         
         // Create the tags row
         var _this = this;
-        var tagsRow = this.add('tags', this.createRow());
+        var tagsRow = this.add('tags', Ti.UI.createView({
+            left: 0,
+            top: 0,
+            height: this.constructor.rowHeight
+        }));
         tagsRow.top = AD.UI.padding;
         tagsRow.add(Ti.UI.createImageView({
             left: AD.UI.padding,
@@ -262,7 +268,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         return Ti.UI.createView({
             left: 0,
             top: 0,
-            height: AD.UI.buttonHeight,
+            height: this.constructor.rowHeight,
             borderWidth: 1,
             borderColor: 'black'
         });
