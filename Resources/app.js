@@ -79,6 +79,7 @@ AD.init({
             $winDownloadingWindow.open();
             
             AD.Comm.syncWithServer(serverURL, transactionLog.get(), sUsername, sPassword).done(function() {
+                transactionLog.apply(transactions);
                 transactionLog.clear();
             }).fail(function() {
                 alert('Could not access the server!');
