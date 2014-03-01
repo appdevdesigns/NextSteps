@@ -294,8 +294,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     },
     
     createStepRow: function(contactStep) {
-        // Lookup the associated ContactStep
-        var step_uuid = contactStep.attr('step_uuid');
         var _this = this;
         var $newRow = $.View.create(this.createRow());
         
