@@ -23,8 +23,7 @@
         cache:true,
 
         attributes: {
-            trans_id: 'integer',
-            user_id: 'integer'
+            trans_id: 'integer'
         }
     };
 
@@ -38,12 +37,10 @@
             },
             fields: {
                 data: {
-                    tag_uuid:"varchar(36)",
-                    user_id:"int(11) unsigned"
+                    tag_uuid:"varchar(36)"
                 },
                 trans: {
                     trans_uuid:"varchar(36)",
-                    user_id:"int(11) unsigned",
                     tag_label:"varchar(40)"
                 }
             },

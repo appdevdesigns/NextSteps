@@ -23,7 +23,6 @@
         cache:true,
 
         attributes: {
-            user_id: 'integer'
         }
     };
 
@@ -34,7 +33,6 @@
             dbTable:'nextsteps_contact_tag',
             modelFields: {
                   contacttag_uuid:"varchar(36)",
-                  user_id:"int(11) unsigned",
                   contact_uuid:"varchar(36)",
                   tag_uuid:"varchar(36)"
 

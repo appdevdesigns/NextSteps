@@ -23,7 +23,6 @@
         cache:true,
         
         attributes: {
-            user_id: 'integer',
             group_filter: 'JSON'
         }
     };
@@ -35,7 +34,6 @@
             dbTable:'nextsteps_group',
             modelFields: {
                   group_uuid:"varchar(36)",
-                  user_id:"int(11) unsigned",
                   group_name:"text",
                   group_filter:"text"
 

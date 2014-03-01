@@ -23,7 +23,6 @@
         cache:true,
         
         attributes: {
-            user_id: 'integer',
             contact_recordId: 'integer',
             year_id: 'integer'
         },
@@ -122,7 +121,6 @@
             dbTable:'nextsteps_contact',
             modelFields: {
                   contact_uuid:"varchar(36)",
-                  user_id:"int(11) unsigned",
                   contact_recordId:"int(11) unsigned",
                   contact_firstName:"text",
                   contact_lastName:"text",
