@@ -415,6 +415,12 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             }
         }, this);
         
+        // regular expression testing on email
+        // it passes all validate emails and rejects some common mistakes
+        if(!/[^@]+@[^@]+\.[^@]+/.test(this.attrs['contact_email'])) {
+            alert("Email is not valid: " + this.attrs['contact_email']);
+        }
+        
         // Apply the changes to the contact
         var oldCampus_uuid = this.contact.attr('campus_uuid');
         this.contact.attrs(this.attrs);
