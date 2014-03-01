@@ -32,6 +32,8 @@
     <string name="contact_call">呼叫</string>
     <string name="contact_SMS">短信</string>
     <string name="contact_email">邮件</string>
+    <string name="personalStep">个人工序</string>
+    <string name="personalSteps">个人工序</string>
     
     <!-- AddContact labels -->
     <string name="createContact">新建联系人</string>

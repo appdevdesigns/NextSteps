@@ -16,6 +16,8 @@
     <string name="contact_call">Call</string>
     <string name="contact_SMS">SMS</string>
     <string name="contact_email">E-mail</string>
+    <string name="personalStep">Personal Step</string>
+    <string name="personalSteps">Personal steps</string>
     
     <!-- AddContact labels -->
     <string name="createContact">Create Contact</string>
