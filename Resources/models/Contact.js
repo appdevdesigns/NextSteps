@@ -222,8 +222,10 @@
         // Return an array of Personal Step models associated with this contact
         getPersonalSteps: function() {
             return AD.Models.ContactStep.cache.query({
-                contact_uuid: this.getId(),
-                campus_uuid: null
+                contact_uuid: this.getId()
+            }).filter(function(contactStep) {
+                var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
+                return !step.attr('campus_uuid');
             });
         },
 
