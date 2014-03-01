@@ -190,15 +190,55 @@
             });
         },
 
+        // Set the personal steps associated with this contact
+        setPersonalSteps: function(newSteps) {
+            // Models in oldSteps that are not in newSteps will be destroyed, models in newSteps
+            // that are not in oldSteps will be created, and models in both lists will be ignored.
+            var oldContactSteps = this.getPersonalSteps();
+            var oldStepIds = oldContactSteps.map(function(step) {
+                return step.attr('step_uuid');
+            });
+            var newStepIds = $.Model.getIds(newSteps);
+            var toDestroyContactSteps = oldContactSteps.filter(function(oldContactStep) {
+                return newStepIds.indexOf(oldContactStep.attr('step_uuid')) === -1;
+            });
+            var toCreateSteps = newSteps.filter(function(newStep) {
+                return oldStepIds.indexOf(newStep.getId()) === -1;
+            });
+            
+            toDestroyContactSteps.forEach(function(contactStep) {
+                contactStep.destroy();
+            });
+            var contact_uuid = this.getId();
+            toCreateSteps.forEach(function(step) {
+                var newContactStep = new AD.Models.ContactStep({ 
+                    contact_uuid: contact_uuid,
+                    step_uuid: step.getId(),
+                    step_date: null,
+                    step_label: step.getLabel()
+                });
+                newContactStep.save();
+            });
+        },
+        
+        // Return an array of Personal Step models associated with this contact
+        getPersonalSteps: function() {
+            return AD.Models.ContactStep.cache.query({
+                contact_uuid: this.getId(),
+                campus_uuid: null
+            });
+        },
+
         // Return an array of the Step models associated with this contact
         // Completed steps are returned, regardless of their associated campus
         getSteps: function() {
-            var campus_uuid = this.attr('campus_uuid');
+            var contact_campus_uuid = this.attr('campus_uuid');
             return AD.Models.ContactStep.cache.query({
                 contact_uuid: this.getId()
             }).filter(function(contactStep) {
                 var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
-                return step.attr('campus_uuid') === campus_uuid || contactStep.attr('step_date');
+                var step_campus_uuid = step.attr('campus_uuid');
+                return step_campus_uuid === null || (contact_campus_uuid && step_campus_uuid === contact_campus_uuid) || contactStep.attr('step_date');
             });
         },
 

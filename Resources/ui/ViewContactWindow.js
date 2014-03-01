@@ -125,7 +125,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             }));
         }
         else {
-            // Create muliple buttons under any other platform
+            // Create multiple buttons under any other platform
             
             // The buttons are spaced evenly and horizontally with AD.UI.padding units of padding between them
             var buttonCount = this.constructor.contactMethods.length;
@@ -185,6 +185,56 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             });
         });
         
+        // Create the campus steps view
+        var scrollableStepsView = Ti.UI.createScrollView({
+            left: 0,
+            top: 0,
+            layout: 'vertical',
+            scrollType: 'vertical',
+            contentHeight: 'auto',
+            showVerticalScrollIndicator: true
+        });
+        this.add(scrollableStepsView);
+        
+        var $stepsView = this.record('steps', $.View.create(Ti.UI.createView({
+            left: 0,
+            top: 0,
+            width: Ti.UI.FILL,
+            height: Ti.UI.SIZE,
+            layout: 'vertical'
+        })));
+        scrollableStepsView.add($stepsView.getView());
+        
+        var personalStepsHeaderRow = Ti.UI.createView({
+            left: 0,
+            top: 0,
+            width: Ti.UI.FILL,
+            height: Ti.UI.SIZE,
+            backgroundColor: 'lightgray'
+        });
+        personalStepsHeaderRow.add(Ti.UI.createLabel({
+            left: AD.UI.padding,
+            top: AD.UI.padding,
+            bottom: AD.UI.padding,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
+            textid: 'personalSteps'
+        }));
+        personalStepsHeaderRow.addEventListener('click', function() {
+            _this.addPersonalSteps();
+        });
+        scrollableStepsView.add(personalStepsHeaderRow);
+        
+        // Create the personal steps view
+        var $personalStepsView = this.record('personalSteps', $.View.create(Ti.UI.createView({
+            left: 0,
+            top: 0,
+            width: Ti.UI.FILL,
+            height: Ti.UI.SIZE,
+            layout: 'vertical'
+        })));
+        scrollableStepsView.add($personalStepsView.getView());
+        
         this.updateSteps();
     },
     
@@ -221,93 +271,98 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     // (Re)create the steps UI
     updateSteps: function() {
         // Remove the steps view in order to replace it
-        var $oldStepsView = this.getChild('steps');
-        if ($oldStepsView) {
-            this.getView().remove($oldStepsView);
-        }
+        var $stepsView = this.get$Child('steps');
+        var $personalStepsView = this.get$Child('personalSteps');
         
-        // Create the steps view
-        var $stepsView = this.add('steps', $.View.create(Ti.UI.createScrollView({
-            left: 0,
-            top: 0,
-            layout: 'vertical',
-            scrollType: 'vertical',
-            contentHeight: 'auto',
-            showVerticalScrollIndicator: true
-        })));
+        $stepsView.removeAllChildren();
+        $personalStepsView.removeAllChildren();
         
         // Display all the steps associated with this contact's campus
         // and all the completed steps, regardless of their campus
-        this.contact.getSteps().forEach(function(contactStep) {
-            // Lookup the associated ContactStep
-            var step_uuid = contactStep.attr('step_uuid');
-            
-            var $newRow = $stepsView.add(step_uuid, $.View.create(this.createRow()));
-            
-            // Create the step title
-            var stepLabel = $newRow.add(Ti.UI.createLabel({
-                left: AD.UI.padding,
-                right: AD.UI.padding,
-                top: 0,
-                height: Ti.UI.FILL,
-                text: contactStep.getLabel(),
-                font: AD.UI.Fonts.mediumSmall
-            }));
-            
-            var stepCompletedDate = contactStep.attr('step_date');
-            var stepCompleted = stepCompletedDate !== null;
-            
-            // Create the switch to toggle the step's completion status
-            var $completedCheckbox = new AD.UI.Checkbox({
-                createParams: {
-                    right: AD.UI.padding
-                },
-                value: stepCompleted
-            });
-            var completedCheckbox = $completedCheckbox.getView();
-            completedCheckbox.addEventListener('change', function(event) {
-                // The step's completion state has been changed
-                stepCompleted = event.value;
-                stepCompletedDate = stepCompleted ? $.today() : null;
+        var steps = this.contact.getSteps();
+        var stepsLength = steps.length;
+        steps.forEach(function(contactStep) {
+            var $stepView = this.createStepRow(contactStep);
+            if (contactStep.attr('campus_uuid')) {
+                $stepsView.add($stepView);
+            }
+            else {
+                $personalStepsView.add($stepView);
+            }
+        }, this);
+    },
+    
+    createStepRow: function(contactStep) {
+        // Lookup the associated ContactStep
+        var step_uuid = contactStep.attr('step_uuid');
+        var _this = this;
+        var $newRow = $.View.create(this.createRow());
+        
+        // Create the step title
+        var stepLabel = $newRow.add(Ti.UI.createLabel({
+            left: AD.UI.padding,
+            right: AD.UI.padding,
+            top: 0,
+            height: Ti.UI.FILL,
+            text: contactStep.getLabel(),
+            font: AD.UI.Fonts.mediumSmall
+        }));
+        
+        var stepCompletedDate = contactStep.attr('step_date');
+        var stepCompleted = stepCompletedDate !== null;
+        
+        // Create the switch to toggle the step's completion status
+        var $completedCheckbox = new AD.UI.Checkbox({
+            createParams: {
+                right: AD.UI.padding
+            },
+            value: stepCompleted
+        });
+        var completedCheckbox = $completedCheckbox.getView();
+        completedCheckbox.addEventListener('change', function(event) {
+            // The step's completion state has been changed
+            stepCompleted = event.value;
+            stepCompletedDate = stepCompleted ? $.today() : null;
+            contactStep.attr('step_date', stepCompletedDate).save();
+            updateRow();
+        });
+        $newRow.add($completedCheckbox);
+        
+        // Create the button to set the step completion date
+        var dateButton = Ti.UI.createButton({
+            right: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
+            width: AD.Platform.isiOS ? 90 : 120,
+            height: AD.UI.buttonHeight,
+            title: ''
+        });
+        dateButton.addEventListener('click', function() {
+            // Set the completion date of the step
+            _this.createWindow('DatePickerWindow', {
+                minDate: new Date(2012, 0, 1), // January 1, 2012
+                maxDate: $.today(),
+                initialDate: stepCompletedDate
+            }).getDeferred().done(function(completedDate) {
+                stepCompletedDate = completedDate;
                 contactStep.attr('step_date', stepCompletedDate).save();
                 updateRow();
             });
-            $newRow.add($completedCheckbox);
-            
-            // Create the button to set the step completion date
-            var dateButton = Ti.UI.createButton({
-                right: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
-                width: AD.Platform.isiOS ? 90 : 120,
-                height: AD.UI.buttonHeight,
-                title: ''
-            });
-            dateButton.addEventListener('click', function() {
-                // Set the completion date of the step
-                _this.createWindow('DatePickerWindow', {
-                    minDate: new Date(2012, 0, 1), // January 1, 2012
-                    maxDate: $.today(),
-                    initialDate: stepCompletedDate
-                }).getDeferred().done(function(completedDate) {
-                    stepCompletedDate = completedDate;
-                    contactStep.attr('step_date', stepCompletedDate).save();
-                    updateRow();
-                });
-            });
-            $newRow.add(dateButton);
-            
-            // Update the checkbox image and the title and visibility of the dateButton
-            var updateRow = function() {
-                if (stepCompleted) {
-                    dateButton.visible = true;
-                    dateButton.title = $.formatDate(stepCompletedDate);
-                }
-                else {
-                    dateButton.visible = false;
-                }
-                stepLabel.right = AD.UI.padding + (dateButton.visible ? (dateButton.right + dateButton.width) : (completedCheckbox.right + completedCheckbox.width));
-            };
-            updateRow();
-        }, this);
+        });
+        $newRow.add(dateButton);
+        
+        // Update the checkbox image and the title and visibility of the dateButton
+        var updateRow = function() {
+            if (stepCompleted) {
+                dateButton.visible = true;
+                dateButton.title = $.formatDate(stepCompletedDate);
+            }
+            else {
+                dateButton.visible = false;
+            }
+            stepLabel.right = AD.UI.padding + (dateButton.visible ? (dateButton.right + dateButton.width) : (completedCheckbox.right + completedCheckbox.width));
+        };
+        updateRow();
+        
+        return $newRow;
     },
     
     // Helper functions that allow the user to contact the contact via telephone, SMS, or e-mail
@@ -330,5 +385,20 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             toRecipients: [this.contact.contact_email]
         });
         emailDialog.open();
+    },
+    
+    // Display a window allowing the user to create personal steps and apply them to the current contact
+    addPersonalSteps: function() {
+        var contact = this.contact;
+        var _this = this;
+        this.createWindow('ChooseOptionsWindow', {
+            groupName: 'personalStep',
+            Model: 'Step',
+            initial: contact.getPersonalSteps().map(function(step) { return step.attr('step_uuid'); }),
+            editable: true
+        }).getDeferred().done(function(options) {
+            contact.setPersonalSteps(options);
+            _this.updateSteps();
+        });
     }
 });
