@@ -394,6 +394,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         this.createWindow('ChooseOptionsWindow', {
             groupName: 'personalStep',
             Model: 'Step',
+            filter: { campus_uuid: null },
             initial: contact.getPersonalSteps().map(function(step) { return step.attr('step_uuid'); }),
             editable: true
         }).getDeferred().done(function(options) {
