@@ -237,13 +237,10 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         })));
         
         // Display all the steps associated with this contact's campus
-        var steps = AD.Models.Step.cache.query({
-            campus_uuid: this.contact.attr('campus_uuid')
-        });
-        steps.forEach(function(step) {
+        // and all the completed steps, regardless of their campus
+        this.contact.getSteps().forEach(function(contactStep) {
             // Lookup the associated ContactStep
-            var step_uuid = step.getId();
-            var contactStep = this.contact.getStep(step_uuid);
+            var step_uuid = contactStep.attr('step_uuid');
             
             var $newRow = $stepsView.add(step_uuid, $.View.create(this.createRow()));
             
@@ -253,7 +250,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
                 right: AD.UI.padding,
                 top: 0,
                 height: Ti.UI.FILL,
-                text: step.getLabel(),
+                text: contactStep.getLabel(),
                 font: AD.UI.Fonts.mediumSmall
             }));
             
