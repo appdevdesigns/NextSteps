@@ -283,7 +283,8 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         var stepsLength = steps.length;
         steps.forEach(function(contactStep) {
             var $stepView = this.createStepRow(contactStep);
-            if (contactStep.attr('campus_uuid')) {
+            var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
+            if (step.attr('campus_uuid')) {
                 $campusStepsView.add($stepView);
             }
             else {
