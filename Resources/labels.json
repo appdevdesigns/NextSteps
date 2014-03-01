@@ -1,0 +1,32 @@
+{
+    "nextsteps_year": {
+        "primary_key": "year_id",
+        "linked_field": "year_id",
+        "label_field": "year_label",
+        "labels": [{
+            "en": "Unknown",
+            "zh-Hans": "未知"
+        }, {
+            "en": "Freshman",
+            "zh-Hans": "大一学生"
+        }, {
+            "en": "Sophomore",
+            "zh-Hans": "大二学生"
+        }, {
+            "en": "Junior",
+            "zh-Hans": "大三学生"
+        }, {
+            "en": "Senior",
+            "zh-Hans": "大四学生"
+        }, {
+            "en": "Graduated",
+            "zh-Hans": "毕业生"
+        }, {
+            "en": "Teacher",
+            "zh-Hans": "老师"
+        }, {
+            "en": "Other",
+            "zh-Hans": "其他"
+        }]
+    }
+}

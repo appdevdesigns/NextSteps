@@ -6,7 +6,6 @@ var ViewTotalsWindow = $.Window('AppDev.UI.ViewTotalsWindow', {}, {
         // Initialize the base $.Window object
         this._super({
             title: 'viewTotalsTitle',
-            tab: options.tab,
             autoOpen: true
         });
     },
@@ -35,15 +34,17 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         // The stats view is the view's view
         this._super({view: statsView});
         
-        this.smartBind(AD.Models.Contact, 'updated', this.update);
+        this.smartBind(AD.Models.Contact, '*', this.update);
+        this.smartBind(AD.Models.Step, '*', this.update);
+        this.smartBind(AD.Models.ContactStep, '*', this.update);
     },
     
     // Create the child views
     create: function() {
         // Create the header label
         this.add('headerLabel', Ti.UI.createLabel({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: Ti.UI.SIZE,
             height: Ti.UI.SIZE,
             text: '',
@@ -64,8 +65,8 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         if (this.footerPresent) {
             // Create the abstract footer view
             this.add('footerView', Ti.UI.createView({
-                bottom: AD.UI.padding,
                 left: 0,
+                bottom: AD.UI.padding,
                 width: AD.UI.screenWidth,
                 height: this.footerHeight
             }));
@@ -92,27 +93,25 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         
         // Create the stats rows, one for each step
         var stats = AD.Models.Contact.getStats(startDate, null);
-        var statRowIndex = 0;
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
+        AD.Models.Step.cache.getArray().forEach(function(step, index) {
             $statsTable.add(new StatRow({
-                index: statRowIndex,
-                label: 'step_'+stepName,
-                count: stats[stepFieldName]
+                index: index,
+                label: step.getLabel(),
+                count: stats[step.getId()]
             }));
-            statRowIndex += 1;
         });
     }
 });
 
 var StatRow = $.View('AppDev.UI.StatRow', {
-    rowHeight: 30,
-    font: AD.UI.Fonts.medium
+    rowHeight: 40,
+    font: AD.UI.Fonts.mediumSmall
 }, {
     init: function(options) {
         // Create the stat row containing view
         var rowView = Ti.UI.createView({
-            top: this.options.index * this.constructor.rowHeight,
             left: AD.UI.padding,
+            top: this.options.index * this.constructor.rowHeight,
             width: AD.UI.useableScreenWidth,
             height: this.constructor.rowHeight,
             backgroundColor: (this.options.index % 2 === 0) ? 'white' : '#CCC' // alternate background colors
@@ -131,8 +130,9 @@ var StatRow = $.View('AppDev.UI.StatRow', {
             font: font
         }));
         this.add(Ti.UI.createLabel({
-            left: 40,
-            textid: this.options.label,
+            left: 30,
+            right: 30,
+            text: this.options.label,
             font: font
         }));
         this.add(Ti.UI.createLabel({
@@ -160,8 +160,7 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
-            title: 'statsTitle',
-            tab: options.tab
+            title: 'statsTitle'
         });
     },
     
@@ -175,26 +174,26 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
         var headerLabel = $statsView.children.headerLabel;
         var statsTable = $statsView.children.statsTable;
         var footerView = $statsView.children.footerView;
-        var tab = this.tab;
         
         // Create the view totals button
+        var _this = this;
         var viewTotalsButton = this.record('viewTotals', Ti.UI.createButton({
-            top: 0,
             left: AD.UI.padding,
+            top: 0,
             width: AD.UI.screenWidth / 2 - AD.UI.padding * 2,
             height: AD.UI.buttonHeight,
             titleid: 'viewTotals',
             visible: AD.PropertyStore.get(this.constructor.lastUpdatePropertyName) ? true : false
         }));
         viewTotalsButton.addEventListener('click', function(event) {
-            var winViewTotals = new ViewTotalsWindow({tab: tab});
+            _this.createWindow('ViewTotalsWindow');
         });
         footerView.add(viewTotalsButton);
         
         // Create the save button
         var saveButton = Ti.UI.createButton({
-            top: 0,
             right: AD.UI.padding,
+            top: 0,
             width: AD.UI.screenWidth / 2 - AD.UI.padding * 2,
             height: AD.UI.buttonHeight,
             titleid: 'saveStats'
@@ -220,14 +219,12 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
             if (sendStatsReportEmail) {
                 var stats = AD.Models.Contact.getStats(lastStatsReport, yesterday);
                 var steps = '';
-                $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-                    var statLabel = AD.Localize('step_'+stepName);
-                    var statValue = stats[stepFieldName];
-                    var line = statLabel+': '+statValue;
+                AD.Models.Step.cache.getArray(function(step) {
+                    var line = step.getValue()+': '+stats[step.getId()];
                     steps += line+'\n';
                 });
                 var messageBody = $.formatString('statsMessageBody', Ti.Platform.username, $.formatDate(today), steps);
-                Ti.API.log(messageBody);
+                console.log(messageBody);
                 
                 var address = Ti.App.Properties.getString('send_stats_email_address_preference');
                 var emailDialog = Ti.UI.createEmailDialog({

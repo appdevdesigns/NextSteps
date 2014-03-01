@@ -10,41 +10,46 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         {label: 'contact_email', callback: 'emailContact', field: 'contact_email'}
     ],
     actions: [{
+        title: 'del',
+        callback: function() {
+            AD.UI.yesNoAlert('contactDeleteConfirmation').done(this.proxy(function() {
+                // The user chose "Yes", so close the window and delete the contact
+                this.dfd.reject();
+                this.contact.destroy();
+            }));
+        },
+        platform: 'Android',
+        showAsAction: true,
+        icon: '/images/ic_action_discard.png'
+    }, {
         title: 'edit',
         callback: function() {
             // Open the EditContact window
-            var $winAddContactWindow = new AD.UI.AddContactWindow({tab: this.options.tab, operation: 'edit', existingContact: this.contact});
+            var _this = this;
+            var $winEditContact = this.createWindow('AddContactWindow', {
+                operation: 'edit',
+                existingContact: this.contact
+            });
+            $winEditContact.getDeferred().done(function() {
+                // Update the steps view after the contact is edited
+                _this.updateSteps();
+            });
         },
-        rightNavButton: true
-    }, {
-        title: 'del',
-        callback: function() {
-            // Close the window and delete the group
-            this.dfd.reject();
-            this.contact.destroy();
-        },
-        platform: 'Android'
-    }, {
-        callback: function() {
-            if (this.contactModified) {
-                // When the window is closed, if any of the contact's attributes have
-                // changed, save the updated contact information to the database
-                this.contact.save();
-            }
-        },
-        menuItem: false,
-        onClose: true
+        rightNavButton: true,
+        showAsAction: true,
+        icon: '/images/ic_action_edit.png'
     }]
 }, {
     init: function(options) {
         this.contact = this.options.contact;
-        this.contactModified = false;
         
         // Initialize the base $.Window object
         this._super({
             title: 'viewContact',
-            tab: this.options.tab,
-            autoOpen: true
+            autoOpen: true,
+            createParams: {
+                layout: 'vertical'
+            }
         });
         
         this.smartBind(this.contact, 'updated.attr', function(property, value) {
@@ -60,34 +65,37 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     create: function() {
         var contact = this.contact;
         
+        // Create a container to hold the label and optional image
+        var headerView = this.add(Ti.UI.createView({
+            left: AD.UI.padding,
+            top: AD.UI.padding,
+            width: AD.UI.useableScreenWidth,
+            height: Ti.UI.SIZE
+        }));
+        
         // Show the contact's image if it exists
         var localContact = contact.contact_recordId === null ? null : Ti.Contacts.getPersonByID(contact.contact_recordId);
         var contactImage = localContact && localContact.getImage();
-        var imageExists = contactImage ? true : false;
-        if (imageExists) {
+        var hasImage = contactImage ? true : false;
+        if (hasImage) {
             var dimensions = AD.UI.getImageScaledDimensions(contactImage, AD.UI.contactImageSize);
-            this.add('contactImage', Ti.UI.createImageView({
-                left: AD.UI.padding,
-                top: AD.UI.padding,
+            headerView.add(Ti.UI.createImageView({
+                left: 0,
                 width: dimensions.width,
                 height: dimensions.height,
                 image: contactImage
             }));
         }
         
-        // Create the contact label 
-        var nameLabel = this.add('nameLabel', Ti.UI.createLabel({
-            left: AD.UI.padding + (imageExists ? AD.UI.contactImageSize.width : 0),
-            top: AD.UI.padding,
-            width: AD.UI.useableScreenWidth - (imageExists ? AD.UI.contactImageSize.width : 0),
-            height: Ti.UI.SIZE,
+        // Create the contact label
+        headerView.add(this.record('nameLabel', Ti.UI.createLabel({
+            left: hasImage ? AD.UI.contactImageSize.width : 0,
+            top: 0,
             text: null,
-            textAlign: 'center',
+            textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+            width: Ti.UI.FILL,
             font: AD.UI.Fonts.header
-        }));
-        
-        var headerHeight = imageExists ? AD.UI.contactImageSize.height : 40;
-        var bodyTop = headerHeight + AD.UI.padding;
+        })));
         
         // Create the contact button bar which allows the user to call, SMS, or e-mail the contact
         if (AD.Platform.isiOS) {
@@ -99,7 +107,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             });
             var contactBB = this.add('contactBB', Ti.UI.createButtonBar({
                 left: AD.UI.padding,
-                top: bodyTop,
+                top: AD.UI.padding * 2,
                 width: AD.UI.useableScreenWidth,
                 height: AD.UI.buttonHeight,
                 style: Ti.UI.iPhone.SystemButtonStyle.BAR,
@@ -120,109 +128,64 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             // Create muliple buttons under any other platform
             
             // The buttons are spaced evenly and horizontally with AD.UI.padding units of padding between them
-            var buttonWidth = AD.UI.useableScreenWidth / this.constructor.contactMethods.length - AD.UI.padding; 
+            var buttonCount = this.constructor.contactMethods.length;
+            var buttonWidth = (AD.UI.useableScreenWidth - (buttonCount - 1) * AD.UI.padding) / buttonCount;
+            var contactButtonView = this.add(Ti.UI.createView({
+                left: AD.UI.padding,
+                top: AD.UI.padding * 2,
+                width: AD.UI.useableScreenWidth,
+                height: AD.UI.buttonHeight
+            }));
             this.constructor.contactMethods.forEach(function(method, index) {
-                var button = this.add(method.label, Ti.UI.createButton($.extend({
-                    top: bodyTop,
-                    left: AD.UI.padding + buttonWidth * index + AD.UI.padding / 2,
+                var buttonParams = $.extend({
+                    left: (buttonWidth + AD.UI.padding) * index,
                     width: buttonWidth,
                     height: AD.UI.buttonHeight,
                     titleid: method.label
-                }, method)));
+                }, method);
+                var button = this.record(method.label, Ti.UI.createButton(buttonParams));
+                contactButtonView.add(button);
                 button.addEventListener('click', this.proxy(method.callback));
             }, this);
         }
         
-        // Create the steps view
-        var $stepsView = $.View.create(Ti.UI.createScrollView({
-            top: bodyTop + AD.UI.buttonHeight + AD.UI.padding,
-            left: 0,
-            scrollType: 'vertical',
-            contentHeight: 'auto',
-            showVerticalScrollIndicator: true
-        }));
-        var rowHeight = AD.UI.buttonHeight;
-        var rowCount = 0;
+        // Create the tags row
         var _this = this;
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-            var $newRow = $.View.create(Ti.UI.createView({
-                left: 0,
-                top: rowCount * rowHeight,
-                height: rowHeight,
-                borderWidth: 1,
-                borderColor: 'black'
-            }));
-            ++rowCount;
-            
-            // Create the step title
-            $newRow.add(Ti.UI.createLabel({
-                top: AD.UI.padding,
-                left: AD.UI.padding,
-                width: AD.UI.useableScreenWidth,
-                height: Ti.UI.SIZE,
-                textid: 'step_'+stepName,
-                font: AD.UI.Fonts.medium
-            }));
-            
-            var stepCompletedDate = contact.attr(stepFieldName);
-            var stepCompleted = stepCompletedDate !== null;
-            
-            // Create the switch to toggle the step's completion status
-            var $completedCheckbox = new AD.UI.Checkbox({
-                createParams: {
-                    right: AD.UI.padding
-                },
-                value: stepCompleted
-            });
-            var completedCheckbox = $completedCheckbox.getView();
-            completedCheckbox.addEventListener('change', function(event) {
-                // The step's completion state has been changed
-                stepCompleted = event.value;
-                stepCompletedDate = stepCompleted ? $.today() : null;
-                contact.attr(stepFieldName, stepCompletedDate);
-                _this.contactModified = true;
-                updateRow();
-            });
-            $newRow.add($completedCheckbox);
-            
-            // Create the button to set the step completion date
-            var dateButton = Ti.UI.createButton({
-                right: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
-                width: AD.Platform.isiOS ? 90 : 60,
-                height: AD.UI.buttonHeight,
-                title: ''
-            });
-            dateButton.addEventListener('click', function() {
-                // Set the completion date of the step
-                AD.UI.DatePickerWindow.datePicker({
-                    tab: _this.options.tab,
-                    minDate: new Date(2012, 0, 1), // January 1, 2012
-                    maxDate: $.today(),
-                    initialDate: stepCompletedDate
-                }).done(function(completedDate) {
-                    stepCompletedDate = completedDate;
-                    contact.attr(stepFieldName, stepCompletedDate);
-                    _this.contactModified = true;
-                    updateRow();
-                });
-            });
-            $newRow.add(dateButton);
-            
-            // Update the checkbox image and the title and visibility of the dateButton
-            var updateRow = function() {
-                if (stepCompleted) {
-                    dateButton.visible = true;
-                    dateButton.title = $.formatDate(stepCompletedDate);
-                }
-                else {
-                    dateButton.visible = false;
-                }
-            };
-            updateRow();
-            
-            $stepsView.add(stepFieldName, $newRow);
+        var tagsRow = this.add('tags', this.createRow());
+        tagsRow.top = AD.UI.padding;
+        tagsRow.add(Ti.UI.createImageView({
+            left: AD.UI.padding,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
+            image: '/images/tags.png'
+        }));
+        var tagsLabel = Ti.UI.createLabel({
+            left: AD.UI.padding * 2 + 25,
+            right: AD.UI.padding,
+            top: 0,
+            height: Ti.UI.FILL,
+            font: AD.UI.Fonts.mediumSmall
         });
-        this.add($stepsView);
+        var updateTagLabel = function() {
+            // Get an array of the lab
+            var tagLabels = contact.getTags().map(function(tag) { return tag.attr('tag_label'); });
+            tagsLabel.text = (tagLabels.join(', ') || AD.Localize('none'));
+        };
+        updateTagLabel();
+        tagsRow.add(tagsLabel);
+        tagsRow.addEventListener('click', function() {
+            _this.createWindow('ChooseOptionsWindow', {
+                groupName: 'tag',
+                Model: 'Tag',
+                initial: contact.getTags().map(function(tag) { return tag.attr('tag_uuid'); }),
+                editable: true
+            }).getDeferred().done(function(options) {
+                contact.setTags(options);
+                updateTagLabel();
+            });
+        });
+        
+        this.updateSteps();
     },
     
     // Initialize the child views
@@ -237,13 +200,114 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         }, this);
         buttons.forEach(function(button) {
             button.enabled = this.contact.attr(button.field) ? true : false;
-            console.log('button = '+JSON.stringify(button));
-            //console.log('button.enabled = '+button.enabled);
         }, this);
         if (AD.Platform.isiOS) {
             // Force the button bar to recognize the new button states
             this.getChild('contactBB').labels = buttons;
         }
+    },
+    
+    // Create and return a basic UI element representing a row
+    createRow: function() {
+        return Ti.UI.createView({
+            left: 0,
+            top: 0,
+            height: AD.UI.buttonHeight,
+            borderWidth: 1,
+            borderColor: 'black'
+        });
+    },
+    
+    // (Re)create the steps UI
+    updateSteps: function() {
+        // Remove the steps view in order to replace it
+        var $oldStepsView = this.getChild('steps');
+        if ($oldStepsView) {
+            this.getView().remove($oldStepsView);
+        }
+        
+        // Create the steps view
+        var $stepsView = this.add('steps', $.View.create(Ti.UI.createScrollView({
+            left: 0,
+            top: 0,
+            layout: 'vertical',
+            scrollType: 'vertical',
+            contentHeight: 'auto',
+            showVerticalScrollIndicator: true
+        })));
+        
+        // Display all the steps associated with this contact's campus
+        // and all the completed steps, regardless of their campus
+        this.contact.getSteps().forEach(function(contactStep) {
+            // Lookup the associated ContactStep
+            var step_uuid = contactStep.attr('step_uuid');
+            
+            var $newRow = $stepsView.add(step_uuid, $.View.create(this.createRow()));
+            
+            // Create the step title
+            var stepLabel = $newRow.add(Ti.UI.createLabel({
+                left: AD.UI.padding,
+                right: AD.UI.padding,
+                top: 0,
+                height: Ti.UI.FILL,
+                text: contactStep.getLabel(),
+                font: AD.UI.Fonts.mediumSmall
+            }));
+            
+            var stepCompletedDate = contactStep.attr('step_date');
+            var stepCompleted = stepCompletedDate !== null;
+            
+            // Create the switch to toggle the step's completion status
+            var $completedCheckbox = new AD.UI.Checkbox({
+                createParams: {
+                    right: AD.UI.padding
+                },
+                value: stepCompleted
+            });
+            var completedCheckbox = $completedCheckbox.getView();
+            completedCheckbox.addEventListener('change', function(event) {
+                // The step's completion state has been changed
+                stepCompleted = event.value;
+                stepCompletedDate = stepCompleted ? $.today() : null;
+                contactStep.attr('step_date', stepCompletedDate).save();
+                updateRow();
+            });
+            $newRow.add($completedCheckbox);
+            
+            // Create the button to set the step completion date
+            var dateButton = Ti.UI.createButton({
+                right: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
+                width: AD.Platform.isiOS ? 90 : 120,
+                height: AD.UI.buttonHeight,
+                title: ''
+            });
+            dateButton.addEventListener('click', function() {
+                // Set the completion date of the step
+                _this.createWindow('DatePickerWindow', {
+                    minDate: new Date(2012, 0, 1), // January 1, 2012
+                    maxDate: $.today(),
+                    initialDate: stepCompletedDate
+                }).getDeferred().done(function(completedDate) {
+                    stepCompletedDate = completedDate;
+                    contactStep.attr('step_date', stepCompletedDate).save();
+                    updateRow();
+                });
+            });
+            $newRow.add(dateButton);
+            
+            // Update the checkbox image and the title and visibility of the dateButton
+            var updateRow = function() {
+                if (stepCompleted) {
+                    dateButton.visible = true;
+                    dateButton.title = $.formatDate(stepCompletedDate);
+                }
+                else {
+                    dateButton.visible = false;
+                }
+                stepLabel.right = AD.UI.padding + (dateButton.visible ? (dateButton.right + dateButton.width) : (completedCheckbox.right + completedCheckbox.width));
+            };
+            updateRow();
+        }, this);
     },
     
     // Helper functions that allow the user to contact the contact via telephone, SMS, or e-mail

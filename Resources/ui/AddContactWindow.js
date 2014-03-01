@@ -33,16 +33,17 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     // Return a new contact model instance
     createContact: function(attrs) {
         var localContact = attrs.contact_recordId === null ? null : Ti.Contacts.getPersonByID(attrs.contact_recordId);
-        var firstName = '', lastName = '', nickname = '', defaultPhone = {value: null, id: null}, defaultEmail = {value: null, id: null}, note = '';
+        var fullName = '', firstName = '', lastName = '', nickname = '', defaultPhone = {value: null, id: null}, defaultEmail = {value: null, id: null}, note = '';
         if (localContact) {
+            fullName = localContact.fullName || '';
             firstName = localContact.firstName || '';
             lastName = localContact.lastName || '';
             nickname = localContact.nickname || '';
             if (AD.Platform.isAndroid) {
                 // Android does not allow access to the firstName, lastName, or nickname properties, so attempt to guess them
-                var nameParts = localContact.fullName.split(' ');
+                var nameParts = fullName.split(' ');
                 firstName = firstName || nameParts[0];
-                lastName = lastName || nameParts[nameParts.length - 1];
+                lastName = lastName || (nameParts.length === 1 ? '' : nameParts[nameParts.length - 1]);
                 nickname = nickname || firstName;
             }
             defaultPhone = this.getDefaultFromMultivalue(localContact.getPhone(), ['iPhone', 'mobile', 'home']);
@@ -53,11 +54,10 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         
         // Populate the contact model fields with the new contact's information
         var baseAttrs = {
-            viewer_id: AD.Viewer.viewer_id,
             contact_firstName: firstName,
             contact_lastName: lastName,
             contact_nickname: nickname,
-            contact_campus: '',
+            campus_uuid: null,
             year_id: defaultYear,
             contact_phone: defaultPhone.value,
             contact_phoneId: defaultPhone.id,
@@ -65,43 +65,30 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             contact_emailId: defaultEmail.id,
             contact_notes: note
         };
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-            baseAttrs[stepFieldName] = null;
-        });
         var mergedAttrs = $.extend(baseAttrs, attrs);
-        mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).year_label;
+        mergedAttrs.campus_label = mergedAttrs.campus_uuid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_uuid).getLabel() : '';
+        mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).getLabel();
         return new AD.Models.Contact(mergedAttrs);
     },
     
     fields: [
         {name: 'firstName', type: 'text'},
         {name: 'lastName', type: 'text'},
-        {name: 'campus', type: 'choice'},
+        {name: 'campus', type: 'choice', field: 'campus_label'},
         {name: 'year', type: 'choice', field: 'year_label'},
         {name: 'phone', type: 'choice/text', keyboardType: Ti.UI.KEYBOARD_PHONE_PAD, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
         {name: 'email', type: 'choice/text', keyboardType: Ti.UI.KEYBOARD_EMAIL, autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE},
         {name: 'notes', type: 'text', multiline: true}
     ],
     
-    years: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; }),
     actions: [{
-        title: 'save',
         callback: 'save',
-        rightNavButton: true
-    }, {
-        callback: function() {
-            if (this.operation === 'edit') {
-                // Changes to contacts are automatically saved during editing
-                this.save();
-            }
-            else {
-                // Closing the window cancels the add or create operation
-                this.dfd.reject();
-            }
-        },
         menuItem: false,
-        onClose: true,
-        backButton: true
+        onClose: true
+    }, {
+        title: 'cancel',
+        callback: 'cancel',
+        rightNavButton: true
     }]
 }, {
     init: function(options) {
@@ -130,6 +117,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 return $.extend({}, field, {type: type, callback: callback});
             }, this);
             
+            this.attrs = {}; // the changed contact attrs
             this.contact = contactData.contact;
             this.localContact = contactData.localContact;
             this.window.title = AD.Localize(this.operation+'Contact');
@@ -139,7 +127,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         // Initialize the base $.Window object
         // Pass in deferreds to delay the execution of this.create and this.initialize until a contact is chosen
         this._super({
-            tab: options.tab,
             createDfd: getContactDfd.promise(),
             initializeDfd: getContactDfd.promise(),
             createParams: {
@@ -162,7 +149,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 var contact = null;
                 if (existingContacts.length > 0) {
                     if (existingContacts.length > 1) {
-                        Ti.API.warn('Found multiple contacts with the same recordId!');
+                        console.warn('Found multiple contacts with the same recordId!');
                     }
                     // A contact was chosen that already exists, so edit the contact
                     contact = existingContacts[0];
@@ -198,7 +185,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     
     // Create each of the form fields
     create: function() {
-        var labelWidth = AD.Platform.isiPhone ? 80 : 60;
+        var labelWidth = 80;
         var rowHeight = 40;
         
         var focusedTextField = null;
@@ -212,8 +199,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
 
         // Scrollable container that will hold the field rows on non-iPhone platforms
         var table = Ti.UI.createScrollView({
-            top: 0,
             left: 0,
+            top: 0,
             width: AD.UI.screenWidth,
             height: Ti.UI.FILL,
             layout: 'vertical',
@@ -348,17 +335,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             this.window.addEventListener('click', function(event) {
                 hideKeyboard();
             });
-            
-            // Create the save button on the screen
-            var saveButton = Ti.UI.createButton({
-                left: AD.UI.padding,
-                top: AD.UI.padding,
-                width: AD.UI.useableScreenWidth,
-                height: AD.UI.buttonHeight * 1.5,
-                titleid: 'save'
-            });
-            table.add(saveButton);
-            saveButton.addEventListener('click', this.proxy('save'));
         }
     },
     
@@ -372,69 +348,59 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     // Handlers for allowing the user to change the contact's campus, year, phone number, and e-mail address
     changeCampus: function() {
         // Allow the user to set the contact's campus
-        var campuses = AD.PropertyStore.get('campuses');
-        var $winChooseCampus = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
+        this.createWindow('ChooseOptionWindow', {
             groupName: 'campus',
-            initial: campuses.indexOf(this.contact.contact_campus),
-            options: campuses,
-            editable: true,
-            onOptionsUpdate: function(campusesNew) {
-                campuses = campusesNew;
-                AD.PropertyStore.set('campuses', campusesNew);
-            }
-        });
-        $winChooseCampus.getDeferred().done(this.proxy(function(campusName) {
+            Model: 'Campus',
+            initial: this.contact.campus_uuid,
+            editable: true
+        }).getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
-            this.contact.attr('contact_campus', campusName.label);
+            var label = campus ? campus.getLabel() : null;
+            this.attrs['campus_uuid'] = campus ? campus.getId() : null;
+            this.attrs['campus_label'] = label;
             var campusLabel = this.getChild('campusLabel');
-            campusLabel.text = campusLabel.title = campusName.label;
+            campusLabel.text = campusLabel.title = label;
         }));
     },
     changeYear: function() {
         // Allow the user to choose the year of this contact
-        var $winChooseYear = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
+        this.createWindow('ChooseOptionWindow', {
             groupName: 'year',
-            initial: this.contact.year_id - 1,
-            options: this.constructor.years
-        });
-        $winChooseYear.getDeferred().done(this.proxy(function(yearData) {
+            Model: 'Year',
+            initial: this.contact.year_id
+        }).getDeferred().done(this.proxy(function(year) {
             // A year was chosen
-            this.contact.attr('year_id', yearData.index + 1);
-            this.contact.attr('year_label', yearData.label);
+            var label = year.getLabel();
+            this.attrs['year_id'] = year.getId();
+            this.attrs['year_label'] = label;
             var yearLabel = this.getChild('yearLabel');
-            yearLabel.text = yearLabel.title = yearData.label;
+            yearLabel.text = yearLabel.title = label;
         }));
     },
     changePhone: function() {
         // Allow the user to choose the phone number to associate with this contact
-        var $winChoosePhone = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
+        this.createWindow('ChooseOptionWindow', {
             groupName: 'phone',
             initial: this.contact.contact_phoneId,
             options: this.phoneNumbers
-        });
-        $winChoosePhone.getDeferred().done(this.proxy(function(phoneNumber) {
+        }).getDeferred().done(this.proxy(function(phoneNumber) {
             // A phone number was chosen
-            this.contact.attr('contact_phone', phoneNumber.value);
-            this.contact.attr('contact_phoneId', phoneNumber.id);
+            this.attrs['contact_phone'] = phoneNumber.value;
+            this.attrs['contact_phoneId'] = phoneNumber.id;
             var phoneLabel = this.getChild('phoneLabel');
             phoneLabel.text = phoneLabel.title = phoneNumber.value;
         }));
     },
     changeEmail: function() {
         // Allow the user to choose the email address to associate with this contact
-        var $winChooseEmail = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
+        this.createWindow('ChooseOptionWindow', {
             groupName: 'email',
             initial: this.contact.contact_emailId,
             options: this.emailAddresses
-        });
-        $winChooseEmail.getDeferred().done(this.proxy(function(emailAddress) {
+        }).getDeferred().done(this.proxy(function(emailAddress) {
             // An email address was chosen
-            this.contact.attr('contact_email', emailAddress.value);
-            this.contact.attr('contact_emailId', emailAddress.id);
+            this.attrs['contact_email'] = emailAddress.value;
+            this.attrs['contact_emailId'] = emailAddress.id;
             var emailLabel = this.getChild('emailLabel');
             emailLabel.text = emailLabel.title = emailAddress.value;
         }));
@@ -445,14 +411,44 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         // Read the values of the text fields
         this.fields.forEach(function(field) {
             if (field.type === 'text') {
-                this.contact.attr(field.field, this.children[field.labelId].value);
+                this.attrs[field.field] = this.children[field.labelId].value;
             }
         }, this);
-        this.dfd.resolve(this.contact);
+        
+        // Apply the changes to the contact
+        var oldCampus_uuid = this.contact.attr('campus_uuid');
+        this.contact.attrs(this.attrs);
+        
         if (this.options.autoSave !== false) {
             // Create/update the contact's record in the database unless
             // explicitly prevented by the autoSave option being set to false
             this.contact.save();
+            
+            var campus_uuid = this.contact.attr('campus_uuid');
+            if (campus_uuid && campus_uuid !== oldCampus_uuid) {
+                // The contact's campus changed, so create the missing ContactStep entries
+                var contact_uuid = this.contact.getId();
+                var existingContactSteps = this.contact.getSteps();
+                var indexedExistingContactSteps = $.indexArray(existingContactSteps, 'step_uuid');
+                var steps = AD.Models.Step.cache.query({
+                    campus_uuid: campus_uuid
+                });
+                steps.forEach(function(step) {
+                    var step_uuid = step.getId();
+                    if (!indexedExistingContactSteps[step_uuid]) {
+                        // The ContactStep for this contact-step pair does not yet exist, so create it now
+                        var contactStep = new AD.Models.ContactStep({
+                            contact_uuid: contact_uuid,
+                            step_uuid: step_uuid,
+                            step_label: step.getLabel(),
+                            step_date: null
+                        });
+                        contactStep.save();
+                    }
+                });
+            }
         }
+        
+        this.dfd.resolve(this.contact);
     }
 });

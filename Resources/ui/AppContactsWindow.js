@@ -10,12 +10,12 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             return key ? key[0].toUpperCase() : key;
         });
         $.ModelTable.addGroupProcessor('year', function(key) {
-            return AD.Models.Year.cache.getById(key).year_label;
+            return AD.Models.Year.cache.getById(key).getLabel();
         });
     },
     
     sortFields: [
-        {field: 'contact_campus', label: 'campus'},
+        {field: 'campus_label', label: 'campus'},
         {field: 'contact_firstName', label: 'firstName', groupProcessor: 'firstLetter'},
         {field: 'contact_lastName', label: 'lastName', groupProcessor: 'firstLetter'},
         {field: 'year_id', label: 'year', groupProcessor: 'year'}
@@ -48,6 +48,8 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             });
         }
         
+        this.smartBind(AD.Models.ContactStep, '*', this.refresh);
+
         // When the sort order is updated, refresh the contacts list
         this.smartBind(AD.PropertyStore, 'sort_order', function(event, sortOrder) {
             this.setSortOrder(sortOrder);
@@ -86,25 +88,29 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
         row.add(yearLabel);
         
         // Create the last step taken row which consists of the step name and date
+        var dateWidth = 80;
         var lastUpdateStepLabel = Ti.UI.createLabel({
-            left: AD.UI.padding * 3,
+            left: AD.UI.padding,
+            right: AD.UI.padding * 2 + dateWidth,
             top: nameRowHeight,
-            width: Ti.UI.SIZE,
+            width: Ti.UI.FILL,
             height: Ti.UI.SIZE,
             text: '', // will be set by 'update'
+            wordWrap: false,
+            ellipsize: true,
             color: 'gray',
-            font: AD.UI.Fonts.medium
+            font: AD.UI.Fonts.mediumSmall
         });
         row.add(lastUpdateStepLabel);
         var lastUpdateDateLabel = Ti.UI.createLabel({
             right: AD.UI.padding,
             top: nameRowHeight,
-            width: Ti.UI.SIZE,
+            width: dateWidth,
             height: Ti.UI.SIZE,
             text: '', // will be set by 'update'
             color: 'gray',
             textAlign: 'right',
-            font: AD.UI.Fonts.medium
+            font: AD.UI.Fonts.mediumSmall
         });
         row.add(lastUpdateDateLabel);
         
@@ -115,22 +121,20 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
             
             // Use space instead of empty string to work around iPhone quirk where label text is not updated when changed from an empty string
             var lastStepCompleted = contact.getLastStep();
-            lastUpdateDateLabel.text = lastStepCompleted ? $.formatDate(lastStepCompleted.completionDate) : ' ';
-            lastUpdateStepLabel.text = lastStepCompleted ? AD.Localize('step_'+lastStepCompleted.stepName) : ' ';
+            lastUpdateDateLabel.text = lastStepCompleted ? $.formatDate(lastStepCompleted.attr('step_date')) : ' ';
+            lastUpdateStepLabel.text = lastStepCompleted ? lastStepCompleted.getLabel() : ' ';
         };
         update();
         
-        this.smartBind(contact, 'updated', function(event, updatedContact) {
-            // This row's contact was updated
-            update();
-        });
+        this.smartBind(AD.Models.ContactStep, '*', update);
+        this.smartBind(contact, 'updated', update);
         
         return row;
     },
     
     // Called when a contact row is selected
     onSelect: function(contact) {
-        var $winViewContact = new AD.UI.ViewContactWindow({tab: this.options.$window.tab, contact: contact});
+        var $winViewContact = this.$window.createWindow('ViewContactWindow', { contact: contact });
     },
     
     // Filter out all contacts that do not match the group filter
@@ -146,32 +150,39 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
         // Add the Android actions for adding contacts method
         this.addContactMethods.forEach(function(method) {
             if ($.isFunction(method.callback)) {
-                this.actions.push({
-                    title: method.title,
-                    callback: method.callback,
+                this.actions.push($.extend({
                     enabled: function() {
                         // The add menu items are only available if the contacts window is not displaying a group
                         return this.options.group ? false : true;
                     },
                     platform: 'Android'
-                });
+                }, method));
             }
         }, this);
         this._super.apply(this, arguments);
     },
     
-    addContactMethods: [
-        {title: 'create', callback: function() {
-            var $winAddContactWindow = new AD.UI.AddContactWindow({ tab: this.options.tab, operation: 'create' });
-        }},
-        {title: 'importTitle', callback: function() {
-            var $winAddContactWindow = new AD.UI.AddContactWindow({ tab: this.options.tab, operation: 'import' });
-        }},
-        {title: 'massImport', callback: function() {
-            var $winImportContactsWindow = new AD.UI.ImportContactsWindow({ tab: this.options.tab });
-        }},
-        {title: 'cancel'}
-    ],
+    addContactMethods: [{
+        title: 'create',
+        callback: function() {
+            var $winAddContactWindow = this.createWindow('AddContactWindow', { operation: 'create' });
+        },
+        showAsAction: true,
+        icon: '/images/ic_action_new.png'
+    }, {
+        title: 'importTitle',
+        callback: function() {
+            var $winAddContactWindow = this.createWindow('AddContactWindow', { operation: 'import' });
+        },
+        showAsAction: true,
+        icon: '/images/arrow-up.png'
+    }, {
+        title: 'massImport', callback: function() {
+            var $winImportContactsWindow = this.createWindow('ImportContactsWindow');
+        }
+    }, {
+        title: 'cancel'
+    }],
     actions: [{
         title: 'add',
         callback: 'addContact',
@@ -184,9 +195,8 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
     }, {
         title: 'sort',
         callback: function() {
-            // Allow the user to specify the conact sort order
-            var $winSortOrder = new AD.UI.SortOrderWindow({
-                tab: this.options.tab,
+            // Allow the user to specify the contact sort order
+            var $winSortOrder = this.createWindow('SortOrderWindow', {
                 fields: ContactTable.sortFields,
                 order: AD.PropertyStore.get('sort_order')
             });
@@ -203,11 +213,12 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
-            title: 'contactsTitle',
-            tab: options.tab
+            title: 'contactsTitle'
         });
         
         this.smartBind(AD.Models.Contact, '*', this.updateTitle);
+        this.smartBind(AD.Models.ContactStep, '*', this.updateTitle);
+        this.smartBind(AD.Models.ContactTag, '*', this.updateTitle);
         if (this.options.group) {
             this.updateTitle();
             this.open();
