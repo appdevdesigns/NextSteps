@@ -1,0 +1,1 @@
+adb uninstall net.appdevdesigns.nextsteps
