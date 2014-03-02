@@ -2,7 +2,7 @@ var AD = require('AppDev');
 var $ = require('jquery');
 
 module.exports = $.Window('AppDev.UI.AppToolsWindow', {
-    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow']
+    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow', 'ProgressWindow']
 }, {
     init: function(options) {
         // Initialize the base $.Window object
@@ -99,5 +99,37 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 });
             });
         });
+
+        var syncButton = this.add('sync', Ti.UI.createButton({
+            top: AD.UI.padding * 2,
+            center: {
+                x: AD.UI.screenWidth / 2
+            },
+            width: 120,
+            height: AD.UI.buttonHeight,
+            titleid: 'sync'
+        }));
+        syncButton.addEventListener('click', function() {
+            var $winSyncingWindow = new AD.UI.ProgressWindow({
+                title: 'Syncing',
+                message: 'Syncing with the server...'
+            });
+            $winSyncingWindow.open();
+            
+            require('app/Transactions');
+            var transactionLog = new AD.Transactions({
+                fileName: 'TransactionLog.json',
+                syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
+            });
+            AD.Comm.syncWithServer(AD.Config.getServer(), transactionLog.get()).done(function() {
+                transactionLog.clear();
+            }).fail(function() {
+                alert('Could not access the server!');
+                console.log('DEBUG >> SyncButton: failure');
+            }).always(function() {
+                $winSyncingWindow.close();
+            });
+        });
+
     }
 });

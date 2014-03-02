@@ -1,0 +1,1 @@
+adb logcat -s TiAPI TiExceptionHandler Module

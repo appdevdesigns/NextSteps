@@ -82,6 +82,7 @@
     <string name="backupRestoreInfoText">Backup the database to or restore the database from Google Drive.</string>
     <string name="backupDatabase">Backup</string>
     <string name="restoreDatabase">Restore</string>
+    <string name="sync">Sync</string>
     <string name="backupTitleFormat">NextSteps database dump {0}/{1}/{2}</string>
     <string name="stringPromptBackupTitle">NextSteps Database Backup</string>
     <string name="stringPromptBackupMessage">Please choose the name of the NextSteps database backup file.</string>
