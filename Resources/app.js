@@ -19,27 +19,28 @@
 // Initialize the AppDev framework
 var AD = require('AppDev');
 var $ = require('jquery');
-AD.init({
-    models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
-    windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppToolsWindow', 'AppInfoWindow']
-}).done(function() {
+  
+// This will perform the following: check if server URL is supplied & ping with server, authenticate user, and sync with server if authentication is successful. If not, the user will be directed to the contacts page and operate in offline mode.
+var performWholeSyncProcess = function() {
     require('app/Transactions');
+    require('app/comm'); // Application-specific communications functions will be in app
+    
     var transactionLog = new AD.Transactions({
         fileName: 'TransactionLog.json',
         syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
     });
-    
-    // Application-specific communications functions will be in app/
-    require('app/comm');
-    
+
     if (!AD.Config.hasServer()) {
         console.log('Does not have server specified.');
+        if (!AD.Platform.isiOS) {
+            alert("You are in offline mode. To sync with server, go to Tools -> Preferences.");
+        }
         return;
     }
     
     var serverURL = AD.Config.getServer();
     if (serverURL === AD.PropertyStore.get('lastSyncServer')) {
-        //return;
+        return;
     }
     
     var ping = function(callback) {
@@ -53,12 +54,14 @@ AD.init({
             });
         });
     };
+    
     ping(function() {
         console.log('Successfully contacted server: ' + serverURL);
         var sUsername;
         var sPassword;
         
         // Show login window
+        // Check if pressing cancel will still continue to the login window
         var $winLoginWindow = new AD.UI.LoginWindow({
             validateCredentials: function(username, password) {
                 console.log('Validating credentials...');
@@ -88,4 +91,11 @@ AD.init({
             });
         });
     });
+};
+
+AD.init({
+    models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
+    windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppToolsWindow', 'AppInfoWindow']
+}).done(function() {    
+    performWholeSyncProcess();
 });
