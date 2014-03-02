@@ -4,6 +4,8 @@ var $ = require('jquery');
 module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     dependencies: ['AddContactWindow', 'DatePickerWindow', 'Checkbox'],
     
+    rowHeight: AD.UI.buttonHeight,
+    
     contactMethods: [
         {label: 'contact_call', callback: 'callContact', field: 'contact_phone'},
         {label: 'contact_SMS', callback: 'SMSContact', field: 'contact_phone'},
@@ -151,7 +153,11 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         
         // Create the tags row
         var _this = this;
-        var tagsRow = this.add('tags', this.createRow());
+        var tagsRow = this.add('tags', Ti.UI.createView({
+            left: 0,
+            top: 0,
+            height: this.constructor.rowHeight
+        }));
         tagsRow.top = AD.UI.padding;
         tagsRow.add(Ti.UI.createImageView({
             left: AD.UI.padding,
@@ -196,14 +202,14 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         });
         this.add(scrollableStepsView);
         
-        var $stepsView = this.record('steps', $.View.create(Ti.UI.createView({
+        var $campusStepsView = this.record('campusSteps', $.View.create(Ti.UI.createView({
             left: 0,
             top: 0,
             width: Ti.UI.FILL,
             height: Ti.UI.SIZE,
             layout: 'vertical'
         })));
-        scrollableStepsView.add($stepsView.getView());
+        scrollableStepsView.add($campusStepsView.getView());
         
         var personalStepsHeaderRow = Ti.UI.createView({
             left: 0,
@@ -234,13 +240,13 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             layout: 'vertical'
         })));
         scrollableStepsView.add($personalStepsView.getView());
-        
-        this.updateSteps();
     },
     
     // Initialize the child views
     initialize: function() {
         this.getChild('nameLabel').text = this.contact.getLabel();
+        
+        this.updateSteps();
         
         // Update the enabled status of each of the contact buttons
         
@@ -262,7 +268,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         return Ti.UI.createView({
             left: 0,
             top: 0,
-            height: AD.UI.buttonHeight,
+            height: this.constructor.rowHeight,
             borderWidth: 1,
             borderColor: 'black'
         });
@@ -271,10 +277,10 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     // (Re)create the steps UI
     updateSteps: function() {
         // Remove the steps view in order to replace it
-        var $stepsView = this.get$Child('steps');
+        var $campusStepsView = this.get$Child('campusSteps');
         var $personalStepsView = this.get$Child('personalSteps');
         
-        $stepsView.removeAllChildren();
+        $campusStepsView.removeAllChildren();
         $personalStepsView.removeAllChildren();
         
         // Display all the steps associated with this contact's campus
@@ -283,8 +289,9 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         var stepsLength = steps.length;
         steps.forEach(function(contactStep) {
             var $stepView = this.createStepRow(contactStep);
-            if (contactStep.attr('campus_uuid')) {
-                $stepsView.add($stepView);
+            var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
+            if (step.attr('campus_uuid')) {
+                $campusStepsView.add($stepView);
             }
             else {
                 $personalStepsView.add($stepView);
@@ -293,8 +300,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     },
     
     createStepRow: function(contactStep) {
-        // Lookup the associated ContactStep
-        var step_uuid = contactStep.attr('step_uuid');
         var _this = this;
         var $newRow = $.View.create(this.createRow());
         
@@ -394,6 +399,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         this.createWindow('ChooseOptionsWindow', {
             groupName: 'personalStep',
             Model: 'Step',
+            filter: { campus_uuid: null },
             initial: contact.getPersonalSteps().map(function(step) { return step.attr('step_uuid'); }),
             editable: true
         }).getDeferred().done(function(options) {

@@ -35,7 +35,6 @@
             dbTable:'nextsteps_contact_step',
             modelFields: {
                   contactstep_uuid:"varchar(36)",
-                  user_id:"int(11) unsigned",
                   contact_uuid:"varchar(36)",
                   step_uuid:"varchar(36)",
                   step_date:"date"

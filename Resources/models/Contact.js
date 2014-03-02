@@ -23,7 +23,6 @@
         cache:true,
         
         attributes: {
-            user_id: 'integer',
             contact_recordId: 'integer',
             year_id: 'integer'
         },
@@ -122,7 +121,6 @@
             dbTable:'nextsteps_contact',
             modelFields: {
                   contact_uuid:"varchar(36)",
-                  user_id:"int(11) unsigned",
                   contact_recordId:"int(11) unsigned",
                   contact_firstName:"text",
                   contact_lastName:"text",
@@ -224,8 +222,10 @@
         // Return an array of Personal Step models associated with this contact
         getPersonalSteps: function() {
             return AD.Models.ContactStep.cache.query({
-                contact_uuid: this.getId(),
-                campus_uuid: null
+                contact_uuid: this.getId()
+            }).filter(function(contactStep) {
+                var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
+                return !step.attr('campus_uuid');
             });
         },
 
