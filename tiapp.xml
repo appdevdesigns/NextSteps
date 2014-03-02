@@ -11,7 +11,7 @@
     <sdk-version>3.2.1.GA</sdk-version>
     <id>net.appdevdesigns.nextsteps</id>
     <name>NextSteps</name>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
     <publisher>AppDev Designs</publisher>
     <url>http://www.appdevdesigns.net</url>
     <description>A contact management app to help you create a logical workflow for organizing your contacts.</description>

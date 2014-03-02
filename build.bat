@@ -1,0 +1,1 @@
+titanium build --platform android --target device --deploy-type development
