@@ -417,7 +417,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         
         // regular expression testing on email
         // it passes all validate emails and rejects some common mistakes
-        if(!/[^@]+@[^@]+\.[^@]+/.test(this.attrs['contact_email'])) {
+        if(this.attrs['contact_email'] !== null && (!/[^@]+@[^@]+\.[^@]+/.test(this.attrs['contact_email']))) {
             alert("Email is not valid: " + this.attrs['contact_email']);
         }
         
