@@ -19,83 +19,11 @@
 // Initialize the AppDev framework
 var AD = require('AppDev');
 var $ = require('jquery');
-  
-// This will perform the following: check if server URL is supplied & ping with server, authenticate user, and sync with server if authentication is successful. If not, the user will be directed to the contacts page and operate in offline mode.
-var performWholeSyncProcess = function() {
-    require('app/Transactions');
-    require('app/comm'); // Application-specific communications functions will be in app
-    
-    var transactionLog = new AD.Transactions({
-        fileName: 'TransactionLog.json',
-        syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
-    });
-
-    if (!AD.Config.hasServer()) {
-        console.log('Does not have server specified.');
-        if (!AD.Platform.isiOS) {
-            alert("You are in offline mode. To sync with server, go to Tools -> Preferences.");
-        }
-        return;
-    }
-    
-    var serverURL = AD.Config.getServer();
-    if (serverURL === AD.PropertyStore.get('lastSyncServer')) {
-        return;
-    }
-    
-    var ping = function(callback) {
-        serverURL = AD.Config.getServer();
-        AD.Comm.HTTP.get({
-            url: 'http://'+serverURL+'/nsserver/ping'
-        }).done(callback).fail(function() {
-            AD.UI.yesNoAlert('Could not access the server. Please ensure that the server URL is correct and that you are connected to your VPN. Do you want to try again?').done(function() {
-                // Try again
-                ping(callback);
-            });
-        });
-    };
-    
-    ping(function() {
-        console.log('Successfully contacted server: ' + serverURL);
-        var sUsername;
-        var sPassword;
-        
-        // Show login window
-        // Check if pressing cancel will still continue to the login window
-        var $winLoginWindow = new AD.UI.LoginWindow({
-            validateCredentials: function(username, password) {
-                console.log('Validating credentials...');
-                sUsername = username;
-                sPassword = password;
-                return AD.Comm.validateCredentials(serverURL, username, password);
-            }
-        });
-        $winLoginWindow.open();
-        $winLoginWindow.getDeferred().done(function() {
-            console.log('Login credentials are valid');
-            
-            require('ui/ProgressWindow');
-            var $winDownloadingWindow = new AD.UI.ProgressWindow({
-                title: 'Downloading',
-                message: 'Downloading data from the server...'
-            });
-            $winDownloadingWindow.open();
-            
-            AD.Comm.syncWithServer(serverURL, transactionLog.get(), sUsername, sPassword).done(function(transactions) {
-                transactionLog.apply(transactions);
-                transactionLog.clear();
-            }).fail(function() {
-                alert('Could not access the server!');
-            }).always(function() {
-                $winDownloadingWindow.close();
-            });
-        });
-    });
-};
+var controller = require('app/controller');  
 
 AD.init({
     models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
     windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppToolsWindow', 'AppInfoWindow']
 }).done(function() {    
-    performWholeSyncProcess();
+    controller.start();
 });

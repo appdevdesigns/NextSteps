@@ -1,5 +1,6 @@
 var AD = require('AppDev');
 var $ = require('jquery');
+var controller = require('app/controller');  
 
 module.exports = $.Window('AppDev.UI.AppToolsWindow', {
     dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow', 'ProgressWindow']
@@ -110,25 +111,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             titleid: 'sync'
         }));
         syncButton.addEventListener('click', function() {
-            var $winSyncingWindow = new AD.UI.ProgressWindow({
-                title: 'Syncing',
-                message: 'Syncing with the server...'
-            });
-            $winSyncingWindow.open();
-            
-            require('app/Transactions');
-            var transactionLog = new AD.Transactions({
-                fileName: 'TransactionLog.json',
-                syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
-            });
-            AD.Comm.syncWithServer(AD.Config.getServer(), transactionLog.get()).done(function() {
-                transactionLog.clear();
-            }).fail(function() {
-                alert('Could not access the server!');
-                console.log('DEBUG >> SyncButton: failure');
-            }).always(function() {
-                $winSyncingWindow.close();
-            });
+            controller.performPreSyncValidation();
         });
 
     }
