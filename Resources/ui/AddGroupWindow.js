@@ -59,15 +59,14 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         });
         
         AD.Models.Step.cache.getArray().forEach(function(step) {
-            var step_uuid = step.getId();
-            defineField('steps '+step_uuid, {
+            defineField('steps '+step.getId(), {
                 name: step.getLabel(),
-                step_uuid: step_uuid,
+                step: step,
                 type: 'bool'
-			});
-		});
-		
-		// If existingGroup is a 'truth' value, we are editing, otherwise we are adding
+            });
+        });
+        
+        // If existingGroup is a 'truthy' value, we are editing, otherwise we are adding
         this.adding = this.options.existingGroup ? false : true;
         
         // Create a new local group model if necessary
@@ -318,13 +317,14 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     // Show the steps fields that are associated with the selected campus and hide the others
     updateSteps: function() {
         var _this = this;
-        var campus_uuid = this.fields.campus_uuid.value;
-		$.each(this.get$Child('fieldsView').children, function(fieldName, fieldView) {
-            // If this field is a step, its fieldDefinition will have a step_uuid property
-            var step_uuid = fieldView.get$View().fieldDefinition.step_uuid;
-            if (step_uuid) {
-                var isVisible = AD.Models.Step.cache.getById(step_uuid).attr('campus_uuid') === campus_uuid;
-				isVisible = isVisible || AD.Models.Step.cache.getById(step_uuid).attr('campus_uuid') === null;
+        var group_campus_uuid = this.fields.campus_uuid.value;
+        $.each(this.get$Child('fieldsView').children, function(fieldName, fieldView) {
+            // If this field is a step, its fieldDefinition will have a
+            // step property referring to the field's associated step model
+            var step = fieldView.get$View().fieldDefinition.step;
+            if (step) {
+                var step_campus_uuid = step.attr('campus_uuid');
+                var isVisible = step_campus_uuid === null || step_campus_uuid === group_campus_uuid;
                 fieldView.visible = isVisible;
                 fieldView.height = isVisible ? _this.constructor.fieldViewHeight : 0;
             }
