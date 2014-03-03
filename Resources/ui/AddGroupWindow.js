@@ -3,8 +3,27 @@ var $ = require('jquery');
 
 module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     setup: function() {
-        // When this class is created, create the static fieldDefinitions object
-        var fieldDefinitions = this.fieldDefinitions;
+    },
+    dependencies: ['ChooseOptionWindow', 'Checkbox'],
+    
+    fieldDefinitions: {},
+    fieldViewHeight: AD.UI.buttonHeight + AD.UI.padding,
+    
+    actions: [{
+        title: 'save',
+        callback: 'save',
+        rightNavButton: true,
+        onClose: true,
+        showAsAction: true,
+        icon: '/images/ic_action_save.png'
+    }, {
+        title: 'cancel',
+        callback: 'cancel', // special pre-defined callback to reject the deferred
+        leftNavButton: true
+    }]
+}, {
+    init: function(options) {
+        var fieldDefinitions = this.constructor.fieldDefinitions;
         var defineField = function(fieldName, fieldData) {
             // Add a boolean property to quickly check the type of a field
             // For example, fieldData.isChoice === true
@@ -45,29 +64,10 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 name: step.getLabel(),
                 step_uuid: step_uuid,
                 type: 'bool'
-            });
-        });
-    },
-    dependencies: ['ChooseOptionWindow', 'Checkbox'],
-    
-    fieldDefinitions: {},
-    fieldViewHeight: AD.UI.buttonHeight + AD.UI.padding,
-    
-    actions: [{
-        title: 'save',
-        callback: 'save',
-        rightNavButton: true,
-        onClose: true,
-        showAsAction: true,
-        icon: '/images/ic_action_save.png'
-    }, {
-        title: 'cancel',
-        callback: 'cancel', // special pre-defined callback to reject the deferred
-        leftNavButton: true
-    }]
-}, {
-    init: function(options) {
-        // If existingGroup is a 'truthy' value, we are editing, otherwise we are adding
+			});
+		});
+		
+		// If existingGroup is a 'truth' value, we are editing, otherwise we are adding
         this.adding = this.options.existingGroup ? false : true;
         
         // Create a new local group model if necessary
@@ -319,11 +319,12 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     updateSteps: function() {
         var _this = this;
         var campus_uuid = this.fields.campus_uuid.value;
-        $.each(this.get$Child('fieldsView').children, function(fieldName, fieldView) {
+		$.each(this.get$Child('fieldsView').children, function(fieldName, fieldView) {
             // If this field is a step, its fieldDefinition will have a step_uuid property
             var step_uuid = fieldView.get$View().fieldDefinition.step_uuid;
             if (step_uuid) {
                 var isVisible = AD.Models.Step.cache.getById(step_uuid).attr('campus_uuid') === campus_uuid;
+				isVisible = isVisible || AD.Models.Step.cache.getById(step_uuid).attr('campus_uuid') === null;
                 fieldView.visible = isVisible;
                 fieldView.height = isVisible ? _this.constructor.fieldViewHeight : 0;
             }
