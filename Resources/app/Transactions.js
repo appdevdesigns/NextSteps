@@ -15,7 +15,21 @@ $.Class('AppDev.Transactions', {
     }, {
         name: 'destroy',
         event: 'destroyed'
-    }]
+    }],
+    
+    instance: null,
+    // Return the Transactions singleton instance
+    getInstance: function() {
+        return this.instance;
+    },
+    
+    // Create the Transactions singleton instance
+    initialize: function(options) {
+        if (this.instance) {
+            console.warn('The AD.Transactions singleton instance already exists! Creating another instance may lead to memory leaks and other unexpected behavior.');
+        }
+        this.instance = new AD.Transactions(options);
+    },
 }, {
     init: function(options) {
         var _this = this;
