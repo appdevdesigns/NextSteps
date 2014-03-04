@@ -56,37 +56,10 @@ AD.init({
     };
     ping(function() {
         console.log('Successfully contacted server: ' + serverURL);
-        var sUsername;
-        var sPassword;
         
-        // Show login window
-        var $winLoginWindow = new AD.UI.LoginWindow({
-            validateCredentials: function(username, password) {
-                console.log('Validating credentials...');
-                sUsername = username;
-                sPassword = password;
-                return AD.Comm.validateCredentials(serverURL, username, password);
-            }
-        });
-        $winLoginWindow.open();
-        $winLoginWindow.getDeferred().done(function() {
-            console.log('Login credentials are valid');
-            
-            require('ui/ProgressWindow');
-            var $winDownloadingWindow = new AD.UI.ProgressWindow({
-                title: 'Downloading',
-                message: 'Downloading data from the server...'
-            });
-            $winDownloadingWindow.open();
-            
-            AD.Comm.syncWithServer(serverURL, transactionLog.get(), sUsername, sPassword).done(function(transactions) {
-                transactionLog.apply(transactions);
-                transactionLog.clear();
-            }).fail(function() {
-                alert('Could not access the server!');
-            }).always(function() {
-                $winDownloadingWindow.close();
-            });
-        });
+        // Programatically trigger a click event on the sync buttton in AppToolsWindow to begin the initial sync
+        var toolsTab = AD.UI.$appTabGroup.getChild('AppToolsWindow');
+        var $appToolsWindow = toolsTab.window.get$View();
+        $appToolsWindow.getChild('sync').fireEvent('click');
     });
 });

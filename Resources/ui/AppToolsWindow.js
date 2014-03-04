@@ -110,26 +110,38 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             titleid: 'sync'
         }));
         syncButton.addEventListener('click', function() {
-            var $winSyncingWindow = new AD.UI.ProgressWindow({
-                title: 'Syncing',
-                message: 'Syncing with the server...'
-            });
-            $winSyncingWindow.open();
+            var sUsername;
+            var sPassword;
             
-            require('app/Transactions');
-            var transactionLog = new AD.Transactions({
-                fileName: 'TransactionLog.json',
-                syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
+            // Show login window
+            var $winLoginWindow = new AD.UI.LoginWindow({
+                validateCredentials: function(username, password) {
+                    console.log('Validating credentials...');
+                    sUsername = username;
+                    sPassword = password;
+                    return AD.Comm.validateCredentials(serverURL, username, password);
+                }
             });
-            AD.Comm.syncWithServer(AD.Config.getServer(), transactionLog.get()).done(function() {
-                transactionLog.clear();
-            }).fail(function() {
-                alert('Could not access the server!');
-                console.log('DEBUG >> SyncButton: failure');
-            }).always(function() {
-                $winSyncingWindow.close();
+            $winLoginWindow.open();
+            $winLoginWindow.getDeferred().done(function() {
+                console.log('Login credentials are valid');
+                
+                var $winDownloadingWindow = new AD.UI.ProgressWindow({
+                    title: 'Downloading',
+                    message: 'Downloading data from the server...'
+                });
+                $winDownloadingWindow.open();
+                
+                var transactionLog = AD.Transactions.getInstance();
+                AD.Comm.syncWithServer(AD.Config.getServer(), transactionLog.get(), sUsername, sPassword).done(function(transactions) {
+                    transactionLog.apply(transactions);
+                    transactionLog.clear();
+                }).fail(function() {
+                    alert('Could not access the server!');
+                }).always(function() {
+                    $winDownloadingWindow.close();
+                });
             });
         });
-
     }
 });
