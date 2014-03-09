@@ -95,7 +95,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             }).getDeferred().done(function(fileId) {
                 AD.UI.yesNoAlert('restoreDatabaseWarning').done(function() {
                     AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
-                        AD.Database.import(AD.Defaults.dbName, JSON.parse(dump));
+                        AD.Database.import(AD.Defaults.dbName, dump);
                     });
                 });
             });
