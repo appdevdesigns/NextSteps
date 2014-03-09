@@ -51,4 +51,7 @@
         <module platform="android">com.dmarie.sql</module>
         <module platform="iphone">com.0x82.key.chain</module>
     </modules>
+    <plugins>
+        <plugin>appdev-framework</plugin>
+    </plugins>
 </ti:app>
