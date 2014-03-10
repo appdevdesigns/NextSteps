@@ -112,9 +112,6 @@ module.exports = {
                     $winSyncWindow.close();
                 });
             }, function() {
-                if (!AD.Platform.isiOS) {
-                    alert("You are in offline mode. To sync with server, go to Tools -> Preferences.");
-                }
             });
         });
         console.log("DEBUG controller > Left performWholeSyncProcess()");
