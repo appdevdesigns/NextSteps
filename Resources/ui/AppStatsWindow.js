@@ -1,6 +1,6 @@
 var AD = require('AppDev');
 var $ = require('jquery');
-
+var controller = require('app/controller');
 var ViewTotalsWindow = $.Window('AppDev.UI.ViewTotalsWindow', {}, {
     init: function(options) {
         // Initialize the base $.Window object
@@ -214,6 +214,8 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
             AD.PropertyStore.set(this.constructor.lastUpdatePropertyName, today.getTime());
             this.get$Child('statsView').update();
             this.getChild('viewTotals').visible = true;
+            
+            controller.performPreSyncValidation();
             
             // Possibly send a stats report email to the address set in preferences
             if (sendStatsReportEmail) {

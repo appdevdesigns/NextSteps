@@ -87,7 +87,7 @@
     <!-- Stats labels -->
     <string name="statsHeaderSince">统计从\n{0}开始:</string>
     <string name="statsHeaderEver">累计统计:</string>
-    <string name="saveStats">新的会话</string>
+    <string name="saveStats">同步</string>
     <string name="viewTotals">查看所有</string>
     <string name="viewTotalsTitle">总统计</string>
     <string name="statsConfirmSubmit">你是否确定要提交这个数据报表、重新开始一个新的数据采集会话？数据统计会得到保留。</string>

@@ -1,5 +1,6 @@
 var AD = require('AppDev');
 var $ = require('jquery');
+var controller = require('app/controller');  
 
 module.exports = $.Window('AppDev.UI.AppToolsWindow', {
     dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow', 'ProgressWindow']
@@ -110,38 +111,8 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             titleid: 'sync'
         }));
         syncButton.addEventListener('click', function() {
-            var sUsername;
-            var sPassword;
-            
-            // Show login window
-            var $winLoginWindow = new AD.UI.LoginWindow({
-                validateCredentials: function(username, password) {
-                    console.log('Validating credentials...');
-                    sUsername = username;
-                    sPassword = password;
-                    return AD.Comm.validateCredentials(serverURL, username, password);
-                }
-            });
-            $winLoginWindow.open();
-            $winLoginWindow.getDeferred().done(function() {
-                console.log('Login credentials are valid');
-                
-                var $winDownloadingWindow = new AD.UI.ProgressWindow({
-                    title: 'Downloading',
-                    message: 'Downloading data from the server...'
-                });
-                $winDownloadingWindow.open();
-                
-                var transactionLog = AD.Transactions.getInstance();
-                AD.Comm.syncWithServer(AD.Config.getServer(), transactionLog.get(), sUsername, sPassword).done(function(transactions) {
-                    transactionLog.apply(transactions);
-                    transactionLog.clear();
-                }).fail(function() {
-                    alert('Could not access the server!');
-                }).always(function() {
-                    $winDownloadingWindow.close();
-                });
-            });
+            controller.performPreSyncValidation();
         });
+
     }
 });

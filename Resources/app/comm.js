@@ -17,8 +17,14 @@ module.exports = $.extend(AD.Comm, {
                 username: username,
                 password: password
             }
-        }).pipe(function(response) {
-            return response.status === 'success';
+        }).then(function(response) {
+            console.log("response (done) = ");
+            console.log(response);
+            return true;
+        }, function(response) {
+            console.log("response (fail) = ");
+            console.log(response);
+            return false;
         });
     },
     
@@ -36,6 +42,7 @@ module.exports = $.extend(AD.Comm, {
                 transactionLog: transactions
             }
         }).done(function(response) {
+            console.log("syncWithServer() >> response (done) = ");
             console.log(response);
             AD.PropertyStore.set('lastSyncServer', server);
             AD.PropertyStore.set('lastSyncTimestamp', response.data.lastSyncTimestamp);

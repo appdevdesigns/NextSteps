@@ -19,47 +19,11 @@
 // Initialize the AppDev framework
 var AD = require('AppDev');
 var $ = require('jquery');
+var controller = require('app/controller');  
+
 AD.init({
     models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
     windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppToolsWindow', 'AppInfoWindow']
-}).done(function() {
-    require('app/Transactions');
-    AD.Transactions.initialize({
-        fileName: 'TransactionLog.json',
-        syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
-    });
-    var transactionLog = AD.Transactions.getInstance();
-    
-    // Application-specific communications functions will be in app/
-    require('app/comm');
-    
-    if (!AD.Config.hasServer()) {
-        console.log('Does not have server specified.');
-        return;
-    }
-    
-    var serverURL = AD.Config.getServer();
-    if (serverURL === AD.PropertyStore.get('lastSyncServer')) {
-        //return;
-    }
-    
-    var ping = function(callback) {
-        serverURL = AD.Config.getServer();
-        AD.Comm.HTTP.get({
-            url: 'http://'+serverURL+'/nsserver/ping'
-        }).done(callback).fail(function() {
-            AD.UI.yesNoAlert('Could not access the server. Please ensure that the server URL is correct and that you are connected to your VPN. Do you want to try again?').done(function() {
-                // Try again
-                ping(callback);
-            });
-        });
-    };
-    ping(function() {
-        console.log('Successfully contacted server: ' + serverURL);
-        
-        // Programatically trigger a click event on the sync buttton in AppToolsWindow to begin the initial sync
-        var toolsTab = AD.UI.$appTabGroup.getChild('AppToolsWindow');
-        var $appToolsWindow = toolsTab.window.get$View();
-        $appToolsWindow.getChild('sync').fireEvent('click');
-    });
+}).done(function() {    
+    controller.start();
 });
