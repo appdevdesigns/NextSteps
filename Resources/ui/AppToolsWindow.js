@@ -23,7 +23,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 center: {
                     x: AD.UI.screenWidth / 2
                 },
-                width: 120,
+                width: 160,
                 height: AD.UI.SIZE,
                 titleid: 'preferences'
             }));
