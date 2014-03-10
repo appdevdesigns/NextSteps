@@ -4,24 +4,30 @@ var AD = require('AppDev');
 module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     dependencies: ['ChooseOptionWindow', 'ChooseContactsWindow', 'AddContactWindow'],
     
-    years: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; }),
-    fields: ['campus', 'year'],
+    fields: [{
+        name: 'campus'
+    }, {
+        name: 'year'
+    }, {
+        name: 'tags',
+        icon: '/images/tags.png'
+    }],
     actions: [{
         title: 'cancel',
         callback: 'cancel',
         leftNavButton: true,
-        backButton: true
+        onClose: true
     }]
 }, {
     init: function(options) {
         this.contacts = [];
         
-        this.campus = '';
-        this.year = 1;
+        this.campus_uuid = null;
+        this.year_id = 1;
+        this.tags = []; // an array of Tag model instances
         
         // Initialize the base $.Window object
         this._super({
-            tab: this.options.tab,
             title: 'importContactsTitle',
             autoOpen: true,
             createParams: {
@@ -38,57 +44,102 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             top: AD.UI.padding,
             width: Ti.UI.SIZE,
             height: Ti.UI.SIZE,
-            textid: 'importHelp'
+            textid: 'importHelp',
+            font: AD.UI.Fonts.mediumSmall
         }));
         
-        // Create the contacts label choose contacts button
-        this.add('contactsLabel', Ti.UI.createLabel({
+        // Create the contacts label and choose contacts button
+        var $contactsView = this.add($.View.create(Ti.UI.createView({
+            top: AD.UI.padding,
+            width: AD.UI.screenWidth,
+            height: AD.UI.buttonHeight
+        })));
+        this.record('contactsLabel', $contactsView.add(Ti.UI.createLabel({
             left: AD.UI.padding,
-            top: AD.UI.padding * 2,
+            top: 0,
             width: Ti.UI.SIZE,
-            height: Ti.UI.SIZE
-        }));
-        var chooseButton = this.add(Ti.UI.createButton({
-            left: AD.UI.padding,
-            top: AD.UI.padding / 2,
+            height: Ti.UI.FILL
+        })));
+        var chooseButton = $contactsView.add(Ti.UI.createButton({
+            right: AD.UI.padding,
+            top: 0,
             width: 120,
             height: AD.UI.buttonHeight,
             titleid: 'unspecified'
         }));
         chooseButton.addEventListener('click', this.proxy('chooseContacts'));
         
-        // Campus and year fields
+        var _this = this;
+
+        // Create the fields container
         var fieldsView = this.add(Ti.UI.createView({
-            top: AD.UI.padding,
             left: AD.UI.padding,
+            top: AD.UI.padding,
             width: Ti.UI.SIZE,
             height: Ti.UI.SIZE,
             layout: 'vertical'
         }));
-        var labelWidth = AD.Platform.isAndroid ? 40 : 80;
+        // Create the campus, year, and tag fields
+        var labelWidth = 80;
         var fieldHeight = AD.UI.buttonHeight;
         this.constructor.fields.forEach(function(field, index) {
             var fieldView = Ti.UI.createView({
-                top: AD.UI.padding,
                 left: 0,
+                top: AD.UI.padding,
                 width: Ti.UI.SIZE,
                 height: fieldHeight
             });
-            fieldView.add(Ti.UI.createLabel({
-                left: 0,
-                width: labelWidth,
-                height: Ti.UI.SIZE,
-                textid: field
-            }));
-            var chooseButton = Ti.UI.createButton({
-                left: labelWidth + AD.UI.padding,
-                top: 0,
-                width: 120,
-                height: AD.UI.buttonHeight
-            });
-            chooseButton.addEventListener('click', this.proxy('change'+$.capitalize(field)));
-            fieldView.add(this.record(field, chooseButton));
-            
+
+            var changeCallback = function() {
+                // Calculate the names of the change and update field functions
+                // changeFieldFuncName === 'changeYear' and updateFieldFuncName === 'updateYear', for example
+                var changeFieldFuncName = 'change'+$.capitalize(field.name);
+                var updateFieldFuncName = 'update'+$.capitalize(field.name);
+                _this[changeFieldFuncName]().done(function() {
+                    // After the field is changed, update its associated UI
+                    _this[updateFieldFuncName]();
+                });
+            };
+            var valueField = null;
+            if (field.icon) {
+                // Create an icon to identify the field
+                fieldView.add(Ti.UI.createImageView({
+                    left: AD.UI.padding,
+                    width: Ti.UI.SIZE,
+                    height: Ti.UI.SIZE,
+                    image: field.icon
+                }));
+                
+                // Create a label that can be clicked to change the field value
+                valueField = Ti.UI.createLabel({
+                    left: AD.UI.padding * 2 + 25,
+                    right: AD.UI.padding,
+                    top: 0,
+                    height: Ti.UI.FILL,
+                    font: AD.UI.Fonts.mediumSmall
+                });
+                fieldView.addEventListener('click', changeCallback);
+            }
+            else {
+                // Create a static label to identify the field
+                fieldView.add(Ti.UI.createLabel({
+                    left: 0,
+                    width: labelWidth,
+                    height: Ti.UI.SIZE,
+                    textid: field.name
+                }));
+                
+                // Create a button that can be clicked to change the field value
+                var chooseButton = valueField = Ti.UI.createButton({
+                    left: labelWidth + AD.UI.padding,
+                    top: 0,
+                    width: 120,
+                    height: AD.UI.buttonHeight
+                });
+                chooseButton.addEventListener('click', changeCallback);
+            }
+            fieldView.add(this.record(field.name, valueField));
+
             fieldsView.add(fieldView);
         }, this);
         
@@ -100,9 +151,11 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             height: AD.UI.buttonHeight,
             titleid: 'importTitle'
         }));
-        importButton.addEventListener('click', this.proxy(function() {
-            this.validate().done(this.proxy('import'));
-        }));
+        importButton.addEventListener('click', function() {
+            _this.validate().done(function() {
+                _this.import();
+            });
+        });
         
         // Create the import progress bar, which is initially hidden
         this.add('importProgress', Ti.UI.createProgressBar({
@@ -118,69 +171,88 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     
     // Set the initial contents of the form fields
     initialize: function() {
-        this.getChild('campus').title = AD.Localize('unspecified');
-        this.getChild('year').title = AD.Models.Year.cache.getById(this.year).year_label;
+        // Initialize the fields by calling updateCampus, updateYear, etc.
+        this.constructor.fields.forEach(function(field) {
+            this['update'+$.capitalize(field.name)]();
+        }, this);
         
         this.updateContactsView();
+    },
+    
+    // Choose which contacts to import
+    chooseContacts: function() {
+        var _this = this;
+        this.createWindow('ChooseContactsWindow', {
+            contacts: this.contacts
+        }).getDeferred().done(function(contacts) {
+            _this.contacts = contacts;
+            _this.updateContactsView();
+        });
+    },
+    
+    // Handlers for setting the campus, year, and tags applied to the imported contacts
+    changeCampus: function() {
+        var _this = this;
+        // Allow the user to choose the contacts' campus
+        return this.createWindow('ChooseOptionWindow', {
+            groupName: 'campus',
+            Model: 'Campus',
+            initial: this.campus_uuid,
+            editable: true
+        }).getDeferred().done(function(campus) {
+            // A campus was chosen
+            _this.campus_uuid = campus ? campus.getId() : null;
+        });
+    },
+    changeYear: function() {
+        var _this = this;
+        // Allow the user to choose the contacts' year
+        return this.createWindow('ChooseOptionWindow', {
+            groupName: 'year',
+            Model: 'Year',
+            initial: this.year_id
+        }).getDeferred().done(function(year) {
+            // A year was chosen
+            _this.year_id = year.getId();
+        });
+    },
+    changeTags: function() {
+        var _this = this;
+        // Allow the user to choose the contacts' associated tags
+        return this.createWindow('ChooseOptionsWindow', {
+            groupName: 'tag',
+            Model: 'Tag',
+            initial: $.Model.getIds(this.tags),
+            editable: true
+        }).getDeferred().done(function(tags) {
+            _this.tags = tags;
+        });
     },
     
     // Update the scrollable view that contains the names of the contacts
     updateContactsView: function() {
         this.getChild('contactsLabel').text = $.formatString('importingContacts', this.contacts.length);
     },
-    
-    // Handlers for allowing the user to change the contact's year, phone number, and e-mail address
-    changeCampus: function() {
-        // Allow the user to set the contact's campus
-        var campuses = AD.PropertyStore.get('campuses');
-        var $winChooseCampus = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
-            groupName: 'campus',
-            initial: campuses.indexOf(this.campus),
-            options: campuses,
-            editable: true,
-            onOptionsUpdate: function(campusesNew) {
-                AD.PropertyStore.set('campuses', campusesNew);
-            }
-        });
-        $winChooseCampus.getDeferred().done(this.proxy(function(campusName) {
-            // A campus was chosen
-            this.getChild('campus').title = this.campus = campusName.label;
-        }));
+
+    // Update the field labels
+    updateCampus: function() {
+        this.getChild('campus').title = this.campus_uuid ? AD.Models.Campus.cache.getById(this.campus_uuid).getLabel() : AD.Localize('unspecified');
     },
-    changeYear: function() {
-        // Allow the user to choose the year of this contact
-        var $winChooseYear = new AD.UI.ChooseOptionWindow({
-            tab: this.tab,
-            groupName: 'year',
-            initial: this.year - 1,
-            options: AD.UI.AddContactWindow.years
-        });
-        $winChooseYear.getDeferred().done(this.proxy(function(yearData) {
-            // A year was chosen
-            this.year = yearData.index + 1;
-            this.getChild('year').title = yearData.label;
-        }));
+    updateYear: function() {
+        this.getChild('year').title = AD.Models.Year.cache.getById(this.year_id).getLabel();
     },
-    
-    // Choose which contacts to import
-    chooseContacts: function() {
-        var _this = this;
-        var $winChooseContacts = new AD.UI.ChooseContactsWindow({ tab: this.options.tab, contacts: this.contacts });
-        $winChooseContacts.getDeferred().done(function(contacts) {
-            _this.contacts = contacts;
-            _this.updateContactsView();
-        });
+    updateTags: function() {
+        this.getChild('tags').text = $.Model.getLabels(this.tags).join(', ') || AD.Localize('none');
     },
     
     // Validate the contacts
     validate: function() {
         var warnDfd = $.Deferred();
         var missingFields = [];
-        if (!this.campus) {
+        if (!this.campus_uuid) {
             missingFields.push('campus');
         }
-        if (this.year === 1) {
+        if (this.year_id === 1) {
             missingFields.push('year');
         }
         if (this.contacts.length === 0) {
@@ -217,10 +289,14 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             
             var contactModel = AD.UI.AddContactWindow.createContact({
                 contact_recordId: contact.recordId,
-                year_id: this.year,
-                contact_campus: this.campus
+                campus_uuid: this.campus_uuid,
+                year_id: this.year_id,
             });
-            contactModel.save();
+            var tags = this.tags;
+            contactModel.save().done(function() {
+                // Set the tags AFTER saving the contact so that contact_uuid will be available
+                contactModel.setTags(tags);
+            });
         }, this);
         this.dfd.resolve();
     }

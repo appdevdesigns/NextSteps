@@ -29,18 +29,31 @@ var GroupTable = $.ModelTable('AppDev.UI.GroupTable', {
     
     // Called when a group row is selected
     onSelect: function(group) {
-        var tab = this.options.$window.tab;
-        
         // View the filtered contact list specified by the selected group
-        var $winContacts = new AD.UI.AppContactsWindow({
-            tab: tab,
+        var $window = this.$window;
+        $window.createWindow('AppContactsWindow', {
             group: group,
             actions: [{
                 title: 'edit',
                 callback: function() {
-                    AD.UI.AddGroupWindow.addGroup(tab, group);
+                    $window.createWindow('AddGroupWindow', { existingGroup: group });
                 },
-                rightNavButton: true
+                rightNavButton: true,
+                showAsAction: true,
+                icon: '/images/ic_action_edit.png'
+            }, {
+                title: 'del',
+                callback: function() {
+                    var _this = this;
+                    AD.UI.yesNoAlert('groupDeleteConfirmation').done(function() {
+                        // The user chose "Yes", so close the window and delete the group
+                        _this.dfd.reject();
+                        group.destroy();
+                    });
+                },
+                platform: 'Android',
+                showAsAction: true,
+                icon: '/images/ic_action_discard.png'
             }]
         });
     }
@@ -52,16 +65,17 @@ module.exports = $.Window('AppDev.UI.AppGroupsWindow', {
         title: 'add',
         callback: function() {
             // Create a new group
-            AD.UI.AddGroupWindow.addGroup(this.tab);
+            this.createWindow('AddGroupWindow');
         },
-        rightNavButton: true
+        rightNavButton: true,
+        showAsAction: true,
+        icon: '/images/ic_action_new.png'
     }]
 }, {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({
-            title: 'groupsTitle',
-            tab: options.tab
+            title: 'groupsTitle'
         });
         
         this.smartBind(AD.Models.Group, 'created', function(event, group) {

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="returnToApp">返回到应用程序?</string>
+    
+    <!-- Tab group labels -->
+    <string name="contactsTitle">联系人</string>
+    <string name="groupsTitle">小组</string>
+    <string name="statsTitle">统计报表</string>
+    <string name="toolsTitle">工具</string>
+    
+    <!-- Button labels used throughout the app -->
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="ok">可以</string>
+    <string name="add">添加</string>
+    <string name="edit">编辑</string>
+    <string name="del">删除</string>
+    <string name="save">保存</string>
+    <string name="submit">提交</string>
+    <string name="done">完成</string>
+    <string name="cancel">取消</string>
+    <string name="back">返回</string>
+    <string name="reset">重置</string>
+    <string name="sort">分类</string>
+    <string name="choose">选择</string>
+    
+    <!-- Contacts labels -->
+    <string name="addMethod">添加方法</string>
+    
+    <!-- ViewContact labels -->
+    <string name="contactDeleteConfirmation">你确定删除此联系人吗?</string>
+    <string name="contact_call">呼叫</string>
+    <string name="contact_SMS">短信</string>
+    <string name="contact_email">邮件</string>
+    <string name="personalStep">个人工序</string>
+    <string name="personalSteps">个人工序</string>
+    
+    <!-- AddContact labels -->
+    <string name="createContact">新建联系人</string>
+    <string name="editContact">编辑联系人</string>
+    <string name="importContact">导入联系人</string>
+    <string name="viewContact">查看联系人</string>
+    <string name="chooseContactTitle">选择联系人</string>
+    
+    <string name="create">创建</string>
+    <string name="massImport">批量导入</string>
+    <string name="name">姓名</string>
+    <string name="fullName">全名</string>
+    <string name="firstName">姓</string>
+    <string name="lastName">名</string>
+    <string name="nickname">昵称</string>
+    <string name="campus">大学</string>
+    <string name="year">年份</string>
+    <string name="tag">标签</string>
+    <string name="tags">标签</string>
+    <string name="none">无</string>
+    <string name="phone">电话</string>
+    <string name="phoneNumber">电话号码</string>
+    <string name="email">电子邮箱</string>
+    <string name="emailAddress">邮箱地址</string>
+    <string name="notes">备注</string>
+    
+    <string name="sortOrderTitle">设置排序顺序</string>
+    
+    <!-- ImportContacts labels -->
+    <string name="importContactsTitle">批量导入</string>
+    <string name="importHelp">选择你希望导出的联系人, 选择适合这些联系人的年份和学校, 然后点击导入。</string>
+    <string name="importTitle">导入</string>
+    <string name="importingContacts">需要导入的联系人 - {0}</string>
+    <string name="importStatus">正在导入联系人 {0} of {1}</string>
+    <string name="importNoContacts">选择需要导入的联系人。</string>
+    <string name="importWarning">你没有制定一个{0}。 你依然希望导入吗?</string>
+    <string name="or">或</string>
+    
+    <!-- Groups labels -->
+    <string name="addGroup">添加小组</string>
+    <string name="editGroup">编辑小组</string>
+    <string name="groupName">小组名称</string>
+    <string name="groupDeleteConfirmation">你确定要删除这个小组吗?</string>
+    <string name="unspecified">选择...</string>
+    <string name="all">所有</string>
+    <string name="invalidGroupName">请确定一个小组名称</string>
+    <string name="invalidOptionChoice">请选择一个 {0}</string>
+    <string name="invalidOptionMultichoice">请选择一个或多个 {0}</string>
+    <string name="invalidOptionMultichoiceAnd">要使用"所有"请选择两个或两个以上 {0}</string>
+    
+    <!-- Stats labels -->
+    <string name="statsHeaderSince">统计从\n{0}开始:</string>
+    <string name="statsHeaderEver">累计统计:</string>
+    <string name="saveStats">同步</string>
+    <string name="viewTotals">查看所有</string>
+    <string name="viewTotalsTitle">总统计</string>
+    <string name="statsConfirmSubmit">你是否确定要提交这个数据报表、重新开始一个新的数据采集会话？数据统计会得到保留。</string>
+    <string name="statsConfirmSave">你确定重新开始一个新的数据采集会话吗？数据统计会得到保留。</string>
+    <string name="statsMessageBody">数据报表会被递交{0} on {1}。\n\n{2}</string>
+    
+    <!-- Tools labels -->
+    <string name="backupRestoreInfoText">备份数据库或从谷歌驱动器中恢复数据库</string>
+    <string name="backupDatabase">备份</string>
+    <string name="restoreDatabase">恢复</string>
+    <string name="backupTitleFormat">下一步的数据转存 {0}/{1}/{2}</string>
+    <string name="stringPromptBackupTitle">下一步的数据备份</string>
+    <string name="stringPromptBackupMessage">为下一步数据库的备份选择文价夹名。</string>
+    <string name="restoreDatabaseWarning">从备份恢复数据库将替换所有现有的数据。你确定要继续？</string>
+</resources>

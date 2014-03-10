@@ -3,90 +3,74 @@ var $ = require('jquery');
 
 module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     setup: function() {
-        // When this class is created, create the static groupDefinition object
-        var groupDefinition = this.groupDefinition;
-        var addGroupField = function(fieldName, fieldData) {
-            groupDefinition[fieldName] = fieldData;
-        };
-        
-        addGroupField('contact_campus', {
-            name: 'campus',
-            type: 'choice',
-            data: function() {
-                return AD.PropertyStore.get('campuses');
-            },
-            params: {
-                editable: true,
-                onOptionsUpdate: function(campusesNew) {
-                    AD.PropertyStore.set('campuses', campusesNew);
-                }
-            }
-        });
-        addGroupField('year_label', {
-            name: 'year',
-            type: 'choice',
-            data: AD.Models.Year.cache.getArray().map(function(model) { return model.year_label; })
-        });
-        
-        $.each(AD.Models.Contact.steps, function(stepName, stepFieldName) {
-            addGroupField(stepFieldName, {
-                name: 'step_'+stepName,
-                type: 'bool'
-            });
-        });
     },
     dependencies: ['ChooseOptionWindow', 'Checkbox'],
     
-    groupDefinition: {},
-    rowHeight: AD.UI.buttonHeight + AD.UI.padding,
-    
-    // Quick function to display the add group window in a single function call
-    // Add a new group or update an existing group
-    addGroup: function(tab, existingGroup) {
-        // Open the 'Add Group' window in the current tab
-        var AddGroupWindow = this;
-        var $winAddGroup = new AddGroupWindow({tab: tab, existingGroup: existingGroup});
-        $winAddGroup.getDeferred().done(function(group) {
-            // 'group' is an AD.Models.Group model instance
-            
-            // Create/update the group's record in the database 
-            group.save();
-        });
-    },
+    fieldDefinitions: {},
+    fieldViewHeight: AD.UI.buttonHeight + AD.UI.padding,
     
     actions: [{
         title: 'save',
-        callback: function() {
-            this.save();
-        },
-        rightNavButton: true
-    }, {
-        title: 'del',
-        callback: function() {
-            // Close the window and delete the group
-            this.dfd.reject();
-            this.group.destroy();
-        },
-        enabled: function() {
-            return !this.adding;
-        },
-        platform: 'Android'
+        callback: 'save',
+        rightNavButton: true,
+        onClose: true,
+        showAsAction: true,
+        icon: '/images/ic_action_save.png'
     }, {
         title: 'cancel',
         callback: 'cancel', // special pre-defined callback to reject the deferred
-        leftNavButton: true,
-        backButton: true
+        leftNavButton: true
     }]
 }, {
     init: function(options) {
-        var _this = this;
+        var fieldDefinitions = this.constructor.fieldDefinitions;
+        var defineField = function(fieldName, fieldData) {
+            // Add a boolean property to quickly check the type of a field
+            // For example, fieldData.isChoice === true
+            fieldData.fieldName = fieldName;
+            fieldData['is'+$.capitalize(fieldData.type)] = true;
+            fieldDefinitions[fieldName] = fieldData;
+        };
+        // Define each of the supported group fields
+        defineField('tags', {
+            name: 'tags',
+            type: 'multichoice',
+            Model: 'Tag',
+            params: {
+                groupName: 'tag',
+                editable: true
+            }
+        });
+        defineField('year_id', {
+            name: 'year',
+            type: 'choice',
+            Model: 'Year'
+        });
+        defineField('campus_uuid', {
+            name: 'campus',
+            type: 'choice',
+            Model: 'Campus',
+            params: {
+                editable: true
+            },
+            onUpdate: function() {
+                this.updateSteps();
+            }
+        });
+        
+        AD.Models.Step.cache.getArray().forEach(function(step) {
+            defineField('steps '+step.getId(), {
+                name: step.getLabel(),
+                step: step,
+                type: 'bool'
+            });
+        });
         
         // If existingGroup is a 'truthy' value, we are editing, otherwise we are adding
         this.adding = this.options.existingGroup ? false : true;
         
         // Create a new local group model if necessary
         this.group = this.adding ? new AD.Models.Group({
-            viewer_id: AD.Viewer.viewer_id,
             group_name: '',
             group_filter: {}
         }) : this.options.existingGroup;
@@ -97,7 +81,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         // Initialize the base $.Window object
         this._super({
             title: this.adding ? 'addGroup' : 'editGroup',
-            tab: options.tab,
             autoOpen: true,
             focusedChild: this.adding ? 'name' : null,
             createParams: {
@@ -116,7 +99,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             height: Ti.UI.SIZE,
             textid: 'groupName'
         }));
-        this.add('name', Ti.UI.createTextField({
+        var name = this.add('name', Ti.UI.createTextField({
             left: AD.UI.padding,
             top: AD.UI.padding,
             width: AD.UI.useableScreenWidth,
@@ -127,8 +110,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         
         // Create the scrollable group fields container
         var $fieldsView = this.add('fieldsView', $.View.create(Ti.UI.createScrollView({
-            top: AD.UI.padding,
             left: 0,
+            top: AD.UI.padding,
             width: AD.UI.screenWidth,
             height: Ti.UI.FILL,
             layout: 'vertical',
@@ -136,66 +119,95 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             contentHeight: 'auto',
             showVerticalScrollIndicator: true
         })));
-        var _this = this;
         $fieldsView.getView().addEventListener('click', function() {
             // Hide the name keyboard
-            _this.getChild('name').blur();
+            name.blur();
         });
         
-        // Create a field row for each step
-        $.each(this.constructor.groupDefinition, this.proxy('createRow'));
+        // Create a field row for each group field
+        var filter = this.group.attr('group_filter');
+        $.each(this.constructor.fieldDefinitions, this.proxy(function(name, definition) {
+            var value = findProperty(filter, name);
+            var enabled = typeof value !== 'undefined';
+            var title = value || AD.Localize('unspecified');
+            if (value && definition.isChoice) {
+                // "value" refers to the primary key of the model, so lookup the associated model instance
+                var model = AD.Models[definition.Model].cache.getById(value);
+                if (model) {
+                    title = model.getLabel();
+                }
+                else {
+                    // This model instance does not exist anymore
+                    enabled = false;
+                }
+            }
+            else if (definition.isMultichoice) {
+                title = AD.Localize('unspecified');
+            }
+            var field = this.fields[name] = {
+                enabled: enabled,
+                value: enabled && value,
+                title: title
+            };
+            this.createRow(field, definition);
+        }));
     },
     
-    createRow: function(fieldName, fieldDefinition) {
-        var fields = this.fields; // fields is now a reference to this.field
+    createRow: function(field, fieldDefinition) {
+        var _this = this;
+        var onUpdate = function() {
+            if ($.isFunction(fieldDefinition.onUpdate)) {
+                fieldDefinition.onUpdate.call(_this, field.value);
+            }
+        };
         
         // Create the field row container
         var $fieldRow = $.View.create(Ti.UI.createView({
-            top: 0,
             left: 0,
+            top: 0,
             width: AD.UI.screenWidth,
-            height: this.constructor.rowHeight
+            height: this.constructor.fieldViewHeight,
         }));
         
         // Create the checkbox to toggle whether this field is included in the group
         var $enabledCheckbox = $fieldRow.add('enabled', new AD.UI.Checkbox({
             createParams: {
-                top: AD.UI.padding / 2,
-                left: AD.UI.padding
+                left: AD.UI.padding,
+                top: AD.UI.padding / 2
             },
-            value: false
+            value: field.enabled
         }));
         $enabledCheckbox.addEventListener('change', function(event) {
             // Enable/disable the row based on the value of the checkbox
-            var enabled = fields[fieldName].enabled = event.value;
+            var enabled = field.enabled = event.value;
             $fieldRow.get$Child('value').setEnabled(enabled);
         });
         
         // Create the field name label
-        $fieldRow.add(Ti.UI.createLabel({
-            top: 0,
+        var nameLabel = $fieldRow.add(Ti.UI.createLabel({
             left: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
-            width: Ti.UI.SIZE,
+            top: 0,
             height: Ti.UI.FILL,
             text: AD.Localize(fieldDefinition.name),
             font: AD.UI.Fonts.medium
         }));
         
-        var _this = this;
         var $valueView = null;
         
-        if (fieldDefinition.type === 'bool') {
+        if (fieldDefinition.isBool) {
             // Create the checkbox to toggle the value of this field
             var $valueCheckbox = $valueView = new AD.UI.Checkbox({
                 createParams: {
-                    top: AD.UI.padding / 2,
-                    right: AD.UI.padding
+                    right: AD.UI.padding,
+                    top: AD.UI.padding / 2
                 },
-                value: false
+                enabled: field.enabled,
+                value: field.value
             });
             $valueCheckbox.addEventListener('change', function(event) {
                 // Set the value of this field
-                fields[fieldName].value = event.value;
+                field.value = event.value;
+                onUpdate();
             });
             $enabledCheckbox.addEventListener('change', function(event) {
                 var enabled = event.value;
@@ -205,75 +217,116 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 }
             });
         }
-        else if (fieldDefinition.type === 'choice') {
-            var buttonSize = AD.Platform.isAndroid ? 80 : 120;
-            var $valueButton = $valueView = $.View.create(Ti.UI.createButton({
+        else if (fieldDefinition.isChoice || fieldDefinition.isMultichoice) {
+            var valueButtonWidth = 120;
+
+            var $conditionCheckbox = null;
+            if (fieldDefinition.isMultichoice) {
+                var conditions = AD.Models.Contact.filterConditions;
+                // Create the condition (any/all) checkbox
+                $conditionCheckbox = new AD.UI.Checkbox({
+                    createParams: {
+                        right: AD.UI.padding * 2 + valueButtonWidth,
+                        top: AD.UI.padding / 2
+                    },
+                    overlayText: AD.Localize('all').toUpperCase(),
+                    enabled: field.enabled,
+                    value: field.value.condition === conditions[1]
+                });
+                $conditionCheckbox.addEventListener('change', function(event) {
+                    field.value.condition = conditions[event.value ? 1 : 0];
+                    onUpdate();
+                });
+                $fieldRow.add('condition', $conditionCheckbox);
+            }
+            
+            var _this = this;
+            
+            var valueButton = Ti.UI.createButton({
                 right: AD.UI.padding,
                 top: AD.UI.padding / 2,
-                width: buttonSize,
-                height: AD.UI.buttonHeight
-            }));
-            var valueButton = $valueButton.getView();
-            $valueButton.addEventListener('click', function() {
-                // If fieldDefinition.data is a function execute it to get the true data
-                var options = $.isFunction(fieldDefinition.data) ? fieldDefinition.data() : fieldDefinition.data;
-                var $winChooseOption = new AD.UI.ChooseOptionWindow($.extend({
-                    tab: _this.options.tab,
+                width: valueButtonWidth,
+                height: AD.UI.buttonHeight,
+                title: field.enabled ? field.title : ''
+            });
+            $valueView = $.View.create(valueButton);
+            valueButton.addEventListener('click', function() {
+                // Assume that all choices are model instances
+                var params = $.extend({
                     groupName: fieldDefinition.name,
-                    initial: options.indexOf(fields[fieldName].value),
-                    options: options
-                }, fieldDefinition.params));
-                $winChooseOption.getDeferred().done(function(campusData) {
-                    // A campus was chosen, so set the value of the field in the filter
-                    valueButton.title = fields[fieldName].value = campusData.label;
-                });
+                    Model: fieldDefinition.Model,
+                }, fieldDefinition.params);
+                if (fieldDefinition.isChoice) {
+                    // This is a single choice field
+                    params.initial = field.value;
+                    var $winChooseOption = _this.createWindow('ChooseOptionWindow', params);
+                    $winChooseOption.getDeferred().done(function(option) {
+                        // An option was chosen, so set the value of the field in the filter
+                        field.value = option ? option.getId() : null;
+                        valueButton.title = option ? option.getLabel() : AD.Localize('unspecified');
+                        onUpdate();
+                    });
+                }
+                else {
+                    // This is a multi choice field
+                    params.initial = field.value.ids || [];
+                    var $winChooseOptions = _this.createWindow('ChooseOptionsWindow', params);
+                    $winChooseOptions.getDeferred().done(function(options) {
+                        // An option was chosen, so set the value of the field in the filter
+                        field.value.ids = $.Model.getIds(options);
+                        onUpdate();
+                    });
+                }
             });
             $enabledCheckbox.addEventListener('change', function(event) {
                 var enabled = event.value;
-                fields[fieldName].value = null;
+                field.value = enabled && fieldDefinition.isMultichoice ? {
+                    ids: [],
+                    condition: 'OR'
+                } : null;
+                onUpdate();
+                
                 // Reset the button's text
                 valueButton.title = enabled ? AD.Localize('unspecified') : '';
+
+                if ($conditionCheckbox) {
+                    $conditionCheckbox.setEnabled(enabled);
+                    if (!enabled) {
+                        $conditionCheckbox.setValue(false);
+                    }
+                }
             });
         }
         
-        $valueView.setEnabled(false);
+        nameLabel.right = $valueView.getView().width + AD.UI.padding * 2;
+
+        $valueView.setEnabled(field.enabled);
         $fieldRow.fieldDefinition = fieldDefinition;
         $fieldRow.add('value', $valueView);
-        
+
         // The row has the same name as the fieldname of the column in the database
-        this.get$Child('fieldsView').add(fieldName, $fieldRow);
+        this.get$Child('fieldsView').add(fieldDefinition.fieldName, $fieldRow);
     },
-    
+
     // Set the initial contents of the form fields
     initialize: function() {
         this.getChild('name').value = this.group.attr('group_name');
-        
-        // Initialize each of the set rows
-        var fields = this.fields; // this object was populated by this.create
-        var filter = this.group.attr('group_filter');
-        $.each(this.get$Child('fieldsView').children, function(stepFieldName, fieldRow) {
-            var enabled = typeof filter[stepFieldName] !== 'undefined';
-            var fieldData = fields[stepFieldName] = {
-                enabled: enabled,
-                value: enabled && filter[stepFieldName]
-            };
-            
-            var $fieldRow = fieldRow.get$View();
-            var $enabledCheckbox = $fieldRow.get$Child('enabled');
-            var $valueView = $fieldRow.get$Child('value');
-            
-            // Modify the enabled and value views to reflect their values in the group
-            $valueView.setEnabled(enabled);
-            $enabledCheckbox.setValue(fieldData.enabled);
-            var fieldType = $fieldRow.fieldDefinition.type; // custom property
-            if (fieldType === 'bool') {
-                var $valueCheckbox = $valueView;
-                $valueCheckbox.setEnabled(fieldData.enabled);
-                $valueCheckbox.setValue(fieldData.enabled && fieldData.value);
-            }
-            else if (fieldType === 'choice') {
-                var $valueButton = $valueView;
-                $valueButton.getView().title = fieldData.enabled ? fieldData.value : '';
+        this.updateSteps();
+    },
+    
+    // Show the steps fields that are associated with the selected campus and hide the others
+    updateSteps: function() {
+        var _this = this;
+        var group_campus_uuid = this.fields.campus_uuid.value;
+        $.each(this.get$Child('fieldsView').children, function(fieldName, fieldView) {
+            // If this field is a step, its fieldDefinition will have a
+            // step property referring to the field's associated step model
+            var step = fieldView.get$View().fieldDefinition.step;
+            if (step) {
+                var step_campus_uuid = step.attr('campus_uuid');
+                var isVisible = step_campus_uuid === null || step_campus_uuid === group_campus_uuid;
+                fieldView.visible = isVisible;
+                fieldView.height = isVisible ? _this.constructor.fieldViewHeight : 0;
             }
         });
     },
@@ -282,23 +335,37 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     save: function() {
         if (!this.getChild('name').value) {
             alert(AD.Localize('invalidGroupName'));
-            return;
+            return false;
         }
         
         // Build the filter object that will be stringified and inserted into the database
         var valid = true;
-        var groupDefinition = this.constructor.groupDefinition;
+        var fieldDefinitions = this.constructor.fieldDefinitions;
         var filter = {};
         $.each(this.fields, function(fieldName, fieldData) {
-            var fieldDefinition = groupDefinition[fieldName];
-            if (fieldDefinition.type === 'choice' && fieldData.enabled && fieldData.value === null) {
-                // No option has been chosen
-                alert($.formatString('invalidOptionChoice', fieldDefinition.name.toLowerCase()));
-                valid = false;
-                return false; // stop looping
+            var fieldValue = fieldData.value;
+            var fieldDefinition = fieldDefinitions[fieldName];
+            if (fieldData.enabled) {
+                var errorTemplate = null;
+                if (fieldDefinition.isChoice && fieldValue === null) {
+                    errorTemplate = 'invalidOptionChoice';
+                }
+                else if (fieldDefinition.isMultichoice && fieldValue.ids.length === 0) {
+                    errorTemplate = 'invalidOptionMultichoice';
+                }
+                else if (fieldDefinition.isMultichoice && fieldValue.condition === 'AND' && fieldValue.ids.length <= 1) {
+                    errorTemplate = 'invalidOptionMultichoiceAnd';
+                }
+                
+                if (errorTemplate) {
+                    // This field is not valid, so display the error message
+                    alert($.formatString(errorTemplate, fieldDefinition.name.toLowerCase()));
+                    valid = false;
+                    return false; // stop looping
+                }
             }
             if (fieldData.enabled) {
-                filter[fieldName] = fieldData.value;
+                findProperty(filter, fieldName, fieldData.value);
             }
         });
         
@@ -308,7 +375,33 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 group_name: this.getChild('name').value,
                 group_filter: filter
             });
+            this.group.save();
             this.dfd.resolve(this.group);
         }
+        return valid;
     }
 });
+
+// Find a property on object, optionally setting its value
+// This function supports multi-level properties:
+//    findProperty({ a: { b: { c: 'd' } } }, 'a b c') === 'd';
+//    findProperty({}, 'a b c', 'd') === { a: { b: { c: 'd' } } };
+var findProperty = function(object, property, value) {
+    var parts = property.split(' ');
+    var propertyName = parts.pop();
+    var source = object;
+    parts.forEach(function(partName) {
+        if (!source[partName]) {
+            source[partName] = {};
+        }
+        source = source[partName];
+    });
+    if (typeof value !== 'undefined') {
+        // Set the value of the property
+        return source[propertyName] = value;
+    }
+    else {
+        // Get the value of the property
+        return source[propertyName];
+    }
+};
