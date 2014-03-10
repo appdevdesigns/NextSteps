@@ -71,7 +71,7 @@
     <!-- Stats labels -->
     <string name="statsHeaderSince">Stats accumulated since\n{0}:</string>
     <string name="statsHeaderEver">Stats accumulated ever:</string>
-    <string name="saveStats">New session</string>
+    <string name="saveStats">Sync</string>
     <string name="viewTotals">View totals</string>
     <string name="viewTotalsTitle">Total stats</string>
     <string name="statsConfirmSubmit">Are you sure you want to submit the stats report and begin a new stats collection session?  Stats totals will be preserved.</string>
