@@ -356,8 +356,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         }).getDeferred().done(this.proxy(function(campus) {
             // A campus was chosen
             var label = campus ? campus.getLabel() : null;
-            this.attrs['campus_uuid'] = campus ? campus.getId() : null;
-            this.attrs['campus_label'] = label;
+            this.attrs.campus_uuid = campus ? campus.getId() : null;
+            this.attrs.campus_label = label;
             var campusLabel = this.getChild('campusLabel');
             campusLabel.text = campusLabel.title = label;
         }));
@@ -371,8 +371,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         }).getDeferred().done(this.proxy(function(year) {
             // A year was chosen
             var label = year.getLabel();
-            this.attrs['year_id'] = year.getId();
-            this.attrs['year_label'] = label;
+            this.attrs.year_id = year.getId();
+            this.attrs.year_label = label;
             var yearLabel = this.getChild('yearLabel');
             yearLabel.text = yearLabel.title = label;
         }));
@@ -385,8 +385,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             options: this.phoneNumbers
         }).getDeferred().done(this.proxy(function(phoneNumber) {
             // A phone number was chosen
-            this.attrs['contact_phone'] = phoneNumber.value;
-            this.attrs['contact_phoneId'] = phoneNumber.id;
+            this.attrs.contact_phone = phoneNumber.value;
+            this.attrs.contact_phoneId = phoneNumber.id;
             var phoneLabel = this.getChild('phoneLabel');
             phoneLabel.text = phoneLabel.title = phoneNumber.value;
         }));
@@ -399,8 +399,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             options: this.emailAddresses
         }).getDeferred().done(this.proxy(function(emailAddress) {
             // An email address was chosen
-            this.attrs['contact_email'] = emailAddress.value;
-            this.attrs['contact_emailId'] = emailAddress.id;
+            this.attrs.contact_email = emailAddress.value;
+            this.attrs.contact_emailId = emailAddress.id;
             var emailLabel = this.getChild('emailLabel');
             emailLabel.text = emailLabel.title = emailAddress.value;
         }));
@@ -417,8 +417,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         
         // regular expression testing on email
         // it passes all validate emails and rejects some common mistakes
-        if(this.attrs['contact_email'] !== null && (!/[^@]+@[^@]+\.[^@]+/.test(this.attrs['contact_email']))) {
-            alert("Email is not valid: " + this.attrs['contact_email']);
+        if(this.attrs.contact_email !== null && (!/[^@]+@[^@]+\.[^@]+/.test(this.attrs.contact_email))) {
+            alert("Email is not valid: " + this.attrs.contact_email);
         }
         
         // Apply the changes to the contact
