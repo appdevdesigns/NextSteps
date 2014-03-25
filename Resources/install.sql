@@ -17,9 +17,7 @@ CREATE TABLE IF NOT EXISTS nextsteps_contact (
     campus_uuid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_uuid) ON DELETE SET DEFAULT,
     year_id INTEGER NOT NULL DEFAULT 1,
     contact_phone TEXT,
-    contact_phoneId TEXT,
     contact_email TEXT,
-    contact_emailId TEXT,
     contact_notes TEXT
 );
 

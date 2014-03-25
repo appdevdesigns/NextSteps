@@ -14,26 +14,20 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     },
     dependencies: ['ChooseOptionWindow'],
     
-    // Return the first value in the multivalue dictionary with a name in priorities
-    getDefaultFromMultivalue: function(multivalue, priorities) {
-        var highestPriority = { value: null, id: null };
-        priorities.forEach(function(fieldName) {
-            var values = multivalue[fieldName];
-            if (values && values.length > 0) {
-                // Use the first value
-                highestPriority = {
-                    value: values[0],
-                    id: fieldName+':0'
-                };
-            }
+    // Return an array of all the values in a multivalue dictionary
+    flattenMultivalue: function(multivalue) {
+        var values = [];
+        $.each(multivalue, function(key, value) {
+            // "value" is an array of values
+            values = values.concat(value);
         });
-        return highestPriority;
+        return values;
     },
     
     // Return a new contact model instance
     createContact: function(attrs) {
         var localContact = attrs.contact_recordId === null ? null : Ti.Contacts.getPersonByID(attrs.contact_recordId);
-        var fullName = '', firstName = '', lastName = '', nickname = '', defaultPhone = {value: null, id: null}, defaultEmail = {value: null, id: null}, note = '';
+        var fullName = '', firstName = '', lastName = '', nickname = '', defaultPhone = null, defaultEmail = null, note = '';
         if (localContact) {
             fullName = localContact.fullName || '';
             firstName = localContact.firstName || '';
@@ -46,8 +40,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 lastName = lastName || (nameParts.length === 1 ? '' : nameParts[nameParts.length - 1]);
                 nickname = nickname || firstName;
             }
-            defaultPhone = this.getDefaultFromMultivalue(localContact.getPhone(), ['iPhone', 'mobile', 'home']);
-            defaultEmail = this.getDefaultFromMultivalue(localContact.getEmail(), ['home', 'work']);
+            
+            // Use the first phone number and email address as the default
+            defaultPhone = this.flattenMultivalue(localContact.phone)[0];
+            defaultEmail = this.flattenMultivalue(localContact.email)[0];
+            
             note = localContact.note || '';
         }
         var defaultYear = 1;
@@ -59,10 +56,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             contact_nickname: nickname,
             campus_uuid: null,
             year_id: defaultYear,
-            contact_phone: defaultPhone.value,
-            contact_phoneId: defaultPhone.id,
-            contact_email: defaultEmail.value,
-            contact_emailId: defaultEmail.id,
+            contact_phone: defaultPhone,
+            contact_email: defaultEmail,
             contact_notes: note
         };
         var mergedAttrs = $.extend(baseAttrs, attrs);
@@ -341,8 +336,8 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     // Set the initial contents of the form fields
     initialize: function() {
         var localContact = this.localContact;
-        this.phoneNumbers = localContact && AD.UI.ChooseOptionWindow.multivalueToOptionsArray(localContact.getPhone());
-        this.emailAddresses = localContact && AD.UI.ChooseOptionWindow.multivalueToOptionsArray(localContact.getEmail());
+        this.phoneNumbers = localContact && this.constructor.flattenMultivalue(localContact.phone);
+        this.emailAddresses = localContact && this.constructor.flattenMultivalue(localContact.email);
     },
     
     // Handlers for allowing the user to change the contact's campus, year, phone number, and e-mail address
@@ -381,12 +376,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         // Allow the user to choose the phone number to associate with this contact
         this.createWindow('ChooseOptionWindow', {
             groupName: 'phone',
-            initial: this.attrs.contact_phoneId,
+            initial: this.attrs.contact_phone,
             options: this.phoneNumbers
         }).getDeferred().done(this.proxy(function(phoneNumber) {
             // A phone number was chosen
             this.attrs.contact_phone = phoneNumber.value;
-            this.attrs.contact_phoneId = phoneNumber.id;
             var phoneLabel = this.getChild('phoneLabel');
             phoneLabel.text = phoneLabel.title = phoneNumber.value;
         }));
@@ -395,12 +389,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         // Allow the user to choose the email address to associate with this contact
         this.createWindow('ChooseOptionWindow', {
             groupName: 'email',
-            initial: this.attrs.contact_emailId,
+            initial: this.attrs.contact_email,
             options: this.emailAddresses
         }).getDeferred().done(this.proxy(function(emailAddress) {
             // An email address was chosen
             this.attrs.contact_email = emailAddress.value;
-            this.attrs.contact_emailId = emailAddress.id;
             var emailLabel = this.getChild('emailLabel');
             emailLabel.text = emailLabel.title = emailAddress.value;
         }));

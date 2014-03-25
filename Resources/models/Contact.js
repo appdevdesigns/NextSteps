@@ -128,9 +128,7 @@
                   campus_uuid:"varchar(36)",
                   year_id:"int(11)",
                   contact_phone:"text",
-                  contact_phoneId:"text",
                   contact_email:"text",
-                  contact_emailId:"text",
                   contact_notes:"text"
 
             },
