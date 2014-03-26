@@ -7,15 +7,21 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     // Return a deferred object that will resolve to a formatted string respresentation of the user's current location
     getStepCompletionLocation: function() {
         var locationDfd = $.Deferred();
-        AD.Location.getCurrentLocation('stepCompletionLocation', Ti.Geolocation.ACCURACY_LOW).done(function(locationResults) {
-            var coordinates = locationResults.coords;
-            locationDfd.resolve(parseFloat(coordinates.latitude).toFixed(5) + ',' + parseFloat(coordinates.longitude).toFixed(5));
-        }).fail(function(result) {
+        if (AD.Config.stepLocationEnabled()) {
+            AD.Location.getCurrentLocation('stepCompletionLocation', Ti.Geolocation.ACCURACY_LOW).done(function(locationResults) {
+                var coordinates = locationResults.coords;
+                locationDfd.resolve(parseFloat(coordinates.latitude).toFixed(5) + ',' + parseFloat(coordinates.longitude).toFixed(5));
+            }).fail(function(result) {
+                locationDfd.resolve(null);
+                if (result.message) {
+                    alert(result.message);
+                }
+            });
+        }
+        else {
+            // Step completion location tracking is disabled by the user
             locationDfd.resolve(null);
-            if (result.message) {
-                alert(result.message);
-            }
-        });
+        }
         return locationDfd.promise();
     },
     
