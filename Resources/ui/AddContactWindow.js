@@ -408,10 +408,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             }
         }, this);
         
-        // regular expression testing on email
-        // it passes all validate emails and rejects some common mistakes
-        if(this.attrs.contact_email !== null && (!/[^@]+@[^@]+\.[^@]+/.test(this.attrs.contact_email))) {
-            alert("Email is not valid: " + this.attrs.contact_email);
+        // Regular expression testing on email
+        // It passes all valid emails and rejects some common mistakes
+        var contact_email = this.attrs.contact_email;
+        if (contact_email && (!/[^@]+@[^@]+\.[^@]+/.test(contact_email))) {
+            alert('Email is not valid: ' + contact_email);
         }
         
         // Apply the changes to the contact
