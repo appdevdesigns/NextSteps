@@ -76,5 +76,6 @@ CREATE TABLE IF NOT EXISTS nextsteps_contact_step (
     contactstep_uuid TEXT PRIMARY KEY UNIQUE,
     contact_uuid TEXT NOT NULL REFERENCES nextsteps_contact(contact_uuid) ON DELETE CASCADE,
     step_uuid TEXT NOT NULL REFERENCES nextsteps_step_data(step_uuid) ON DELETE CASCADE,
-    step_date TEXT DEFAULT NULL
+    step_date TEXT DEFAULT NULL,
+    step_location TEXT DEFAULT NULL
 );
