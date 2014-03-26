@@ -6,6 +6,13 @@ module.exports = {
     // This will be called by app.js once the initialization is finished
     start: function() {
         console.log("DEBUG controller > Entered start()");
+        
+        require('app/Transactions');
+        AD.Transactions.initialize({
+            fileName: 'TransactionLog.json',
+            syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
+        });
+        
         var serverURL = AD.Config.getServer();
         
         if (!AD.Config.hasServer()) {
@@ -45,10 +52,7 @@ module.exports = {
         var sTitle;
         var sMessage;
         
-        var transactionLog = new AD.Transactions({
-            fileName: 'TransactionLog.json',
-            syncedModels: ['Contact', 'Campus', 'Step', 'ContactStep']
-        });
+        var transactionLog = AD.Transactions.getInstance();
 
         var ping = function(callback) {
             serverURL = AD.Config.getServer();
