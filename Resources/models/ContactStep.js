@@ -37,8 +37,8 @@
                   contactstep_uuid:"varchar(36)",
                   contact_uuid:"varchar(36)",
                   step_uuid:"varchar(36)",
-                  step_date:"date"
-
+                  step_date:"date",
+                  step_location:"varchar(30)"
             },
             lookupLabels: {
                 step_label: {

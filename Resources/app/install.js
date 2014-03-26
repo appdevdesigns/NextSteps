@@ -329,6 +329,10 @@ module.exports.upgraders = [{
         tables.nextsteps_step_data.data.forEach(function(step) {
             step.campus_uuid = null;
         });
+        // Add a step_location field to all contact steps
+        tables.nextsteps_contact_step.data.forEach(function(contactStep) {
+            contactStep.step_location = null;
+        });
         
         return database;
     }

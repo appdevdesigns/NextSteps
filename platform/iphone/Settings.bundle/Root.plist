@@ -17,6 +17,20 @@
 		<dict>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Store step location</string>
+			<key>Key</key>
+			<string>step_location_enabled_preference</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
 			<key>Title</key>
 			<string>Stats Reporting</string>
 		</dict>

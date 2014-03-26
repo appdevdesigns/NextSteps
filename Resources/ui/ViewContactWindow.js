@@ -4,6 +4,27 @@ var $ = require('jquery');
 module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     dependencies: ['AddContactWindow', 'DatePickerWindow', 'Checkbox'],
     
+    // Return a deferred object that will resolve to a formatted string respresentation of the user's current location
+    getStepCompletionLocation: function() {
+        var locationDfd = $.Deferred();
+        if (AD.Config.stepLocationEnabled()) {
+            AD.Location.getCurrentLocation('stepCompletionLocation', Ti.Geolocation.ACCURACY_LOW).done(function(locationResults) {
+                var coordinates = locationResults.coords;
+                locationDfd.resolve(parseFloat(coordinates.latitude).toFixed(5) + ',' + parseFloat(coordinates.longitude).toFixed(5));
+            }).fail(function(result) {
+                locationDfd.resolve(null);
+                if (result.message) {
+                    alert(result.message);
+                }
+            });
+        }
+        else {
+            // Step completion location tracking is disabled by the user
+            locationDfd.resolve(null);
+        }
+        return locationDfd.promise();
+    },
+    
     rowHeight: AD.UI.buttonHeight,
     
     contactMethods: [
@@ -328,8 +349,14 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             // The step's completion state has been changed
             stepCompleted = event.value;
             stepCompletedDate = stepCompleted ? $.today() : null;
-            contactStep.attr('step_date', stepCompletedDate).save();
+            contactStep.attr('step_date', stepCompletedDate);
             updateRow();
+            
+            // If the step is being "uncompleted", the step completion location will be set to null
+            var locationDfd = stepCompleted ? _this.constructor.getStepCompletionLocation() : null;
+            $.when(locationDfd).done(function(location) {
+                contactStep.attr('step_location', location).save();
+            });
         });
         $newRow.add($completedCheckbox);
         

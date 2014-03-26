@@ -6,6 +6,11 @@
         android:defaultValue=""
         android:summary="URL of the server to sync with"
         android:key="server_url_preference" />
+    <CheckBoxPreference
+        android:title="Store step location"
+        android:defaultValue="true"
+        android:summary="Record the physical location of step completions"
+        android:key="step_location_enabled_preference" />
     <PreferenceScreen
         android:title="Stats Reporting"
         android:summary="Click to see more options">
