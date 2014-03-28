@@ -53,7 +53,9 @@ module.exports = {
         var sMessage;
         
         var transactionLog = AD.Transactions.getInstance();
-
+        
+        var serverURL = null;
+        
         var ping = function(callback) {
             serverURL = AD.Config.getServer();
             AD.Comm.HTTP.get({
