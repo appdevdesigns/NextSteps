@@ -55,9 +55,7 @@ module.exports = {
         
         var ping = function(callback) {
             serverURL = AD.Config.getServer();
-            AD.Comm.HTTP.get({
-                url: 'http://'+serverURL+'/nsserver/ping'
-            }).done(callback).fail(function() {
+            AD.Comm.pingServer(serverURL).done(callback).fail(function() {
                 console.log();
                 AD.UI.yesNoAlert('Could not access the server. Please ensure that the server URL is correct and that you are connected to your VPN. Do you want to try again?').done(function() {
                     // Try again
