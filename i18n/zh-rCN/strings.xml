@@ -99,6 +99,10 @@
     <string name="backupRestoreInfoText">备份数据库或从谷歌驱动器中恢复数据库</string>
     <string name="backupDatabase">备份</string>
     <string name="restoreDatabase">恢复</string>
+    <string name="downloadingTitle">下载</string>
+    <string name="downloadingMessage">​服务器下载数据​</string>
+    <string name="syncingTitle">​进行同步​</string>
+    <string name="syncingMessage">与服务器同步数据</string>
     <string name="backupTitleFormat">下一步的数据转存 {0}/{1}/{2}</string>
     <string name="stringPromptBackupTitle">下一步的数据备份</string>
     <string name="stringPromptBackupMessage">为下一步数据库的备份选择文价夹名。</string>

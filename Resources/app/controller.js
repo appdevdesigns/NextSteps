@@ -49,9 +49,6 @@ module.exports = {
         require('app/Transactions');
         require('app/comm'); // Application-specific communications functions will be in app
         
-        var sTitle;
-        var sMessage;
-        
         var transactionLog = AD.Transactions.getInstance();
         
         var serverURL = null;
@@ -68,14 +65,6 @@ module.exports = {
                 });
             });
         };
-        
-        if(isInitial === true) {
-            sTitle = "Downloading";
-            SMessage = "Downloading data from the server";
-        } else {
-            sTitle = "Syncing";
-            SMessage = "Syncing data with the server";
-        }
         
         console.log("start ping()");
         ping(function() {
@@ -98,11 +87,10 @@ module.exports = {
             $winLoginWindow.open();
             $winLoginWindow.getDeferred().done(function() {
                 console.log('Login credentials are valid');
-                console.log("sMessage = " + sMessage);
                 require('ui/ProgressWindow');
                 var $winSyncWindow = new AD.UI.ProgressWindow({
-                    title: sTitle,
-                    message: sMessage
+                    title: isInitial ? 'downloadingTitle' : 'syncingTitle',
+                    message: isInitial ? 'downloadingMessage' : 'syncingMessage'
                 });
                 $winSyncWindow.open();
                 

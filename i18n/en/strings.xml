@@ -84,6 +84,10 @@
     <string name="backupDatabase">Backup</string>
     <string name="restoreDatabase">Restore</string>
     <string name="sync">Sync</string>
+    <string name="downloadingTitle">Downloading</string>
+    <string name="downloadingMessage">Downloading data from the server</string>
+    <string name="syncingTitle">Syncing</string>
+    <string name="syncingMessage">Syncing data with the server</string>
     <string name="backupTitleFormat">NextSteps database dump {0}/{1}/{2}</string>
     <string name="stringPromptBackupTitle">NextSteps Database Backup</string>
     <string name="stringPromptBackupMessage">Please choose the name of the NextSteps database backup file.</string>
