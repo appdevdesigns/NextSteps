@@ -96,7 +96,7 @@ module.exports = {
             
             console.log("open $winLoginWindow()");
             $winLoginWindow.open();
-            $winLoginWindow.getDeferred().then(function() {
+            $winLoginWindow.getDeferred().done(function() {
                 console.log('Login credentials are valid');
                 console.log("sMessage = " + sMessage);
                 require('ui/ProgressWindow');
@@ -117,7 +117,6 @@ module.exports = {
                 }).always(function() {
                     $winSyncWindow.close();
                 });
-            }, function() {
             });
         });
         console.log("DEBUG controller > Left performWholeSyncProcess()");
