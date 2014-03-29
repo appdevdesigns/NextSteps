@@ -4,7 +4,7 @@ var $ = require('jquery');
 module.exports = $.extend(AD.Comm, {
     pingServer: function(server) {
         return AD.Comm.HTTP.get({
-            url: 'http://'+server+'/nsserver/ping'
+            url: server+'/nsserver/ping'
         });
     },
     
@@ -15,11 +15,11 @@ module.exports = $.extend(AD.Comm, {
         
         // Get the CAS service ticket
         var cas = new AD.Comm.CAS({ casBaseUrl: casConfig.uri });
-        cas.getServiceTicket(username, password, 'http://'+server+'/'+casConfig.authURI).done(function(serviceTicket) {
+        cas.getServiceTicket(username, password, server+'/'+casConfig.authURI).done(function(serviceTicket) {
             console.log('CAS service ticket: ' + serviceTicket);
             AD.Comm.appdevRequest({
                 method: 'POST',
-                url: 'http://'+server+'/nsserver/auth',
+                url: server+'/nsserver/auth',
                 query: {
                     ticket: serviceTicket
                 },
@@ -45,7 +45,7 @@ module.exports = $.extend(AD.Comm, {
         var syncDfd = $.Deferred();
         AD.Comm.appdevRequest({
             method: 'POST',
-            url: 'http://'+server+'/nsserver/sync',
+            url: server+'/nsserver/sync',
             params: {
                 username: username,
                 password: password,
