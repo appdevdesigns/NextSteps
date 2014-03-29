@@ -65,15 +65,23 @@ module.exports = {
         };
         
         console.log("start ping()");
-        ping(function() {
+        ping(function(response) {
             console.log('Successfully contacted server: ' + serverURL);
+            
+            var casConfig = response.CAS;
             
             // Show login window
             // Check if pressing cancel will still continue to the login window
             var $winLoginWindow = new AD.UI.LoginWindow({
                 validateCredentials: function(username, password) {
-                    console.log('Validating credentials...');
-                    return AD.Comm.validateCredentials(serverURL, username, password);
+                    console.log('Attempting to authenticate...');
+                    var validateDfd = $.Deferred();
+                    AD.Comm.authenticate(serverURL, casConfig, username, password).done(function() {
+                        validateDfd.resolve(true);
+                    }).fail(function() {
+                        validateDfd.resolve(false);
+                    });
+                    return validateDfd.promise();
                 }
             });
             

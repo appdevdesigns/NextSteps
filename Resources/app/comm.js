@@ -9,24 +9,34 @@ module.exports = $.extend(AD.Comm, {
     },
     
     // Make an authentication request to the specified server using the provided username and password credentials
-    // Return a deferred object that will resolve to true if the credentials are valid, false if they are not
-    validateCredentials: function(server, username, password) {
-        return AD.Comm.appdevRequest({
-            method: 'POST',
-            url: 'http://'+server+'/nsserver/auth',
-            params: {
-                username: username,
-                password: password
-            }
-        }).then(function(response) {
-            console.log("response (done) = ");
+    // Return a deferred object that will be resolved if the credentials are valid and rejected if they are invalid
+    authenticate: function(server, casConfig, username, password) {
+        var authenticateDfd = $.Deferred();
+        
+        // Get the CAS service ticket
+        var cas = new AD.Comm.CAS({ casBaseUrl: casConfig.uri });
+        cas.getServiceTicket(username, password, 'http://'+server+'/'+casConfig.authURI).done(function(serviceTicket) {
+            console.log('CAS service ticket: ' + serviceTicket);
+            AD.Comm.appdevRequest({
+                method: 'POST',
+                url: 'http://'+server+'/nsserver/auth',
+                query: {
+                    ticket: serviceTicket
+                },
+                params: {
+                    username: username,
+                    password: password
+                }
+            }).done(authenticateDfd.resolve).fail(authenticateDfd.reject).fail(function(response) {
+                console.log('Authentication failed:');
+                console.log(response);
+            });
+        }).fail(authenticateDfd.reject).fail(function(response) {
+            console.log('getServiceTicket failed:');
             console.log(response);
-            return true;
-        }, function(response) {
-            console.log("response (fail) = ");
-            console.log(response);
-            return false;
-        }).promise();
+        });
+        
+        return authenticateDfd.promise();
     },
     
     // Send the provided transactions to the server and return a deferred
