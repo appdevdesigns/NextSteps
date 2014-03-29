@@ -15,11 +15,7 @@ module.exports = {
         
         var serverURL = AD.Config.getServer();
         
-        if (!AD.Config.hasServer()) {
-            if (!AD.Platform.isiOS) {
-                alert("You are in offline mode. To sync with server, go to Tools -> Preferences.");
-            }
-        } else if (serverURL !== AD.PropertyStore.get('lastSyncServer')) {
+        if (AD.Config.hasServer() && serverURL !== AD.PropertyStore.get('lastSyncServer')) {
             console.log("AD.PropertyStore = " + AD.PropertyStore);
             console.log("lastSyncServer = " + AD.PropertyStore.get('lastSyncServer'));
             console.log("serverURL = " + serverURL);
@@ -33,10 +29,7 @@ module.exports = {
         var serverURL = AD.Config.getServer();
         
         if (!AD.Config.hasServer()) {
-            console.log('Does not have server specified.');
-            if (!AD.Platform.isiOS) {
-                alert("Please specify the server first. To specify the server, go to Preferences -> Sync Options.");
-            }
+            alert(AD.Localize('syncErrorNoServer'));
         } else {
             this.performWholeSyncProcess(false);
         }
@@ -56,8 +49,7 @@ module.exports = {
         var ping = function(callback) {
             serverURL = AD.Config.getServer();
             AD.Comm.pingServer(serverURL).done(callback).fail(function() {
-                console.log();
-                AD.UI.yesNoAlert('Could not access the server. Please ensure that the server URL is correct and that you are connected to your VPN. Do you want to try again?').done(function() {
+                AD.UI.yesNoAlert('syncErrorPingFailed').done(function() {
                     // Try again
                     ping(callback);
                 });
@@ -103,7 +95,7 @@ module.exports = {
                     transactionLog.apply(transactions);
                     transactionLog.clear();
                 }).fail(function() {
-                    alert('Problem encountered when accessing the server. Please try again later.'); // move this one after closing the sync window
+                    alert(AD.Localize('syncErrorUnknown')); // move this one after closing the sync window
                 }).always(function() {
                     $winSyncWindow.close();
                 });

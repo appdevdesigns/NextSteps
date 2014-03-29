@@ -84,6 +84,9 @@
     <string name="backupDatabase">Backup</string>
     <string name="restoreDatabase">Restore</string>
     <string name="sync">Sync</string>
+    <string name="syncErrorNoServer">No sync server specified! Please enter the sync server URL in the application preferences.</string>
+    <string name="syncErrorPingFailed">Could not access the sync server. Please ensure that the sync server URL is correct and that you are connected to your VPN. Do you want to try again?</string>
+    <string name="syncErrorUnknown">An error occurred while accessing the sync server. Please try again later.</string>
     <string name="downloadingTitle">Downloading</string>
     <string name="downloadingMessage">Downloading data from the server</string>
     <string name="syncingTitle">Syncing</string>

@@ -99,6 +99,9 @@
     <string name="backupRestoreInfoText">备份数据库或从谷歌驱动器中恢复数据库</string>
     <string name="backupDatabase">备份</string>
     <string name="restoreDatabase">恢复</string>
+    <string name="syncErrorNoServer">没有指定的同步服务器！请在应用程序首选项中输入同步服务器的网址。</string>
+    <string name="syncErrorPingFailed">无法连接到服务器。请确定​同步服务器的网址是正确的。也确定你​连接到VPN。​你希望再试一次？</string>
+    <string name="syncErrorUnknown">连接​同步服务器时发生错误。请​稍后再试。</string>
     <string name="downloadingTitle">下载</string>
     <string name="downloadingMessage">​服务器下载数据​</string>
     <string name="syncingTitle">​进行同步​</string>
