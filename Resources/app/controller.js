@@ -67,23 +67,19 @@ module.exports = {
         console.log("start ping()");
         ping(function() {
             console.log('Successfully contacted server: ' + serverURL);
-            var sUsername;
-            var sPassword;
             
             // Show login window
             // Check if pressing cancel will still continue to the login window
             var $winLoginWindow = new AD.UI.LoginWindow({
                 validateCredentials: function(username, password) {
                     console.log('Validating credentials...');
-                    sUsername = username;
-                    sPassword = password;
                     return AD.Comm.validateCredentials(serverURL, username, password);
                 }
             });
             
             console.log("open $winLoginWindow()");
             $winLoginWindow.open();
-            $winLoginWindow.getDeferred().done(function() {
+            $winLoginWindow.getDeferred().done(function(credentials) {
                 console.log('Login credentials are valid');
                 require('ui/ProgressWindow');
                 var $winSyncWindow = new AD.UI.ProgressWindow({
@@ -95,7 +91,7 @@ module.exports = {
                 console.log("start syncWithServer()");
                 console.log("transactionLog sent = ");
                 console.log(transactionLog.get());
-                AD.Comm.syncWithServer(serverURL, transactionLog.get(), sUsername, sPassword).done(function(transactions) {
+                AD.Comm.syncWithServer(serverURL, transactionLog.get(), credentials.username, credentials.password).done(function(transactions) {
                     transactionLog.apply(transactions);
                     transactionLog.clear();
                 }).fail(function() {
