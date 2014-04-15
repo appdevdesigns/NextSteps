@@ -52,7 +52,8 @@ module.exports = $.extend(AD.Comm, {
                 lastSyncTimestamp: AD.PropertyStore.get('lastSyncTimestamp') || 0,
                 appVersion: AD.Defaults.version,
                 transactionLog: transactions
-            }
+            },
+            timeout: 300000 // five minutes
         }).done(function(response) {
             console.log("syncWithServer() >> response (done) = ");
             console.log(response);
