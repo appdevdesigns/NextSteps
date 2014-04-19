@@ -423,30 +423,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             // Create/update the contact's record in the database unless
             // explicitly prevented by the autoSave option being set to false
             this.contact.save();
-            
-            var campus_uuid = this.contact.attr('campus_uuid');
-            if (campus_uuid && campus_uuid !== oldCampus_uuid) {
-                // The contact's campus changed, so create the missing ContactStep entries
-                var contact_uuid = this.contact.getId();
-                var existingContactSteps = this.contact.getSteps();
-                var indexedExistingContactSteps = $.indexArray(existingContactSteps, 'step_uuid');
-                var steps = AD.Models.Step.cache.query({
-                    campus_uuid: campus_uuid
-                });
-                steps.forEach(function(step) {
-                    var step_uuid = step.getId();
-                    if (!indexedExistingContactSteps[step_uuid]) {
-                        // The ContactStep for this contact-step pair does not yet exist, so create it now
-                        var contactStep = new AD.Models.ContactStep({
-                            contact_uuid: contact_uuid,
-                            step_uuid: step_uuid,
-                            step_label: step.getLabel(),
-                            step_date: null
-                        });
-                        contactStep.save();
-                    }
-                });
-            }
         }
         
         this.dfd.resolve(this.contact);

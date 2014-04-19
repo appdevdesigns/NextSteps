@@ -226,7 +226,37 @@
                 return !step.attr('campus_uuid');
             });
         },
-
+        
+        // Create the ContactStep entries for the contact's current campus
+        createContactSteps: function() {
+            var campus_uuid = this.attr('campus_uuid');
+            // The contact's campus changed, so ensure that it has ContactStep entries for its new campus
+            if (!campus_uuid) {
+                // Ignore because the contact does not have a campus
+                return;
+            }
+            
+            var contact_uuid = this.getId();
+            var existingContactSteps = this.getSteps();
+            var indexedExistingContactSteps = $.indexArray(existingContactSteps, 'step_uuid');
+            var steps = AD.Models.Step.cache.query({
+                campus_uuid: campus_uuid
+            });
+            steps.forEach(function(step) {
+                var step_uuid = step.getId();
+                if (!indexedExistingContactSteps[step_uuid]) {
+                    // The ContactStep for this contact-step pair does not yet exist, so create it now
+                    var contactStep = new AD.Models.ContactStep({
+                        contact_uuid: contact_uuid,
+                        step_uuid: step_uuid,
+                        step_label: step.getLabel(),
+                        step_date: null
+                    });
+                    contactStep.save();
+                }
+            });
+        },
+        
         // Return an array of the Step models associated with this contact
         // Completed steps are returned, regardless of their associated campus
         getSteps: function() {
@@ -293,6 +323,20 @@
                 }
             }));
             return matches;
+        }
+    });
+    
+    // Ensure that contacts always have the appropriate ContactStep entries for their campus
+    // Create the ContactSteps when the contact is created or when the campus is changed
+    Model.bind('created', function(event, contact) {
+        contact.createContactSteps();
+    });
+    // Listen for changes to any contact's campus_uuid field
+    Model.bind('campus_uuid', function(event, contact, campus_uuid) {
+        // The ContactSteps reference the contact_uuid in the database, so
+        // only create them if the contact has been saved to the database 
+        if (contact.isSaved) {
+            contact.createContactSteps();
         }
     });
     
