@@ -57,10 +57,8 @@ module.exports = {
         };
         
         console.log("start ping()");
-        ping(function(response) {
-            console.log('Successfully contacted server: ' + serverURL);
-            
-            var casConfig = response.CAS;
+        ping(function(apiConfig) {
+            console.log('Successfully contacted server: ' + apiConfig.server);
             
             // Show login window
             // Check if pressing cancel will still continue to the login window
@@ -68,7 +66,7 @@ module.exports = {
                 validateCredentials: function(username, password) {
                     console.log('Attempting to authenticate...');
                     var validateDfd = $.Deferred();
-                    AD.Comm.authenticate(serverURL, casConfig, username, password).done(function() {
+                    AD.Comm.authenticate(apiConfig, username, password).done(function() {
                         validateDfd.resolve(true);
                     }).fail(function() {
                         validateDfd.resolve(false);
@@ -91,7 +89,7 @@ module.exports = {
                 console.log("start syncWithServer()");
                 console.log("transactionLog sent = ");
                 console.log(transactionLog.get());
-                AD.Comm.syncWithServer(serverURL, transactionLog.get(), credentials.username, credentials.password).done(function(transactions) {
+                AD.Comm.syncWithServer(apiConfig, transactionLog.get(), credentials.username, credentials.password).done(function(transactions) {
                     transactionLog.apply(transactions);
                     transactionLog.clear();
                 }).fail(function() {

@@ -5,21 +5,30 @@ module.exports = $.extend(AD.Comm, {
     pingServer: function(server) {
         return AD.Comm.HTTP.get({
             url: server+'/nsserver/ping'
+        }).then(function(response) {
+            // Tweak the API configuration response to make it more useful
+            var apiConfig = response;
+            apiConfig.server = server;
+            // Prepend the server url to each of the uri paths so that they will be fully qualified URLs
+            $.each(apiConfig.uris, function(key, uri) {
+                apiConfig.uris[key] = server + uri;
+            });
         });
     },
     
     // Make an authentication request to the specified server using the provided username and password credentials
     // Return a deferred object that will be resolved if the credentials are valid and rejected if they are invalid
-    authenticate: function(server, casConfig, username, password) {
+    authenticate: function(apiConfig, username, password) {
         var authenticateDfd = $.Deferred();
         
         // Get the CAS service ticket
+        var casConfig = apiConfig.CAS;
         var cas = new AD.Comm.CAS({ casBaseUrl: casConfig.uri });
-        cas.getServiceTicket(username, password, server+'/'+casConfig.authURI).done(function(serviceTicket) {
+        cas.getServiceTicket(username, password, apiConfig.server + '/' + casConfig.authURI).done(function(serviceTicket) {
             console.log('CAS service ticket: ' + serviceTicket);
             AD.Comm.appdevRequest({
                 method: 'POST',
-                url: server+'/nsserver/auth',
+                url: apiConfig.uris.auth,
                 query: {
                     ticket: serviceTicket
                 },
@@ -41,11 +50,11 @@ module.exports = $.extend(AD.Comm, {
     
     // Send the provided transactions to the server and return a deferred
     // that will resolve to the transaction log received from the server
-    syncWithServer: function(server, transactions, username, password) {
+    syncWithServer: function(apiConfig, transactions, username, password) {
         var syncDfd = $.Deferred();
         AD.Comm.appdevRequest({
             method: 'POST',
-            url: server+'/nsserver/sync',
+            url: apiConfig.uris.sync,
             params: {
                 username: username,
                 password: password,
@@ -57,7 +66,7 @@ module.exports = $.extend(AD.Comm, {
         }).done(function(response) {
             console.log("syncWithServer() >> response (done) = ");
             console.log(response);
-            AD.PropertyStore.set('lastSyncServer', server);
+            AD.PropertyStore.set('lastSyncServer', apiConfig.server);
             AD.PropertyStore.set('lastSyncTimestamp', response.data.lastSyncTimestamp);
             syncDfd.resolve(response.data.transactionLog);
         }).fail(syncDfd.reject);
