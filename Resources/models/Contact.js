@@ -75,42 +75,31 @@
                 }
             }
         },
-
-        // Calculate the stats information between startDate and endDate inclusive
-        // The parameters can be set to null to remove that bound
-        // Return an object whose keys represent fieldnames and values represents the number of contacts who have completed the step
-        //{
-        //    contact_preEv: 24,
-        //    contact_conversation: 17,
-        //    contact_Gpresentation: 15,
-        //    contact_decision: 7,
-        //    contact_finishedFU: 9,
-        //    contact_HSpresentation: 10,
-        //    contact_engaged: 5,
-        //    contact_ministering: 9,
-        //    contact_multiplying: 8
-        //}
-        getStats: function(startDate, endDate) {
-            var steps = AD.Models.Step.cache.getArray();
-            
-            // Initialize the stats object
+        
+        // Return the stats data of every step
+        getAllStats: function(startDate, endDate) {
             var stats = {};
-            steps.forEach(function(step) {
-                stats[step.getId()] = 0;
-            });
-            
-            // For each contact, determine whether any steps have been taken since the last stats report
-            this.cache.getArray().forEach(function(contact) {
-                steps.forEach(function(step) {
-                    var stepId = step.getId();
-                    var stepCompletionDate = contact.getStep(stepId).attr('step_date');
-                    // The step must have been taken and between the start and end dates, if they were specified
-                    if (stepCompletionDate && (!startDate || stepCompletionDate >= startDate) && (!endDate || stepCompletionDate <= endDate)) {
-                        ++stats[stepId];
-                    }
-                });
-            });
+            AD.Models.Step.cache.getArray().forEach(function(step) {
+                var step_uuid = step.getId();
+                stats[step_uuid] = this.getStepStats(step_uuid, startDate, endDate);
+            }, this);
             return stats;
+        },
+        
+        // Calculate the stats data for the specified step between startDate and endDate inclusive
+        // The date parameters can be set to null to remove that bound
+        getStepStats: function(step_uuid, startDate, endDate) {
+            var completed = 0;
+            AD.Models.ContactStep.cache.query({
+                step_uuid: step_uuid
+            }).forEach(function(contactStep) {
+                var stepCompletionDate = contactStep.attr('step_date');
+                // The step must have been completed between the start and end dates, if they were specified
+                if (stepCompletionDate && (!startDate || stepCompletionDate >= startDate) && (!endDate || stepCompletionDate <= endDate)) {
+                    ++completed;
+                }
+            });
+            return completed;
         }
     };
     

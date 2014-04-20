@@ -1,30 +1,12 @@
 var AD = require('AppDev');
 var $ = require('jquery');
 var controller = require('app/controller');
-var ViewTotalsWindow = $.Window('AppDev.UI.ViewTotalsWindow', {}, {
-    init: function(options) {
-        // Initialize the base $.Window object
-        this._super({
-            title: 'viewTotalsTitle',
-            autoOpen: true
-        });
-    },
-    
-    // Create the child views
-    create: function() {
-        // Create the scrollable stats container
-        var $statsView = new StatsView({
-            lastUpdatePropertyName: 'lastStatsReset' // a property in AD.PropertyStore
-        });
-        this.add('statsView', $statsView);
-    }
-});
 
 // Create a stats container, complete with a header label and footer view
 var StatsView = $.View('AppDev.UI.StatsView', {}, {
     init: function(options) {
-        this.footerPresent = typeof this.options.footerHeight !== 'undefined';
-        this.footerHeight = this.footerPresent ? this.options.footerHeight : 0;
+        this.hasFooter = typeof this.options.footerHeight !== 'undefined';
+        this.footerHeight = this.options.footerHeight || 0;
         
         // Create the stats containing view
         var statsView = Ti.UI.createView({
@@ -34,9 +16,8 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         // The stats view is the view's view
         this._super({view: statsView});
         
-        this.smartBind(AD.Models.Contact, '*', this.update);
         this.smartBind(AD.Models.Step, '*', this.update);
-        this.smartBind(AD.Models.ContactStep, '*', this.update);
+        this.smartBind(AD.Models.ContactStep, '*', this.refreshStats);
     },
     
     // Create the child views
@@ -51,18 +32,12 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
             font: AD.UI.Fonts.header
         }));
         
-        // Create the scrollable stats container
-        this.add('statsTable', $.View.create(Ti.UI.createScrollView({
-            left: 0,
-            top: 50,
-            width: AD.UI.screenWidth,
-            height: Ti.UI.SIZE,
-            scrollType: 'vertical',
-            contentHeight: Ti.UI.SIZE,
-            showVerticalScrollIndicator: true
-        })));
+        // Create the stats container
+        this.$statsTable = this.add('statsTable', new StatsTable({
+            $window: this
+        }));
         
-        if (this.footerPresent) {
+        if (this.hasFooter) {
             // Create the abstract footer view
             this.add('footerView', Ti.UI.createView({
                 left: 0,
@@ -78,7 +53,7 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         this.update();
     },
     
-    // Update the window's contents
+    // Update the entire stats view UI
     update: function() {
         var startDateString = AD.PropertyStore.get(this.options.lastUpdatePropertyName);
         var startDate = startDateString ? new Date(parseInt(startDateString, 10)) : null;
@@ -86,60 +61,68 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         var headerHeight = startDate ? 60 : 30;
         this.getChild('headerLabel').text = headerText;
         
-        var $statsTable = this.get$Child('statsTable');
-        var statsTable = $statsTable.getView();
+        var statsTable = this.$statsTable.table;
         statsTable.top = headerHeight + AD.UI.padding;
         statsTable.bottom = this.footerHeight + AD.UI.padding * 2;
         
-        // Create the stats rows, one for each step
-        var stats = AD.Models.Contact.getStats(startDate, null);
-        AD.Models.Step.cache.getArray().forEach(function(step, index) {
-            $statsTable.add(new StatRow({
-                index: index,
-                label: step.getLabel(),
-                count: stats[step.getId()]
-            }));
-        });
+        this.refreshStats();
+    },
+    
+    // Refresh the stats values
+    refreshStats: function() {
+        this.$statsTable.refreshStats();
     }
 });
 
-var StatRow = $.View('AppDev.UI.StatRow', {
+// Create a ModelTable subclass that represents the stats table
+var StatsTable = $.ModelTable('AppDev.UI.StatsTable', {
     rowHeight: 40,
     font: AD.UI.Fonts.mediumSmall
 }, {
     init: function(options) {
-        // Create the stat row containing view
-        var rowView = Ti.UI.createView({
-            left: AD.UI.padding,
-            top: this.options.index * this.constructor.rowHeight,
-            width: AD.UI.useableScreenWidth,
-            height: this.constructor.rowHeight,
-            backgroundColor: (this.options.index % 2 === 0) ? 'white' : '#CCC' // alternate background colors
+        this._super({
+            $window: this.options.$window,
+            Model: AD.Models.Step
         });
         
-        // The row is the view's view
-        this._super({view: rowView});
+        this.refreshStats();
     },
     
-    // Create the child views
-    create: function() {
+    // Create and return a table view row that represents the contact
+    createRow: function(step) {
+        // Create a table view row that represents this step
+        var $statRow = $.View.create(Ti.UI.createTableViewRow({
+            height: this.constructor.rowHeight
+        }));
+        
         var font = this.constructor.font;
-        this.add(Ti.UI.createLabel({
-            left: 0,
-            text: (this.options.index + 1) + '.',
+        $statRow.add('index', Ti.UI.createLabel({
+            left: AD.UI.padding,
+            text: null,
             font: font
         }));
-        this.add(Ti.UI.createLabel({
-            left: 30,
-            right: 30,
-            text: this.options.label,
+        $statRow.add('label', Ti.UI.createLabel({
+            left: 40,
+            right: 40,
+            text: step.getLabel(),
             font: font
         }));
-        this.add(Ti.UI.createLabel({
-            right: 0,
-            text: this.options.count,
+        $statRow.add('stat', Ti.UI.createLabel({
+            right: AD.UI.padding,
+            text: null,
             font: font
         }));
+        
+        return $statRow.getView();
+    },
+    
+    // Refresh the stats values
+    refreshStats: function(startDate, endDate) {
+        $.each(this.modelRows, function(step_uuid, row) {
+            var $statRow = row.get$View();
+            $statRow.getChild('stat').text = AD.Models.Contact.getStepStats(step_uuid, startDate, endDate);
+            $statRow.getChild('index').text = row.index + 1 + '.';
+        });
     }
 });
 
@@ -171,9 +154,8 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
             lastUpdatePropertyName: this.constructor.lastUpdatePropertyName
         }));
         
-        var headerLabel = $statsView.children.headerLabel;
-        var statsTable = $statsView.children.statsTable;
-        var footerView = $statsView.children.footerView;
+        var headerLabel = $statsView.getChild('headerLabel');
+        var footerView = $statsView.getChild('footerView');
         
         // Create the view totals button
         var _this = this;
@@ -235,24 +217,26 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
                     messageBody: messageBody
                 });
                 emailDialog.open();
-                // Do not actually send the e-mail until the AppDev e-mail service is fully implemented
-                /*
-                AD.ServiceJSON.post({
-                    url: '/site/email/send',
-                    params: {
-                        to: address,
-                        subject: $.formatDate(today)+' Stats Report',
-                        body: messageBody
-                    },
-                    success: function(data) {
-                        alert('Stats report email successfully sent!');
-                    },
-                    failure: function(data) {
-                        alert('Stats report email failed to send!');
-                    }
-                });
-                */
             }
         }));
+    }
+});
+
+var ViewTotalsWindow = $.Window('AppDev.UI.ViewTotalsWindow', {}, {
+    init: function(options) {
+        // Initialize the base $.Window object
+        this._super({
+            title: 'viewTotalsTitle',
+            autoOpen: true
+        });
+    },
+    
+    // Create the child views
+    create: function() {
+        // Create the scrollable stats container
+        var $statsView = new StatsView({
+            lastUpdatePropertyName: 'lastStatsReset' // a property in AD.PropertyStore
+        });
+        this.add('statsView', $statsView);
     }
 });
