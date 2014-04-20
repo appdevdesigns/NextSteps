@@ -58,7 +58,7 @@ module.exports = $.extend(AD.Comm, {
             params: {
                 username: username,
                 password: password,
-                lastSyncTimestamp: AD.PropertyStore.get('lastSyncTimestamp') || 0,
+                lastSyncTimestamp: (apiConfig.server === AD.PropertyStore.get('lastSyncServer')) ? AD.PropertyStore.get('lastSyncTimestamp') : 0,
                 appVersion: AD.Defaults.version,
                 transactionLog: transactions
             },
