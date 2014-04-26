@@ -90,8 +90,10 @@ module.exports = {
                 console.log("transactionLog sent = ");
                 console.log(transactionLog.get());
                 AD.Comm.syncWithServer(apiConfig, transactionLog.get(), credentials.username, credentials.password).done(function(transactions) {
-                    transactionLog.apply(transactions);
                     transactionLog.clear();
+                    transactionLog.pause();
+                    transactionLog.apply(transactions);
+                    transactionLog.resume();
                 }).fail(function() {
                     alert(AD.Localize('syncErrorUnknown')); // move this one after closing the sync window
                 }).always(function() {

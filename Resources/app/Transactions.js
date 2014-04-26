@@ -41,17 +41,21 @@ $.Class('AppDev.Transactions', {
         });
         this.transactions = this.transactionStore.getData();
         
+        this.active = true;
+        
         this.options.syncedModels.forEach(function(modelName) {
             // Listen for updates to the model and record all the transactions
             var Model = AD.Models[modelName];
             _this.constructor.operations.forEach(function(operation) {
                 Model.bind(operation.event, function(event, model) {
-                    _this.transactions.push({
-                        model: modelName,
-                        operation: operation.name,
-                        params: model.attrs()
-                    });
-                    _this.save();
+                    if (_this.active) {
+                        _this.transactions.push({
+                            model: modelName,
+                            operation: operation.name,
+                            params: model.attrs()
+                        });
+                        _this.save();
+                    }
                 });
             });
         });
@@ -72,6 +76,16 @@ $.Class('AppDev.Transactions', {
     // Save the transactions to the persistent file store
     save: function() {
         this.transactionStore.flush();
+    },
+    
+    // Stop recording transations
+    pause: function() {
+        this.active = false;
+    },
+    
+    // Stop recording transations
+    resume: function() {
+        this.active = true;
     },
     
     // Apply an array of transactions to the database
