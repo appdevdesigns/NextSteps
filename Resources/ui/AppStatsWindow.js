@@ -16,8 +16,8 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
         // The stats view is the view's view
         this._super({view: statsView});
         
-        this.smartBind(AD.Models.Step, '*', this.update);
-        this.smartBind(AD.Models.ContactStep, '*', this.refreshStats);
+        this.smartBind(AD.Models.Step, '*', $.throttle(this.update));
+        this.smartBind(AD.Models.ContactStep, '*', $.throttle(this.refreshStats));
     },
     
     // Create the child views

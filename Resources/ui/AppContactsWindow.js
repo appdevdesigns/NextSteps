@@ -126,7 +126,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
         };
         update();
         
-        this.smartBind(AD.Models.ContactStep, '*', update);
+        this.smartBind(AD.Models.ContactStep, '*', $.throttle(update));
         this.smartBind(contact, 'updated', update);
         
         return row;
