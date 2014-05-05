@@ -8,7 +8,7 @@
         <target device="android">true</target>
         <target device="blackberry">false</target>
     </deployment-targets>
-    <sdk-version>3.2.2.GA</sdk-version>
+    <sdk-version>3.2.3.GA</sdk-version>
     <id>net.appdevdesigns.nextsteps</id>
     <name>NextSteps</name>
     <version>1.5.1</version>
