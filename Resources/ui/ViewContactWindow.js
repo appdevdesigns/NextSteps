@@ -49,13 +49,18 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         callback: function() {
             // Open the EditContact window
             var _this = this;
+            var campus_uuidOld = this.contact.attr('campus_uuid');
             var $winEditContact = this.createWindow('AddContactWindow', {
                 operation: 'edit',
                 existingContact: this.contact
             });
             $winEditContact.getDeferred().done(function() {
-                // Update the steps view after the contact is edited
-                _this.updateSteps();
+                // Update the contact UI
+                _this.update();
+                if (_this.contact.attr('campus_uuid') !== campus_uuidOld) {
+                    // The contact campus changed, so update the steps view
+                    _this.updateSteps();
+                }
             });
         },
         rightNavButton: true,
@@ -73,14 +78,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             createParams: {
                 layout: 'vertical'
             }
-        });
-        
-        this.smartBind(this.contact, 'updated.attr', function(property, value) {
-            // Re-initialize the name label and contact buttons
-            this.initialize();
-            
-            // Simulate a global model 'updated' event
-            $(this.contact.constructor).trigger('updated', this.contact);
         });
     },
     
@@ -265,9 +262,13 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     
     // Initialize the child views
     initialize: function() {
-        this.getChild('nameLabel').text = this.contact.getLabel();
-        
+        this.update();
         this.updateSteps();
+    },
+    
+    // Update the contact UI (name label and contact buttons)
+    update: function() {
+        this.getChild('nameLabel').text = this.contact.getLabel();
         
         // Update the enabled status of each of the contact buttons
         
@@ -295,7 +296,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         });
     },
     
-    // (Re)create the steps UI
+    // Update the steps UI
     updateSteps: function() {
         // Remove the steps view in order to replace it
         var $campusStepsView = this.get$Child('campusSteps');
