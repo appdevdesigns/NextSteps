@@ -206,13 +206,13 @@
             });
         },
         
-        // Return an array of Personal Step models associated with this contact
+        // Return an array of personal ContactStep models associated with this contact
         getPersonalSteps: function() {
             return AD.Models.ContactStep.cache.query({
                 contact_uuid: this.getId()
             }).filter(function(contactStep) {
                 var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
-                return !step.attr('campus_uuid');
+                return step && !step.attr('campus_uuid');
             });
         },
         
@@ -246,7 +246,7 @@
             });
         },
         
-        // Return an array of the Step models associated with this contact
+        // Return an array of the ContactStep models associated with this contact
         // Completed steps are returned, regardless of their associated campus
         getSteps: function() {
             var contact_campus_uuid = this.attr('campus_uuid');
@@ -254,12 +254,16 @@
                 contact_uuid: this.getId()
             }).filter(function(contactStep) {
                 var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
+                if (!step) {
+                    // The ContactStep's associated step no longer exists
+                    return false;
+                }
                 var step_campus_uuid = step.attr('campus_uuid');
                 return step_campus_uuid === null || (contact_campus_uuid && step_campus_uuid === contact_campus_uuid) || contactStep.attr('step_date');
             });
         },
 
-        // Return a Step model with the specified step_uuid associated with this contact
+        // Return a ContactStep model with the specified step_uuid associated with this contact
         getStep: function(step_uuid) {
             var contact_uuid = this.getId();
             var steps = AD.Models.ContactStep.cache.query({
