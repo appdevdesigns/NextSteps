@@ -8,22 +8,6 @@
     <string name="statsTitle">统计报表</string>
     <string name="toolsTitle">工具</string>
     
-    <!-- Button labels used throughout the app -->
-    <string name="yes">是</string>
-    <string name="no">否</string>
-    <string name="ok">可以</string>
-    <string name="add">添加</string>
-    <string name="edit">编辑</string>
-    <string name="del">删除</string>
-    <string name="save">保存</string>
-    <string name="submit">提交</string>
-    <string name="done">完成</string>
-    <string name="cancel">取消</string>
-    <string name="back">返回</string>
-    <string name="reset">重置</string>
-    <string name="sort">分类</string>
-    <string name="choose">选择</string>
-    
     <!-- Contacts labels -->
     <string name="addMethod">添加方法</string>
     
