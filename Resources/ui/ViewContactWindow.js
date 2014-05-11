@@ -71,6 +71,8 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
     init: function(options) {
         this.contact = this.options.contact;
         
+        this.stepRows = {};
+        
         // Initialize the base $.Window object
         this._super({
             title: 'viewContact',
@@ -310,7 +312,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         var steps = this.contact.getSteps();
         var stepsLength = steps.length;
         steps.forEach(function(contactStep) {
-            var $stepView = this.createStepRow(contactStep);
+            var $stepView = this.getStepRow(contactStep);
             var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
             if (step.attr('campus_uuid')) {
                 $campusStepsView.add($stepView);
@@ -321,6 +323,16 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         }, this);
     },
     
+    // Return the UI row associated with the contactStep, creating it if necessary
+    getStepRow: function(contactStep) {
+        var contactstep_uuid = contactStep.getId();
+        if (this.stepRows[contactstep_uuid]) {
+            return this.stepRows[contactstep_uuid];
+        }
+        return this.stepRows[contactstep_uuid] = this.createStepRow(contactStep);
+    },
+    
+    // Create and return a $.View UI element for the given contact step
     createStepRow: function(contactStep) {
         var _this = this;
         var $newRow = $.View.create(this.createRow());
