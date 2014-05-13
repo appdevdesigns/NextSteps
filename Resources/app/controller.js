@@ -79,11 +79,12 @@ module.exports = {
             $winLoginWindow.open();
             $winLoginWindow.getDeferred().done(function(credentials) {
                 console.log('Login credentials are valid');
-                require('ui/ProgressWindow');
-                var $winSyncWindow = new AD.UI.ProgressWindow({
+                require('ui/ActivityWindow');
+                var $winSyncWindow = new AD.UI.ActivityWindow({
                     title: isInitial ? 'downloadingTitle' : 'syncingTitle',
                     message: isInitial ? 'downloadingMessage' : 'syncingMessage'
                 });
+                $winSyncWindow.setProgress(null);
                 $winSyncWindow.open();
                 
                 console.log("start syncWithServer()");
@@ -92,7 +93,9 @@ module.exports = {
                 AD.Comm.syncWithServer(apiConfig, transactionLog.get(), credentials.username, credentials.password).done(function(transactions) {
                     transactionLog.clear();
                     transactionLog.pause();
-                    transactionLog.apply(transactions);
+                    transactionLog.apply(transactions, function(completed, total) {
+                        $winSyncWindow.setProgress(completed, total);
+                    });
                     transactionLog.resume();
                 }).fail(function() {
                     alert(AD.Localize('syncErrorUnknown')); // move this one after closing the sync window

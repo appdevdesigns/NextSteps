@@ -3,7 +3,7 @@ var $ = require('jquery');
 var controller = require('app/controller');  
 
 module.exports = $.Window('AppDev.UI.AppToolsWindow', {
-    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow', 'ProgressWindow']
+    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow']
 }, {
     init: function(options) {
         // Initialize the base $.Window object

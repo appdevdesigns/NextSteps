@@ -35,6 +35,7 @@ Resources/images/checkbox-unchecked.png
 Resources/images/info.png
 Resources/images/info@2x.png
 Resources/models/Viewer.js
+Resources/ui/ActivityWindow.js
 Resources/ui/AppInfoWindow.js
 Resources/ui/AppTabGroup.js
 Resources/ui/Checkbox.js
@@ -46,7 +47,6 @@ Resources/ui/GoogleDriveChooseFileWindow.js
 Resources/ui/LoginWindow.js
 Resources/ui/ModelTable.js
 Resources/ui/PasswordPromptWindow.js
-Resources/ui/ProgressWindow.js
 Resources/ui/SortOrderWindow.js
 Resources/ui/StringPromptWindow.js
 Resources/ui/UIBase.js

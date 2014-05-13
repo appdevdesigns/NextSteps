@@ -89,8 +89,10 @@ $.Class('AppDev.Transactions', {
     },
     
     // Apply an array of transactions to the database
-    apply: function (transactions) {
-        transactions.forEach(function(transaction) {
+    apply: function(transactions, progress) {
+        var numTransactions = transactions.length;
+        transactions.forEach(function(transaction, index) {
+            progress(index, numTransactions);
             var Model = AD.Models[transaction.model],
             model;
             if (transaction.operation === 'create') {
@@ -107,5 +109,6 @@ $.Class('AppDev.Transactions', {
                 model.destroy();
             }
         });
+        progress(numTransactions, numTransactions);
     }
 });
