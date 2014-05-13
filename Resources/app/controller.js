@@ -93,6 +93,7 @@ module.exports = {
                 AD.Comm.syncWithServer(apiConfig, transactionLog.get(), credentials.username, credentials.password).done(function(transactions) {
                     transactionLog.clear();
                     transactionLog.pause();
+                    $winSyncWindow.setMessage('updatingMessage');
                     transactionLog.apply(transactions, function(completed, total) {
                         $winSyncWindow.setProgress(completed, total);
                     });
