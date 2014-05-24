@@ -217,13 +217,10 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
             title: 'contactsTitle'
         });
         
-        this.smartBind(AD.Models.Contact, '*', this.updateTitle);
-        this.smartBind(AD.Models.ContactStep, '*', this.updateTitle);
-        this.smartBind(AD.Models.ContactTag, '*', this.updateTitle);
         if (this.options.group) {
             this.updateTitle();
             this.open();
-            this.smartBind(this.options.group, 'updated.attr', this.updateTitle);
+            this.smartBind(this.options.group, 'group_name', this.updateTitle);
             this.smartBind(this.options.group, 'destroyed', function() {
                 // If the group is destroyed, close the window
                 this.dfd.reject();
@@ -242,6 +239,9 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
             group: this.options.group,
             $window: this
         });
+        // Update the window title whenever the contact table is updated
+        $contactsTable.update = this.proxy('updateTitle');
+        
         this.add('contactsTable', $contactsTable);
     },
     
