@@ -49,6 +49,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
         }
         
         this.smartBind(AD.Models.ContactStep, '*', this.refresh);
+        this.smartBind(AD.Models.ContactTag, '*', this.refresh);
 
         // When the sort order is updated, refresh the contacts list
         this.smartBind(AD.PropertyStore, 'sort_order', function(event, sortOrder) {
