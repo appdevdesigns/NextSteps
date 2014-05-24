@@ -30,7 +30,8 @@
         defaults: {
             contact_firstName: '',
             contact_lastName: '',
-            contact_nickname: ''
+            contact_nickname: '',
+            year_id: 1
         },
         
         // An array of the conditions supported by matchesFilter
