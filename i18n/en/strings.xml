@@ -44,6 +44,7 @@
     <string name="email">Email</string>
     <string name="emailAddress">Email address</string>
     <string name="notes">Notes</string>
+    <string name="contactInvalidName">The contact has no name!</string>
     
     <string name="sortOrderTitle">Set Sort Order</string>
     

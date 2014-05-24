@@ -81,13 +81,16 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     ],
     
     actions: [{
+        title: 'save',
         callback: 'save',
-        menuItem: false,
-        onClose: true
+        rightNavButton: true,
+        onClose: true,
+        showAsAction: true,
+        icon: '/images/ic_action_save.png'
     }, {
         title: 'cancel',
-        callback: 'cancel',
-        rightNavButton: true
+        callback: 'cancel', // special pre-defined callback to reject the deferred
+        leftNavButton: true
     }]
 }, {
     init: function(options) {
@@ -417,6 +420,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         var contact_email = this.attrs.contact_email;
         if (contact_email && (!/[^@]+@[^@]+\.[^@]+/.test(contact_email))) {
             alert('Email is not valid: ' + contact_email);
+        }
+        
+        if (!this.attrs.contact_firstName && !this.attrs.contact_lastName) {
+            alert(AD.Localize('contactInvalidName'));
+            return false;
         }
         
         // Apply the changes to the contact
