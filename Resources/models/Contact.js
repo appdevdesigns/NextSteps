@@ -147,7 +147,15 @@
         
         // Return the label of this contact
         getLabel: function() {
-            return this.contact_firstName+' '+this.contact_lastName+(this.contact_nickName ? ' ('+this.contact_nickName+')' : '');
+            var label = this.contact_firstName;
+            if (label) {
+                label += ' ';
+            }
+            label += this.contact_lastName;
+            if (this.contact_nickName) {
+                label += ' ('+this.contact_nickName+')';
+            }
+            return label;
         },
         
         // Return an array of the Tag models associated with this contact

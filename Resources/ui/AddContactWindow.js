@@ -40,6 +40,10 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 lastName = lastName || (nameParts.length === 1 ? '' : nameParts[nameParts.length - 1]);
                 nickname = nickname || firstName;
             }
+            if (!firstName && !lastName) {
+                // The contact has no first name or last name, so use its organization (if present) as the last name
+                lastName = localContact.organization || '';
+            }
             
             // Use the first phone number and email address as the default
             defaultPhone = this.flattenMultivalue(localContact.phone)[0];
