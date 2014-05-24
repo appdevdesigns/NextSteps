@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS site_viewer (
 CREATE TABLE IF NOT EXISTS nextsteps_contact (
     contact_uuid TEXT PRIMARY KEY UNIQUE,
     contact_recordId INTEGER,
-    contact_firstName TEXT NOT NULL,
-    contact_lastName TEXT NOT NULL,
-    contact_nickname TEXT,
+    contact_firstName TEXT DEFAULT '',
+    contact_lastName TEXT DEFAULT '',
+    contact_nickname TEXT DEFAULT '',
     campus_uuid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_uuid) ON DELETE SET DEFAULT,
     year_id INTEGER NOT NULL DEFAULT 1,
     contact_phone TEXT,

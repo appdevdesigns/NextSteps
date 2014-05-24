@@ -26,7 +26,13 @@
             contact_recordId: 'integer',
             year_id: 'integer'
         },
-
+        
+        defaults: {
+            contact_firstName: '',
+            contact_lastName: '',
+            contact_nickname: ''
+        },
+        
         // An array of the conditions supported by matchesFilter
         filterConditions: ['OR', 'AND'],
         // This object defines custom filter fields
