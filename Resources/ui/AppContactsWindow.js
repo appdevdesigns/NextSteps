@@ -3,15 +3,15 @@ var $ = require('jquery');
 
 // Create a class that represents the contacts table
 var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
-    setup: function() {
+    init: function() {
         AD.PropertyStore.setDefault('sort_order', this.sortFields.map(function(field) { return field.field; }));
-        this.indexedSortFields = $.indexArray(this.sortFields, 'field');
         $.ModelTable.addGroupProcessor('firstLetter', function(key) {
             return key ? key[0].toUpperCase() : key;
         });
         $.ModelTable.addGroupProcessor('year', function(key) {
             return AD.Models.Year.cache.getById(key).getLabel();
         });
+        return this._super.apply(this, arguments);
     },
     
     sortFields: [
