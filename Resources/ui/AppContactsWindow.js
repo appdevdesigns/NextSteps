@@ -118,7 +118,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
         // Update the contact row to reflect changes in the contact's data
         var update = function() {
             nameLabel.text = contact.getLabel();
-            yearLabel.text = contact.year_label;
+            yearLabel.text = contact.attr('year_label');
             
             // Use space instead of empty string to work around iPhone quirk where label text is not updated when changed from an empty string
             var lastStepCompleted = contact.getLastStep();

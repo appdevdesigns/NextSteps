@@ -65,8 +65,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             contact_notes: note
         };
         var mergedAttrs = $.extend(baseAttrs, attrs);
-        mergedAttrs.campus_label = mergedAttrs.campus_uuid ? AD.Models.Campus.cache.getById(mergedAttrs.campus_uuid).getLabel() : '';
-        mergedAttrs.year_label = AD.Models.Year.cache.getById(mergedAttrs.year_id).getLabel();
         return new AD.Models.Contact(mergedAttrs);
     },
     
@@ -359,7 +357,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             // A campus was chosen
             var label = campus ? campus.getLabel() : null;
             this.attrs.campus_uuid = campus ? campus.getId() : null;
-            this.attrs.campus_label = label;
             var campusLabel = this.getChild('campusLabel');
             campusLabel.text = campusLabel.title = label;
         }));
@@ -374,7 +371,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             // A year was chosen
             var label = year.getLabel();
             this.attrs.year_id = year.getId();
-            this.attrs.year_label = label;
             var yearLabel = this.getChild('yearLabel');
             yearLabel.text = yearLabel.title = label;
         }));
