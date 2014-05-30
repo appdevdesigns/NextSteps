@@ -49,6 +49,14 @@
                     step_label:"varchar(40)"
                 }
             },
+            lookupLabels: {
+                campus_uuid: {
+                    tableName: 'nextsteps_campus_trans',
+                    foreignKey: 'campus_uuid',
+                    referencedKey: 'campus_uuid',
+                    label: 'campus_label'
+                }
+            },
             primaryKey:'step_uuid',
             multilingualFields: ['step_label']
         });

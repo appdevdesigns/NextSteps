@@ -76,13 +76,18 @@ var StatsView = $.View('AppDev.UI.StatsView', {}, {
 
 // Create a ModelTable subclass that represents the stats table
 var StatsTable = $.ModelTable('AppDev.UI.StatsTable', {
+    sortFields: [{field: 'campus_label', label: 'campus'}],
+    
     rowHeight: 40,
     font: AD.UI.Fonts.mediumSmall
 }, {
     init: function(options) {
         this._super({
             $window: this.options.$window,
-            Model: AD.Models.Step
+            Model: AD.Models.Step,
+            grouped: true,
+            sorted: true,
+            sortOrder: ['campus_label']
         });
         
         this.refreshStats();
