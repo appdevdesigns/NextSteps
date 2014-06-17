@@ -90,6 +90,8 @@ $.Class('AppDev.Transactions', {
     
     // Apply an array of transactions to the database
     apply: function(transactions, progress) {
+        AD.Database.DataStore.disableForeignKeys(AD.Defaults.dbName); // temporarily disable foreign-key checks
+        
         var numTransactions = transactions.length;
         transactions.forEach(function(transaction, index) {
             progress(index, numTransactions);
@@ -110,5 +112,7 @@ $.Class('AppDev.Transactions', {
             }
         });
         progress(numTransactions, numTransactions);
+        
+        AD.Database.DataStore.enableForeignKeys(AD.Defaults.dbName); // re-enable foreign-key checks
     }
 });
