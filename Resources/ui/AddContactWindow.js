@@ -51,15 +51,12 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             
             note = localContact.note || '';
         }
-        var defaultYear = 1;
         
         // Populate the contact model fields with the new contact's information
         var baseAttrs = {
             contact_firstName: firstName,
             contact_lastName: lastName,
             contact_nickname: nickname,
-            campus_uuid: null,
-            year_id: defaultYear,
             contact_phone: defaultPhone,
             contact_email: defaultEmail,
             contact_notes: note
