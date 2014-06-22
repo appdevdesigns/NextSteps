@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS nextsteps_year_data (
 );
 CREATE TABLE IF NOT EXISTS nextsteps_year_trans (
     trans_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-    year_id INTEGER NOT NULL DEFAULT 1,
+    year_id INTEGER NOT NULL REFERENCES nextsteps_year_data(year_id) ON DELETE CASCADE,
     language_code TEXT NOT NULL DEFAULT '',
     year_label TEXT NOT NULL
 );
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS nextsteps_contact_tag (
 
 CREATE TABLE IF NOT EXISTS nextsteps_step_data (
     step_uuid TEXT PRIMARY KEY UNIQUE,
-    campus_uuid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_uuid) DEFAULT NULL
+    campus_uuid TEXT DEFAULT NULL REFERENCES nextsteps_campus_data(campus_uuid) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS nextsteps_step_trans (
     trans_uuid TEXT PRIMARY KEY UNIQUE,
@@ -76,6 +76,6 @@ CREATE TABLE IF NOT EXISTS nextsteps_contact_step (
     contactstep_uuid TEXT PRIMARY KEY UNIQUE,
     contact_uuid TEXT NOT NULL REFERENCES nextsteps_contact(contact_uuid) ON DELETE CASCADE,
     step_uuid TEXT NOT NULL REFERENCES nextsteps_step_data(step_uuid) ON DELETE CASCADE,
-    step_date TEXT DEFAULT NULL,
-    step_location TEXT DEFAULT NULL
+    step_date TEXT,
+    step_location TEXT
 );
