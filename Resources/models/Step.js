@@ -25,9 +25,6 @@
         attributes: {
             trans_id: 'integer',
             viewer_id: 'integer'
-        },
-        defaults: {
-            campus_uuid: null
         }
     };
 
