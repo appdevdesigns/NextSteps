@@ -39,7 +39,7 @@
     </iphone>
     <android xmlns:android="http://schemas.android.com/apk/res/android">
         <manifest android:versionCode="200" android:versionName="2.0.0">
-            <application android:theme="@android:style/Theme.Holo.Light"/>
+            <application android:theme="@style/Theme.AppCompat.Light"/>
             <uses-sdk targetSdkVersion="19"/>
             <supports-screens android:anyDensity="false"/>
         </manifest>
