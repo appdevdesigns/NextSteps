@@ -1,8 +1,8 @@
 var AD = require('AppDev');
 var $ = require('jquery');
+var utils = require('app/utils');
 
 module.exports = {
-
     // This will be called by app.js once the initialization is finished
     start: function() {
         console.log("DEBUG controller > Entered start()");
@@ -21,6 +21,25 @@ module.exports = {
             console.log("serverURL = " + serverURL);
             this.performWholeSyncProcess(true);
         }
+        
+        var nextPromotion = new Date(AD.PropertyStore.get('nextPromotion'));
+        if (new Date() >= nextPromotion) {
+            AD.UI.alert('promoteStudentsMessage', ['yes', 'no', 'later']).done(function(buttonIndex) {
+                if (buttonIndex === 0) {
+                    // The user clicked "Yes"
+                    controller.promoteStudents();
+                }
+                else if (buttonIndex === 1) {
+                    // The user clicked "No"
+                    controller.advancePromotionDate();
+                }
+                else if (buttonIndex === 2) {
+                    // Do nothing if the user clicked "Later"
+                    // The user will be prompted again during the next application launch
+                }
+            });
+        }
+        
         console.log("DEBUG controller > Left start()");
     },
     
@@ -106,5 +125,24 @@ module.exports = {
             });
         });
         console.log("DEBUG controller > Left performWholeSyncProcess()");
+    },
+    
+    // Promote all students to the next year
+    promoteStudents: function() {
+        AD.Models.Contact.cache.getArray().forEach(function(contact) {
+            var year = contact.attr('year_id');
+            // For contacts who are freshmen through seniors, promote them to the next year
+            if (year >= 2 && year <= 5) {
+                contact.attr('year_id', year + 1);
+                contact.save();
+            }
+        });
+        
+        controller.advancePromotionDate();
+    },
+    
+    // Set the promotion date to the end of the school year
+    advancePromotionDate: function() {
+        AD.PropertyStore.set('nextPromotion', utils.schoolYearEnd());
     }
 };

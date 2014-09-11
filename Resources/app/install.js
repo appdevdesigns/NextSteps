@@ -347,6 +347,9 @@ var onInstall = function(installData) {
             return field === 'contact_campus' ? 'campus_label' : field;
         }));
     }
+    
+    // Students will be promoted next at the end of the school year
+    AD.PropertyStore.setDefault('nextPromotion', require('app/utils').schoolYearEnd());
 };
 
 // Called during the initial installation after the database has been created

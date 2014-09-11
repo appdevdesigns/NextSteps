@@ -97,4 +97,8 @@
     <string name="stringPromptBackupTitle">NextSteps Database Backup</string>
     <string name="stringPromptBackupMessage">Please choose the name of the NextSteps database backup file.</string>
     <string name="restoreDatabaseWarning">Restoring the database from a backup will replace all of your current data. Are you sure you want to proceed?</string>
+    
+    <!-- Controller labels -->
+    <string name="promoteStudentsMessage">It is the end of the school year! Do you want to promote all of the students in your contacts to the next year?</string>
+    <string name="later">Later</string>
 </resources>
