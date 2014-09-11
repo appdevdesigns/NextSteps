@@ -119,6 +119,20 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
         syncButton.addEventListener('click', function() {
             controller.performPreSyncValidation();
         });
-
+        
+        var promoteStudentsButton = this.add('promoteStudents', Ti.UI.createButton({
+            top: AD.UI.padding * 2,
+            center: {
+                x: AD.UI.screenWidth / 2
+            },
+            width: 120,
+            height: AD.UI.promoteStudents,
+            titleid: 'promoteStudents'
+        }));
+        promoteStudentsButton.addEventListener('click', function() {
+            AD.UI.yesNoAlert('promoteStudentsConfirmation').done(function() {
+                controller.promoteStudents();
+            });
+        });
     }
 });
