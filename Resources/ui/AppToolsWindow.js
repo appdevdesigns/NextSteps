@@ -24,7 +24,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                     x: AD.UI.screenWidth / 2
                 },
                 width: 160,
-                height: AD.UI.SIZE,
+                height: Ti.UI.SIZE,
                 titleid: 'preferences'
             }));
             preferencesButton.addEventListener('click', function() {
@@ -35,8 +35,8 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
         this.add(Ti.UI.createLabel({
             left: AD.UI.padding,
             top: AD.Platform.isAndroid ? AD.UI.padding * 2 : AD.UI.padding,
-            width: AD.UI.SIZE,
-            height: AD.UI.SIZE,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
             textid: 'backupRestoreInfoText',
             font: AD.UI.Fonts.mediumSmall
         }));
