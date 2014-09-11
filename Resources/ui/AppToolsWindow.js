@@ -31,7 +31,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 Ti.UI.Android.openPreferences();
             });
         }
-
+        
         this.add(Ti.UI.createLabel({
             left: AD.UI.padding,
             top: AD.Platform.isAndroid ? AD.UI.padding * 2 : AD.UI.padding,
@@ -40,17 +40,22 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             textid: 'backupRestoreInfoText',
             font: AD.UI.Fonts.mediumSmall
         }));
-
+        
         var _this = this;
-        var backupButton = this.add('backup', Ti.UI.createButton({
+        var backupRestoreView = this.add(Ti.UI.createView({
+            top: 0,
+            left: 0,
+            width: Ti.UI.FILL,
+            height: Ti.UI.SIZE
+        }));
+        var backupButton = this.record('backup', Ti.UI.createButton({
             top: AD.UI.padding,
-            center: {
-                x: AD.UI.screenWidth / 2
-            },
+            left: AD.UI.padding * 2,
             width: 120,
             height: AD.UI.buttonHeight,
             titleid: 'backupDatabase'
         }));
+        backupRestoreView.add(backupButton);
         backupButton.addEventListener('click', function() {
             // Calculate the default backup title
             var today = new Date();
@@ -77,16 +82,15 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 });
             });
         });
-
-        var restoreButton = this.add('restore', Ti.UI.createButton({
+        
+        var restoreButton = this.record('restore', Ti.UI.createButton({
             top: AD.UI.padding,
-            center: {
-                x: AD.UI.screenWidth / 2
-            },
+            right: AD.UI.padding * 2,
             width: 120,
             height: AD.UI.buttonHeight,
             titleid: 'restoreDatabase'
         }));
+        backupRestoreView.add(restoreButton);
         restoreButton.addEventListener('click', function() {
             // Let the user choose the file to restore from
             _this.createWindow('GoogleDriveChooseFileWindow', {
@@ -102,7 +106,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 });
             });
         });
-
+        
         var syncButton = this.add('sync', Ti.UI.createButton({
             top: AD.UI.padding * 2,
             center: {
