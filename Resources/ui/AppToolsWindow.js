@@ -3,7 +3,7 @@ var $ = require('jquery');
 var controller = require('app/controller');  
 
 module.exports = $.Window('AppDev.UI.AppToolsWindow', {
-    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow']
+    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow', 'DatePickerWindow']
 }, {
     init: function(options) {
         // Initialize the base $.Window object
@@ -119,6 +119,59 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
         syncButton.addEventListener('click', function() {
             controller.performPreSyncValidation();
         });
-
+        
+        
+        this.add(Ti.UI.createLabel({
+            left: AD.UI.padding,
+            right: AD.UI.padding,
+            top: AD.UI.padding * 2,
+            height: Ti.UI.SIZE,
+            textid: 'schoolYearInfoText',
+            font: AD.UI.Fonts.mediumSmall
+        }));
+        var schoolYearView = this.add(Ti.UI.createView({
+            top: 0,
+            left: 0,
+            width: Ti.UI.FILL,
+            height: Ti.UI.SIZE
+        }));
+        
+        var schoolYearEndButton = Ti.UI.createButton({
+            top: AD.UI.padding,
+            left: AD.UI.padding * 2,
+            width: 120,
+            height: AD.UI.promoteStudents,
+            titleid: 'schoolYearEnd'
+        });
+        schoolYearView.add(schoolYearEndButton);
+        schoolYearEndButton.addEventListener('click', function() {
+            // Set the end of the school year
+            var currentYear = new Date().getFullYear();
+            var schoolYearEnd = controller.getSchoolYearEnd();
+            _this.createWindow('DatePickerWindow', {
+                minDate: new Date(currentYear, 0, 1), // January 1
+                maxDate: new Date(currentYear, 11, 31), // December 31
+                initialDate: new Date(currentYear, schoolYearEnd.month, schoolYearEnd.date)
+            }).getDeferred().done(function(schoolYearEndDate) {
+                controller.setSchoolYearEnd({
+                    date: schoolYearEndDate.getDate(),
+                    month: schoolYearEndDate.getMonth()
+                });
+            });
+        });
+        
+        var promoteStudentsButton = Ti.UI.createButton({
+            top: AD.UI.padding,
+            right: AD.UI.padding * 2,
+            width: 120,
+            height: AD.UI.promoteStudents,
+            titleid: 'promoteStudents'
+        });
+        schoolYearView.add(promoteStudentsButton);
+        promoteStudentsButton.addEventListener('click', function() {
+            AD.UI.yesNoAlert('promoteStudentsConfirmation').done(function() {
+                controller.promoteStudents();
+            });
+        });
     }
 });

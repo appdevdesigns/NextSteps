@@ -85,6 +85,10 @@
     <string name="backupDatabase">Backup</string>
     <string name="restoreDatabase">Restore</string>
     <string name="sync">Sync</string>
+    <string name="schoolYearInfoText">Promote students to the next year at the end of the school year.</string>
+    <string name="schoolYearEnd">Year end</string>
+    <string name="promoteStudents">Promote</string>
+    <string name="promoteStudentsConfirmation">Are you want to promote all of the students in your contacts to the next year?</string>
     <string name="syncErrorNoServer">No sync server specified! Please enter the sync server URL in the application preferences.</string>
     <string name="syncErrorPingFailed">Could not access the sync server. Please ensure that the sync server URL is correct and that you are connected to your VPN. Do you want to try again?</string>
     <string name="syncErrorUnknown">An error occurred while accessing the sync server. Please try again later.</string>
@@ -97,4 +101,8 @@
     <string name="stringPromptBackupTitle">NextSteps Database Backup</string>
     <string name="stringPromptBackupMessage">Please choose the name of the NextSteps database backup file.</string>
     <string name="restoreDatabaseWarning">Restoring the database from a backup will replace all of your current data. Are you sure you want to proceed?</string>
+    
+    <!-- Controller labels -->
+    <string name="promoteStudentsMessage">It is the end of the school year! Do you want to promote all of the students in your contacts to the next year?</string>
+    <string name="later">Later</string>
 </resources>
