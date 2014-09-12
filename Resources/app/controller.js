@@ -22,8 +22,7 @@ module.exports = {
             this.performWholeSyncProcess(true);
         }
         
-        var nextPromotion = new Date(AD.PropertyStore.get('nextPromotion'));
-        if (new Date() >= nextPromotion) {
+        if (controller.isPromotionPending()) {
             AD.UI.alert('promoteStudentsMessage', ['yes', 'no', 'later']).done(function(buttonIndex) {
                 if (buttonIndex === 0) {
                     // The user clicked "Yes"
@@ -127,6 +126,11 @@ module.exports = {
         console.log("DEBUG controller > Left performWholeSyncProcess()");
     },
     
+    // Determine whether or not a promotion is pending that has not yet been acted upon
+    isPromotionPending: function() {
+        return new Date() >= new Date(AD.PropertyStore.get('nextPromotion'));
+    },
+    
     // Promote all students to the next year
     promoteStudents: function() {
         AD.Models.Contact.cache.getArray().forEach(function(contact) {
@@ -144,5 +148,25 @@ module.exports = {
     // Set the promotion date to the end of the school year
     advancePromotionDate: function() {
         AD.PropertyStore.set('nextPromotion', utils.schoolYearEnd());
+    },
+    
+    // Get and set the end of the school year
+    // The end of the school year is encoded as a dictionary with "date" and "month" properties
+    // For example: { date: 1, month: 5 } refers to June 1st
+    getSchoolYearEnd: function() {
+        return AD.PropertyStore.get('schoolYearEnd');
+    },
+    setSchoolYearEnd: function(schoolYearEnd) {
+        AD.PropertyStore.set('schoolYearEnd', schoolYearEnd);
+        
+        // Update the next promotion date, preserving whether or not a promotion is pending
+        var nextPromotionOld = AD.PropertyStore.get('nextPromotion');
+        var nextPromotionNew = utils.schoolYearEnd();
+        if (controller.isPromotionPending()) {
+            // A promotion was previous pending, so decrement the upcoming promotion year to
+            // ensure that the promotion will still be pending after changing the promotion date
+            nextPromotionNew.setFullYear(nextPromotionNew.getFullYear() - 1);
+        }
+        AD.PropertyStore.set('nextPromotion', nextPromotionNew);
     }
 };

@@ -348,6 +348,8 @@ var onInstall = function(installData) {
         }));
     }
     
+    // By default, the end of the school year is June 1st
+    AD.PropertyStore.setDefault('schoolYearEnd', { date: 1, month: 5 });
     // Students will be promoted next at the end of the school year
     AD.PropertyStore.setDefault('nextPromotion', require('app/utils').schoolYearEnd());
 };
