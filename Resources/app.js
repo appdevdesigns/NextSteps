@@ -7,11 +7,11 @@
 // Initialize the AppDev framework
 var AD = require('AppDev');
 var $ = require('jquery');
-var controller = require('app/controller');  
 
 AD.init({
     models: ['Viewer', 'Contact', 'Group', 'Campus', 'Year', 'Tag', 'ContactTag', 'Step', 'ContactStep'],
     windows: ['AppContactsWindow', 'AppGroupsWindow', 'AppStatsWindow', 'AppToolsWindow', 'AppInfoWindow']
-}).done(function() {    
+}).done(function() {
+    var controller = require('app/controller');
     controller.start();
 });

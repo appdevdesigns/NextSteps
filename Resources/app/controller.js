@@ -2,7 +2,7 @@ var AD = require('AppDev');
 var $ = require('jquery');
 var utils = require('app/utils');
 
-module.exports = {
+var controller = module.exports = {
     // This will be called by app.js once the initialization is finished
     start: function() {
         console.log("DEBUG controller > Entered start()");
