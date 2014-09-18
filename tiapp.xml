@@ -43,6 +43,9 @@
             <uses-sdk targetSdkVersion="19"/>
             <supports-screens android:anyDensity="false"/>
         </manifest>
+        <services>
+            <service url="Keepalive.js" type="interval"/>
+        </services>
     </android>
     <modules>
         <module platform="android">net.appdevdesigns.encryption</module>

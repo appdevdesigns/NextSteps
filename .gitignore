@@ -10,6 +10,7 @@ i18n/en/appdev-strings.xml
 i18n/zh-rCN/appdev-strings.xml
 Resources/AppDev.js
 Resources/jquery.js
+Resources/android/Keepalive.js
 Resources/android/images/res-hdpi/ic_action_discard.png
 Resources/android/images/res-hdpi/ic_action_edit.png
 Resources/android/images/res-hdpi/ic_action_new.png
