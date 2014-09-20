@@ -2,8 +2,6 @@ var AD = require('AppDev');
 var $ = require('jquery');
 
 module.exports = $.Window('AppDev.UI.AddGroupWindow', {
-    setup: function() {
-    },
     dependencies: ['ChooseOptionWindow', 'Checkbox'],
     
     fieldDefinitions: {},
