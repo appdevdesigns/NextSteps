@@ -4,7 +4,7 @@ var $ = require('jquery');
 module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     dependencies: ['ChooseOptionWindow', 'Checkbox'],
     
-    fieldDefinitions: {},
+    fieldDefinitions: null,
     fieldViewHeight: AD.UI.buttonHeight + AD.UI.padding,
     
     actions: [{
@@ -21,7 +21,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     }]
 }, {
     init: function(options) {
-        var fieldDefinitions = this.constructor.fieldDefinitions;
+        var fieldDefinitions = this.constructor.fieldDefinitions = {};
         var defineField = function(fieldName, fieldData) {
             // Add a boolean property to quickly check the type of a field
             // For example, fieldData.isChoice === true
