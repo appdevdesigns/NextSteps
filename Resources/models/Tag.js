@@ -5,57 +5,56 @@
 
 
 (function () {
-    // Pull AppDev from the global scope on NodeJS and browser and load the AppDev CommonJS module on Titanium
-    var AD = AD || (global && global.AD) || require('AppDev');
-
+    var AD = require('AppDev');
+    
     // On Titanium and NodeJS, the full model definition is needed
     var extendedDefinition = typeof Titanium !== 'undefined' || typeof process !== 'undefined';
-
+    
     var attr = {
         // Shared model attributes
-        _adModule:'nextSteps',
-        _adModel:'Tag',
-        id:'tag_uuid',
-        hasUuid:true,
-        labelKey:'tag_label',
-        _isMultilingual:true,
-        //connectionType:'server', // optional field
-        cache:true,
-
+        _adModule: 'nextSteps',
+        _adModel: 'Tag',
+        id: 'tag_uuid',
+        hasUuid: true,
+        labelKey: 'tag_label',
+        _isMultilingual: true,
+        //connectionType: 'server', // optional field
+        cache: true,
+        
         attributes: {
             trans_id: 'integer'
         }
     };
-
+    
     if (extendedDefinition) {
         // Extended model attributes
         AD.jQuery.extend(attr, {
-            type:'multilingual',  // 'single' | 'multilingual'
+            type: 'multilingual',  // 'single' | 'multilingual'
             tables:{
-                data:'nextsteps_tag_data',
-                trans:'nextsteps_tag_trans'
+                data: 'nextsteps_tag_data',
+                trans: 'nextsteps_tag_trans'
             },
             fields: {
                 data: {
-                    tag_uuid:"varchar(36)"
+                    tag_uuid: 'varchar(36)'
                 },
                 trans: {
-                    trans_uuid:"varchar(36)",
-                    tag_label:"varchar(40)"
+                    trans_uuid: 'varchar(36)',
+                    tag_label: 'varchar(40)'
                 }
             },
-            primaryKey:'tag_uuid',
+            primaryKey: 'tag_uuid',
             multilingualFields: ['tag_label']
         });
     }
-
-
-    var Model = AD.Model.extend("nextSteps.Tag",
+    
+    
+    var Model = AD.Model.extend('nextSteps.Tag',
     attr,
     {
         // define instance methods here.
     });
-
+    
     if (module && module.exports) {
         // This is a CommonJS module, so return the model
         module.exports = Model;

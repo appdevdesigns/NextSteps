@@ -21,7 +21,7 @@ module.exports = $.Window('AppDev.UI.ChooseContactWindow', {
         Ti.Contacts.getAllPeople().forEach(function(contact) {
             var contactRecordId = contact.recordId || contact.id;
             if (!options.filterExisting || usedRecordIds.indexOf(contactRecordId) === -1) {
-                // This contact is not already in the database 
+                // This contact is not already in the database
                 contactsData.push({
                     title: contact.fullName || '',
                     contact: contact

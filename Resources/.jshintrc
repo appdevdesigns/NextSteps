@@ -1,0 +1,13 @@
+{
+    "curly": true,
+    "eqeqeq": true,
+    "indent": 4,
+    "forin": true,
+    "latedef": true,
+    "newcap": true,
+    "noarg": true,
+    "quotmark": "single",
+    "undef": true,
+    "unused": "vars",
+    "predef": ["Ti", "Titanium", "require", "module", "console", "alert", "setTimeout", "setInterval", "clearTimeout", "clearInterval"]
+}

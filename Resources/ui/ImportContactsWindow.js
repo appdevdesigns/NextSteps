@@ -70,7 +70,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
         chooseButton.addEventListener('click', this.proxy('chooseContacts'));
         
         var _this = this;
-
+        
         // Create the fields container
         var fieldsView = this.add(Ti.UI.createView({
             left: AD.UI.padding,
@@ -89,7 +89,7 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
                 width: Ti.UI.SIZE,
                 height: fieldHeight
             });
-
+            
             var changeCallback = function() {
                 // Calculate the names of the change and update field functions
                 // changeFieldFuncName === 'changeYear' and updateFieldFuncName === 'updateYear', for example
@@ -130,16 +130,17 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
                 }));
                 
                 // Create a button that can be clicked to change the field value
-                var chooseButton = valueField = Ti.UI.createButton({
+                var chooseButton = Ti.UI.createButton({
                     left: labelWidth + AD.UI.padding,
                     top: 0,
                     width: 120,
                     height: AD.UI.buttonHeight
                 });
                 chooseButton.addEventListener('click', changeCallback);
+                valueField = chooseButton;
             }
             fieldView.add(this.record(field.name, valueField));
-
+            
             fieldsView.add(fieldView);
         }, this);
         
@@ -233,16 +234,16 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
     updateContactsView: function() {
         this.getChild('contactsLabel').text = $.formatString('importingContacts', this.contacts.length);
     },
-
+    
     // Update the field labels
     updateCampus: function() {
-        this.getChild('campus').title = this.campus_uuid ? AD.Models.Campus.cache.getById(this.campus_uuid).getLabel() : AD.Localize('unspecified');
+        this.getChild('campus').title = this.campus_uuid ? AD.Models.Campus.cache.getById(this.campus_uuid).getLabel() : AD.localize('unspecified');
     },
     updateYear: function() {
         this.getChild('year').title = AD.Models.Year.cache.getById(this.year_id).getLabel();
     },
     updateTags: function() {
-        this.getChild('tags').text = $.Model.getLabels(this.tags).join(', ') || AD.Localize('none');
+        this.getChild('tags').text = $.Model.getLabels(this.tags).join(', ') || AD.localize('none');
     },
     
     // Validate the contacts
@@ -256,11 +257,11 @@ module.exports = $.Window('AppDev.UI.ImportContactsWindow', {
             missingFields.push('year');
         }
         if (this.contacts.length === 0) {
-            alert(AD.Localize('importNoContacts'));
+            alert(AD.localize('importNoContacts'));
             warnDfd.reject();
         }
         else if (missingFields.length > 0) {
-            var warning = $.formatString('importWarning', missingFields.join(' '+AD.Localize('or')+' '));
+            var warning = $.formatString('importWarning', missingFields.join(' '+AD.localize('or')+' '));
             AD.UI.yesNoAlert(warning).then(warnDfd.resolve, warnDfd.reject);
         }
         else {

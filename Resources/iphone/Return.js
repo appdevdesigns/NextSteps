@@ -9,7 +9,7 @@ var timer = setInterval(function() {
     console.log('outstandingCalls: '+outstandingCalls);
     if (!outstandingCalls) {
         // Popup one second after ALL calls have ended
-        var notification = Ti.App.iOS.scheduleLocalNotification({
+        Ti.App.iOS.scheduleLocalNotification({
             alertBody: 'returnToApp',
             alertAction: 'OK',
             date: new Date(Date.now() + 1000)

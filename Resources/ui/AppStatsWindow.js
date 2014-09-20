@@ -2,78 +2,6 @@ var AD = require('AppDev');
 var $ = require('jquery');
 var controller = require('app/controller');
 
-// Create a stats container, complete with a header label and footer view
-var StatsView = $.View('AppDev.UI.StatsView', {}, {
-    init: function(options) {
-        this.hasFooter = typeof this.options.footerHeight !== 'undefined';
-        this.footerHeight = this.options.footerHeight || 0;
-        
-        // Create the stats containing view
-        var statsView = Ti.UI.createView({
-            width: AD.UI.screenWidth
-        });
-        
-        // The stats view is the view's view
-        this._super({view: statsView});
-        
-        this.smartBind(AD.Models.Step, '*', $.throttle(this.update));
-        this.smartBind(AD.Models.ContactStep, '*', $.throttle(this.refreshStats));
-    },
-    
-    // Create the child views
-    create: function() {
-        // Create the header label
-        this.add('headerLabel', Ti.UI.createLabel({
-            left: AD.UI.padding,
-            top: AD.UI.padding,
-            width: Ti.UI.SIZE,
-            height: Ti.UI.SIZE,
-            text: '',
-            font: AD.UI.Fonts.header
-        }));
-        
-        // Create the stats container
-        this.$statsTable = this.add('statsTable', new StatsTable({
-            $window: this
-        }));
-        
-        if (this.hasFooter) {
-            // Create the abstract footer view
-            this.add('footerView', Ti.UI.createView({
-                left: 0,
-                bottom: AD.UI.padding,
-                width: AD.UI.screenWidth,
-                height: this.footerHeight
-            }));
-        }
-    },
-    
-    // Initialize the child views
-    initialize: function() {
-        this.update();
-    },
-    
-    // Update the entire stats view UI
-    update: function() {
-        var startDateString = AD.PropertyStore.get(this.options.lastUpdatePropertyName);
-        var startDate = startDateString ? new Date(parseInt(startDateString, 10)) : null;
-        var headerText = startDate ? $.formatString('statsHeaderSince', $.formatDate(startDate)) : AD.Localize('statsHeaderEver');
-        var headerHeight = startDate ? 60 : 30;
-        this.getChild('headerLabel').text = headerText;
-        
-        var statsTable = this.$statsTable.table;
-        statsTable.top = headerHeight + AD.UI.padding;
-        statsTable.bottom = this.footerHeight + AD.UI.padding * 2;
-        
-        this.refreshStats();
-    },
-    
-    // Refresh the stats values
-    refreshStats: function() {
-        this.$statsTable.refreshStats();
-    }
-});
-
 // Create a ModelTable subclass that represents the stats table
 var StatsTable = $.ModelTable('AppDev.UI.StatsTable', {
     sortFields: [{field: 'campus_label', label: 'campus'}],
@@ -131,6 +59,78 @@ var StatsTable = $.ModelTable('AppDev.UI.StatsTable', {
     }
 });
 
+// Create a stats container, complete with a header label and footer view
+var StatsView = $.View('AppDev.UI.StatsView', {}, {
+    init: function(options) {
+        this.hasFooter = typeof this.options.footerHeight !== 'undefined';
+        this.footerHeight = this.options.footerHeight || 0;
+        
+        // Create the stats containing view
+        var statsView = Ti.UI.createView({
+            width: AD.UI.screenWidth
+        });
+        
+        // The stats view is the view's view
+        this._super({view: statsView});
+        
+        this.smartBind(AD.Models.Step, '*', $.throttle(this.update));
+        this.smartBind(AD.Models.ContactStep, '*', $.throttle(this.refreshStats));
+    },
+    
+    // Create the child views
+    create: function() {
+        // Create the header label
+        this.add('headerLabel', Ti.UI.createLabel({
+            left: AD.UI.padding,
+            top: AD.UI.padding,
+            width: Ti.UI.SIZE,
+            height: Ti.UI.SIZE,
+            text: '',
+            font: AD.UI.Fonts.header
+        }));
+        
+        // Create the stats container
+        this.$statsTable = this.add('statsTable', new StatsTable({
+            $window: this
+        }));
+        
+        if (this.hasFooter) {
+            // Create the abstract footer view
+            this.add('footerView', Ti.UI.createView({
+                left: 0,
+                bottom: AD.UI.padding,
+                width: AD.UI.screenWidth,
+                height: this.footerHeight
+            }));
+        }
+    },
+    
+    // Initialize the child views
+    initialize: function() {
+        this.update();
+    },
+    
+    // Update the entire stats view UI
+    update: function() {
+        var startDateString = AD.PropertyStore.get(this.options.lastUpdatePropertyName);
+        var startDate = startDateString ? new Date(parseInt(startDateString, 10)) : null;
+        var headerText = startDate ? $.formatString('statsHeaderSince', $.formatDate(startDate)) : AD.localize('statsHeaderEver');
+        var headerHeight = startDate ? 60 : 30;
+        this.getChild('headerLabel').text = headerText;
+        
+        var statsTable = this.$statsTable.table;
+        statsTable.top = headerHeight + AD.UI.padding;
+        statsTable.bottom = this.footerHeight + AD.UI.padding * 2;
+        
+        this.refreshStats();
+    },
+    
+    // Refresh the stats values
+    refreshStats: function() {
+        this.$statsTable.refreshStats();
+    }
+});
+
 module.exports = $.Window('AppDev.UI.AppStatsWindow', {
     actions: [{
         title: 'reset',
@@ -159,7 +159,6 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
             lastUpdatePropertyName: this.constructor.lastUpdatePropertyName
         }));
         
-        var headerLabel = $statsView.getChild('headerLabel');
         var footerView = $statsView.getChild('footerView');
         
         // Create the view totals button
@@ -227,7 +226,7 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
     }
 });
 
-var ViewTotalsWindow = $.Window('AppDev.UI.ViewTotalsWindow', {}, {
+$.Window('AppDev.UI.ViewTotalsWindow', {}, {
     init: function(options) {
         // Initialize the base $.Window object
         this._super({

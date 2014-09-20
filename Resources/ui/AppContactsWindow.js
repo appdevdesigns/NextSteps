@@ -24,7 +24,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
     init: function(options) {
         var group = this.options.group;
         
-        // The group filter must be setup before the ModelTable is initialized 
+        // The group filter must be setup before the ModelTable is initialized
         this.groupFilter = null;
         if (group) {
             this.groupFilter = group.attr('group_filter');
@@ -50,7 +50,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
         
         this.smartBind(AD.Models.ContactStep, '*', this.refresh);
         this.smartBind(AD.Models.ContactTag, '*', this.refresh);
-
+        
         // When the sort order is updated, refresh the contacts list
         this.smartBind(AD.PropertyStore, 'sort_order', function(event, sortOrder) {
             this.setSortOrder(sortOrder);
@@ -135,7 +135,7 @@ var ContactTable = $.ModelTable('AppDev.UI.ContactTable', {
     
     // Called when a contact row is selected
     onSelect: function(contact) {
-        var $winViewContact = this.$window.createWindow('ViewContactWindow', { contact: contact });
+        this.$window.createWindow('ViewContactWindow', { contact: contact });
     },
     
     // Filter out all contacts that do not match the group filter
@@ -166,20 +166,20 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
     addContactMethods: [{
         title: 'create',
         callback: function() {
-            var $winAddContactWindow = this.createWindow('AddContactWindow', { operation: 'create' });
+            this.createWindow('AddContactWindow', { operation: 'create' });
         },
         showAsAction: true,
         icon: '/images/ic_action_new.png'
     }, {
         title: 'importTitle',
         callback: function() {
-            var $winAddContactWindow = this.createWindow('AddContactWindow', { operation: 'import' });
+            this.createWindow('AddContactWindow', { operation: 'import' });
         },
         showAsAction: true,
         icon: '/images/arrow-up.png'
     }, {
         title: 'massImport', callback: function() {
-            var $winImportContactsWindow = this.createWindow('ImportContactsWindow');
+            this.createWindow('ImportContactsWindow');
         }
     }, {
         title: 'cancel'
@@ -253,16 +253,16 @@ module.exports = $.Window('AppDev.UI.AppContactsWindow', {
             this.window.title = this.options.group.attr('group_name') + ' - ' + contactCount;
         }
         else {
-            this.window.title = AD.Localize('contactsTitle') + ' - ' + contactCount;
+            this.window.title = AD.localize('contactsTitle') + ' - ' + contactCount;
         }
     },
     
-    // Allow the user to choose an add method (add, create, or import), then add a contact using the specified method 
+    // Allow the user to choose an add method (add, create, or import), then add a contact using the specified method
     addContact: function() {
         var methods = this.constructor.addContactMethods;
         var dialog = Ti.UI.createOptionDialog({
             cancel: methods.length - 1,
-            options: methods.map(function(method) { return AD.Localize(method.title); }),
+            options: methods.map(function(method) { return AD.localize(method.title); }),
             titleid: 'addMethod'
         });
         var _this = this;

@@ -2,13 +2,6 @@ var AD = require('AppDev');
 var $ = require('jquery');
 var ADinstall = require('appdev/install');
 
-module.exports.install = function() {
-    return ADinstall.install({
-        installDatabases: installDatabases,
-        onInstall: onInstall
-    });
-};
-
 // Return the field name prefix given the database table name
 var getPrefix = function(tableName) {
     if (/_trans$/.test(tableName)) {
@@ -85,56 +78,56 @@ module.exports.upgraders = [{
         
         // Create the step labels
         var stepLabels = [{
-            "en": "Pre-ev",
-            "zh-Hans": "福音预工"
+            'en': 'Pre-ev',
+            'zh-Hans': '福音预工'
         }, {
-            "en": "G Conversation",
-            "zh-Hans": "福音会话"
+            'en': 'G Conversation',
+            'zh-Hans': '福音会话'
         }, {
-            "en": "G Presentation",
-            "zh-Hans": "福音传讲"
+            'en': 'G Presentation',
+            'zh-Hans': '福音传讲'
         }, {
-            "en": "Decision",
-            "zh-Hans": "做决定"
+            'en': 'Decision',
+            'zh-Hans': '做决定'
         }, {
-            "en": "Finished Following Up",
-            "zh-Hans": "跟进结束"
+            'en': 'Finished Following Up',
+            'zh-Hans': '跟进结束'
         }, {
-            "en": "HS Presentation",
-            "zh-Hans": "传讲圣灵"
+            'en': 'HS Presentation',
+            'zh-Hans': '传讲圣灵'
         }, {
-            "en": "Trained for Action",
-            "zh-Hans": "培训传讲福音"
+            'en': 'Trained for Action',
+            'zh-Hans': '培训传讲福音'
         }, {
-            "en": "Challenged as Lifetime Laborer",
-            "zh-Hans": "挑战成为一生服事主的工人"
+            'en': 'Challenged as Lifetime Laborer',
+            'zh-Hans': '挑战成为一生服事主的工人'
         }, {
-            "en": "Challenged to Develop Local Resources",
-            "zh-Hans": "挑战培养当地教会资源"
+            'en': 'Challenged to Develop Local Resources',
+            'zh-Hans': '挑战培养当地教会资源'
         }, {
-            "en": "Engaged Disciple",
-            "zh-Hans": "参加门徒训练"
+            'en': 'Engaged Disciple',
+            'zh-Hans': '参加门徒训练'
         }, {
-            "en": "Multiplying Disciple",
-            "zh-Hans": "门徒倍增"
+            'en': 'Multiplying Disciple',
+            'zh-Hans': '门徒倍增'
         }, {
-            "en": "Movement Leader",
-            "zh-Hans": "运动领袖"
+            'en': 'Movement Leader',
+            'zh-Hans': '运动领袖'
         }, {
-            "en": "New Lifetime Laborer",
-            "zh-Hans": "成为一生服事主的工人"
+            'en': 'New Lifetime Laborer',
+            'zh-Hans': '成为一生服事主的工人'
         }, {
-            "en": "People Giving Resource",
-            "zh-Hans": "服事他人的人"
+            'en': 'People Giving Resource',
+            'zh-Hans': '服事他人的人'
         }, {
-            "en": "Domestic Project",
-            "zh-Hans": "国内宣教"
+            'en': 'Domestic Project',
+            'zh-Hans': '国内宣教'
         }, {
-            "en": "Cross-Cultural Project",
-            "zh-Hans": "跨文化宣教"
+            'en': 'Cross-Cultural Project',
+            'zh-Hans': '跨文化宣教'
         }, {
-            "en": "International Project",
-            "zh-Hans": "国际宣教"
+            'en': 'International Project',
+            'zh-Hans': '国际宣教'
         }];
         stepLabels.forEach(function(stepLabel) {
             var step = {};
@@ -190,7 +183,7 @@ module.exports.upgraders = [{
             var campus_guid = campusGuidsByLabel[campusLabel];
             if (campusLabel && !campus_guid) {
                 // The campus referenced by the contact does not exist so create it
-                campus = insertRow(tables.nextsteps_campus_data, {});
+                var campus = insertRow(tables.nextsteps_campus_data, {});
                 campus_guid = campus.campus_guid;
                 campusGuidsByLabel[campusLabel] = campus_guid;
                 AD.Defaults.supportedLanguages.forEach(function(languageCode) {
@@ -256,11 +249,11 @@ module.exports.upgraders = [{
         // Generate meta-data for each of the database tables
         var tables = {};
         var tablesByGuid = {};
-        $.each(database.tables, function(tableName, table) {
+        $.each(database.tables, function(tableName, tableData) {
             var prefix = getPrefix(tableName);
             var table = tables[tableName] = {
                 name: tableName,
-                data: table,
+                data: tableData,
                 guid: prefix + '_guid', // the name of the guid field (e.g. 'contact_guid')
                 uuid: prefix + '_uuid'  // the name of the uuid field (e.g. 'contact_uuid')
             };
@@ -358,4 +351,11 @@ var onInstall = function(installData) {
 var installDatabases = function(installData) {
     // Install the year labels
     installData.installLabels('nextsteps_year');
+};
+
+module.exports.install = function() {
+    return ADinstall.install({
+        installDatabases: installDatabases,
+        onInstall: onInstall
+    });
 };

@@ -1,6 +1,30 @@
 var AD = require('AppDev');
 var $ = require('jquery');
 
+// Find a property on object, optionally setting its value
+// This function supports multi-level properties:
+//    findProperty({ a: { b: { c: 'd' } } }, 'a b c') === 'd';
+//    findProperty({}, 'a b c', 'd') === { a: { b: { c: 'd' } } };
+var findProperty = function(object, property, value) {
+    var parts = property.split(' ');
+    var propertyName = parts.pop();
+    var source = object;
+    parts.forEach(function(partName) {
+        if (!source[partName]) {
+            source[partName] = {};
+        }
+        source = source[partName];
+    });
+    if (typeof value !== 'undefined') {
+        // Set the value of the property
+        return (source[propertyName] = value);
+    }
+    else {
+        // Get the value of the property
+        return source[propertyName];
+    }
+};
+
 module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     dependencies: ['ChooseOptionWindow', 'Checkbox'],
     
@@ -127,7 +151,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         $.each(this.constructor.fieldDefinitions, this.proxy(function(name, definition) {
             var value = findProperty(filter, name);
             var enabled = typeof value !== 'undefined';
-            var title = value || AD.Localize('unspecified');
+            var title = value || AD.localize('unspecified');
             if (value && definition.isChoice) {
                 // "value" refers to the primary key of the model, so lookup the associated model instance
                 var model = AD.Models[definition.Model].cache.getById(value);
@@ -140,7 +164,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 }
             }
             else if (definition.isMultichoice) {
-                title = AD.Localize('unspecified');
+                title = AD.localize('unspecified');
             }
             var field = this.fields[name] = {
                 enabled: enabled,
@@ -186,7 +210,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
             left: AD.UI.Checkbox.defaultSize + AD.UI.padding * 2,
             top: 0,
             height: Ti.UI.FILL,
-            text: AD.Localize(fieldDefinition.name),
+            text: AD.localize(fieldDefinition.name),
             font: AD.UI.Fonts.medium
         }));
         
@@ -194,7 +218,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         
         if (fieldDefinition.isBool) {
             // Create the checkbox to toggle the value of this field
-            var $valueCheckbox = $valueView = new AD.UI.Checkbox({
+            var $valueCheckbox = new AD.UI.Checkbox({
                 createParams: {
                     right: AD.UI.padding,
                     top: AD.UI.padding / 2
@@ -207,6 +231,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 field.value = event.value;
                 onUpdate();
             });
+            $valueView = $valueCheckbox;
             $enabledCheckbox.addEventListener('change', function(event) {
                 var enabled = event.value;
                 if (!enabled) {
@@ -217,7 +242,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         }
         else if (fieldDefinition.isChoice || fieldDefinition.isMultichoice) {
             var valueButtonWidth = 120;
-
+            
             var $conditionCheckbox = null;
             if (fieldDefinition.isMultichoice) {
                 var conditions = AD.Models.Contact.filterConditions;
@@ -227,7 +252,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                         right: AD.UI.padding * 2 + valueButtonWidth,
                         top: AD.UI.padding / 2
                     },
-                    overlayText: AD.Localize('all').toUpperCase(),
+                    overlayText: AD.localize('all').toUpperCase(),
                     enabled: field.enabled,
                     value: field.value.condition === conditions[1]
                 });
@@ -237,8 +262,6 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 });
                 $fieldRow.add('condition', $conditionCheckbox);
             }
-            
-            var _this = this;
             
             var valueButton = Ti.UI.createButton({
                 right: AD.UI.padding,
@@ -261,7 +284,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                     $winChooseOption.getDeferred().done(function(option) {
                         // An option was chosen, so set the value of the field in the filter
                         field.value = option ? option.getId() : null;
-                        valueButton.title = option ? option.getLabel() : AD.Localize('unspecified');
+                        valueButton.title = option ? option.getLabel() : AD.localize('unspecified');
                         onUpdate();
                     });
                 }
@@ -285,8 +308,8 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
                 onUpdate();
                 
                 // Reset the button's text
-                valueButton.title = enabled ? AD.Localize('unspecified') : '';
-
+                valueButton.title = enabled ? AD.localize('unspecified') : '';
+                
                 if ($conditionCheckbox) {
                     $conditionCheckbox.setEnabled(enabled);
                     if (!enabled) {
@@ -297,15 +320,15 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         }
         
         nameLabel.right = $valueView.getView().width + AD.UI.padding * 2;
-
+        
         $valueView.setEnabled(field.enabled);
         $fieldRow.fieldDefinition = fieldDefinition;
         $fieldRow.add('value', $valueView);
-
+        
         // The row has the same name as the fieldname of the column in the database
         this.get$Child('fieldsView').add(fieldDefinition.fieldName, $fieldRow);
     },
-
+    
     // Set the initial contents of the form fields
     initialize: function() {
         this.getChild('name').value = this.group.attr('group_name');
@@ -332,7 +355,7 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
     // Save the current group
     save: function() {
         if (!this.getChild('name').value) {
-            alert(AD.Localize('invalidGroupName'));
+            alert(AD.localize('invalidGroupName'));
             return false;
         }
         
@@ -379,27 +402,3 @@ module.exports = $.Window('AppDev.UI.AddGroupWindow', {
         return valid;
     }
 });
-
-// Find a property on object, optionally setting its value
-// This function supports multi-level properties:
-//    findProperty({ a: { b: { c: 'd' } } }, 'a b c') === 'd';
-//    findProperty({}, 'a b c', 'd') === { a: { b: { c: 'd' } } };
-var findProperty = function(object, property, value) {
-    var parts = property.split(' ');
-    var propertyName = parts.pop();
-    var source = object;
-    parts.forEach(function(partName) {
-        if (!source[partName]) {
-            source[partName] = {};
-        }
-        source = source[partName];
-    });
-    if (typeof value !== 'undefined') {
-        // Set the value of the property
-        return source[propertyName] = value;
-    }
-    else {
-        // Get the value of the property
-        return source[propertyName];
-    }
-};

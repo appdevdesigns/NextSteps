@@ -89,8 +89,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     }]
 }, {
     init: function(options) {
-        var _this = this;
-        
         this.operation = options.operation;
         var getContactDfd = $.Deferred();
         
@@ -117,7 +115,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             this.contact = contactData.contact;
             this.attrs = this.contact.attrs(); // the changed contact attrs
             this.localContact = contactData.localContact;
-            this.window.title = AD.Localize(this.operation+'Contact');
+            this.window.title = AD.localize(this.operation+'Contact');
             this.open();
         }));
         
@@ -193,7 +191,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 focusedTextField = null;
             }
         };
-
+        
         // Scrollable container that will hold the field rows on non-iPhone platforms
         var table = Ti.UI.createScrollView({
             left: 0,
@@ -208,7 +206,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         
         // Create the form fields
         // On iPhone, attempt to mimic the built-in Contacts app
-
+        
         // Create each of the field views
         var rows = [];
         this.fields.forEach(function(field, index) {
@@ -226,7 +224,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 left: 0,
                 width: labelWidth,
                 height: Ti.UI.SIZE,
-                text: AD.Localize(field.name)
+                text: AD.localize(field.name)
             });
             fieldRow.add(label);
             if (AD.Platform.isiPhone) {
@@ -256,7 +254,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                         right: AD.UI.padding,
                         center: { y: rowHeight / 2 },
                         height: AD.UI.buttonHeight,
-                        title: fieldValue || AD.Localize('unspecified')
+                        title: fieldValue || AD.localize('unspecified')
                     });
                     // When a choice row is clicked, call the callback that will presumably allow the user to choose a value
                     fieldView.addEventListener('click', field.callback);
@@ -416,12 +414,11 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
         }
         
         if (!this.attrs.contact_firstName && !this.attrs.contact_lastName) {
-            alert(AD.Localize('contactInvalidName'));
+            alert(AD.localize('contactInvalidName'));
             return false;
         }
         
         // Apply the changes to the contact
-        var oldCampus_uuid = this.contact.attr('campus_uuid');
         this.contact.attrs(this.attrs);
         
         if (this.options.autoSave !== false) {

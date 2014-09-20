@@ -64,7 +64,7 @@ module.exports = $.extend(AD.Comm, {
             },
             timeout: 300000 // five minutes
         }).done(function(response) {
-            console.log("syncWithServer() >> response (done) = ");
+            console.log('syncWithServer() >> response (done) = ');
             console.log(response);
             AD.PropertyStore.set('lastSyncServer', apiConfig.server);
             AD.PropertyStore.set('lastSyncTimestamp', response.data.lastSyncTimestamp);

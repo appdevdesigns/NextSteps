@@ -5,7 +5,7 @@ var utils = require('app/utils');
 var controller = module.exports = {
     // This will be called by app.js once the initialization is finished
     start: function() {
-        console.log("DEBUG controller > Entered start()");
+        console.log('DEBUG controller > Entered start()');
         
         require('app/Transactions');
         AD.Transactions.initialize({
@@ -16,9 +16,9 @@ var controller = module.exports = {
         var serverURL = AD.Config.getServer();
         
         if (AD.Config.hasServer() && serverURL !== AD.PropertyStore.get('lastSyncServer')) {
-            console.log("AD.PropertyStore = " + AD.PropertyStore);
-            console.log("lastSyncServer = " + AD.PropertyStore.get('lastSyncServer'));
-            console.log("serverURL = " + serverURL);
+            console.log('AD.PropertyStore = ' + AD.PropertyStore);
+            console.log('lastSyncServer = ' + AD.PropertyStore.get('lastSyncServer'));
+            console.log('serverURL = ' + serverURL);
             this.performWholeSyncProcess(true);
         }
         
@@ -39,24 +39,22 @@ var controller = module.exports = {
             });
         }
         
-        console.log("DEBUG controller > Left start()");
+        console.log('DEBUG controller > Left start()');
     },
     
     performPreSyncValidation: function() {
-        console.log("DEBUG controller > Entered performPreSyncValidation()");
-        var serverURL = AD.Config.getServer();
-        
+        console.log('DEBUG controller > Entered performPreSyncValidation()');
         if (!AD.Config.hasServer()) {
-            alert(AD.Localize('syncErrorNoServer'));
+            alert(AD.localize('syncErrorNoServer'));
         } else {
             this.performWholeSyncProcess(false);
         }
-        console.log("DEBUG controller > Left performPreSyncValidation()");
+        console.log('DEBUG controller > Left performPreSyncValidation()');
     },
     
     // This will perform the following: check if server URL is supplied & ping with server, authenticate user, and sync with server if authentication is successful. If not, the user will be directed to the contacts page and operate in offline mode.
     performWholeSyncProcess: function(isInitial) {
-        console.log("DEBUG controller > Entered performWholeSyncProcess()");
+        console.log('DEBUG controller > Entered performWholeSyncProcess()');
         require('app/Transactions');
         require('app/comm'); // Application-specific communications functions will be in app
         
@@ -74,7 +72,7 @@ var controller = module.exports = {
             });
         };
         
-        console.log("start ping()");
+        console.log('start ping()');
         ping(function(apiConfig) {
             console.log('Successfully contacted server: ' + apiConfig.server);
             
@@ -93,7 +91,7 @@ var controller = module.exports = {
                 }
             });
             
-            console.log("open $winLoginWindow()");
+            console.log('open $winLoginWindow()');
             $winLoginWindow.open();
             $winLoginWindow.getDeferred().done(function(credentials) {
                 console.log('Login credentials are valid');
@@ -105,8 +103,8 @@ var controller = module.exports = {
                 $winSyncWindow.setProgress(null);
                 $winSyncWindow.open();
                 
-                console.log("start syncWithServer()");
-                console.log("transactionLog sent = ");
+                console.log('start syncWithServer()');
+                console.log('transactionLog sent = ');
                 console.log(transactionLog.get());
                 AD.Comm.syncWithServer(apiConfig, transactionLog.get(), credentials.username, credentials.password).done(function(transactions) {
                     transactionLog.clear();
@@ -117,13 +115,13 @@ var controller = module.exports = {
                     });
                     transactionLog.resume();
                 }).fail(function() {
-                    alert(AD.Localize('syncErrorUnknown')); // move this one after closing the sync window
+                    alert(AD.localize('syncErrorUnknown')); // move this one after closing the sync window
                 }).always(function() {
                     $winSyncWindow.close();
                 });
             });
         });
-        console.log("DEBUG controller > Left performWholeSyncProcess()");
+        console.log('DEBUG controller > Left performWholeSyncProcess()');
     },
     
     // Determine whether or not a promotion is pending that has not yet been acted upon
@@ -160,7 +158,6 @@ var controller = module.exports = {
         AD.PropertyStore.set('schoolYearEnd', schoolYearEnd);
         
         // Update the next promotion date, preserving whether or not a promotion is pending
-        var nextPromotionOld = AD.PropertyStore.get('nextPromotion');
         var nextPromotionNew = utils.schoolYearEnd();
         if (controller.isPromotionPending()) {
             // A promotion was previous pending, so decrement the upcoming promotion year to

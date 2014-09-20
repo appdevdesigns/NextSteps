@@ -5,22 +5,21 @@
 
 
 (function () {
-    // Pull AppDev from the global scope on NodeJS and browser and load the AppDev CommonJS module on Titanium
-    var AD = AD || (global && global.AD) || require('AppDev');
+    var AD = require('AppDev');
     
     // On Titanium and NodeJS, the full model definition is needed
     var extendedDefinition = typeof Titanium !== 'undefined' || typeof process !== 'undefined';
     
     var attr = {
         // Shared model attributes
-        _adModule:'nextSteps',
-        _adModel:'Group',
-        id:'group_uuid',
-        hasUuid:true,
-        labelKey:'group_name',
-        _isMultilingual:false,
-        //connectionType:'server', // optional field
-        cache:true,
+        _adModule: 'nextSteps',
+        _adModel: 'Group',
+        id: 'group_uuid',
+        hasUuid: true,
+        labelKey: 'group_name',
+        _isMultilingual: false,
+        //connectionType: 'server', // optional field
+        cache: true,
         
         attributes: {
             group_filter: 'JSON'
@@ -30,20 +29,19 @@
     if (extendedDefinition) {
         // Extended model attributes
         AD.jQuery.extend(attr, {
-            type:'single',  // 'single' | 'multilingual'
-            dbTable:'nextsteps_group',
+            type: 'single',  // 'single' | 'multilingual'
+            dbTable: 'nextsteps_group',
             modelFields: {
-                  group_uuid:"varchar(36)",
-                  group_name:"text",
-                  group_filter:"text"
-
+                  group_uuid: 'varchar(36)',
+                  group_name: 'text',
+                  group_filter: 'text'
             },
-            primaryKey:'group_uuid'
+            primaryKey: 'group_uuid'
         });
     }
     
     
-    var Model = AD.Model.extend("nextSteps.Group",
+    var Model = AD.Model.extend('nextSteps.Group',
     attr,
     {
         // define instance methods here.

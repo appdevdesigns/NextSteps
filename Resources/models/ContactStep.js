@@ -5,40 +5,39 @@
 
 
 (function () {
-    // Pull AppDev from the global scope on NodeJS and browser and load the AppDev CommonJS module on Titanium
-    var AD = AD || (global && global.AD) || require('AppDev');
-
+    var AD = require('AppDev');
+    
     // On Titanium and NodeJS, the full model definition is needed
     var extendedDefinition = typeof Titanium !== 'undefined' || typeof process !== 'undefined';
-
+    
     var attr = {
         // Shared model attributes
-        _adModule:'nextStep',
-        _adModel:'ContactStep',
-        id:'contactstep_uuid',
-        hasUuid:true,
-        labelKey:'step_label',
-        _isMultilingual:false,
-        //connectionType:'server', // optional field
-        cache:true,
-
+        _adModule: 'nextStep',
+        _adModel: 'ContactStep',
+        id: 'contactstep_uuid',
+        hasUuid: true,
+        labelKey: 'step_label',
+        _isMultilingual: false,
+        //connectionType: 'server', // optional field
+        cache: true,
+        
         attributes: {
             viewer_id: 'integer',
             step_date: 'date'
         },
     };
-
+    
     if (extendedDefinition) {
         // Extended model attributes
         AD.jQuery.extend(attr, {
-            type:'single',  // 'single' | 'multilingual'
-            dbTable:'nextsteps_contact_step',
+            type: 'single',  // 'single' | 'multilingual'
+            dbTable: 'nextsteps_contact_step',
             modelFields: {
-                  contactstep_uuid:"varchar(36)",
-                  contact_uuid:"varchar(36)",
-                  step_uuid:"varchar(36)",
-                  step_date:"date",
-                  step_location:"varchar(30)"
+                  contactstep_uuid: 'varchar(36)',
+                  contact_uuid: 'varchar(36)',
+                  step_uuid: 'varchar(36)',
+                  step_date: 'date',
+                  step_location: 'varchar(30)'
             },
             lookupLabels: {
                 step_label: {
@@ -48,17 +47,17 @@
                     label: 'step_label'
                 }
             },
-            primaryKey:'contactstep_uuid'
+            primaryKey: 'contactstep_uuid'
         });
     }
-
-
-    var Model = AD.Model.extend("nextStep.ContactStep",
+    
+    
+    var Model = AD.Model.extend('nextStep.ContactStep',
     attr,
     {
         // define instance methods here.
     });
-
+    
     if (module && module.exports) {
         // This is a CommonJS module, so return the model
         module.exports = Model;

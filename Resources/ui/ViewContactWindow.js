@@ -124,7 +124,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
             // Create a button bar under iOS
             this.contactBBLabels = this.constructor.contactMethods.map(function(method) {
                 return $.extend({
-                    title: AD.Localize(method.label)
+                    title: AD.localize(method.label)
                 }, method);
             });
             var contactBB = this.add('contactBB', Ti.UI.createButtonBar({
@@ -195,7 +195,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         var updateTagLabel = function() {
             // Get an array of the lab
             var tagLabels = contact.getTags().map(function(tag) { return tag.attr('tag_label'); });
-            tagsLabel.text = (tagLabels.join(', ') || AD.Localize('none'));
+            tagsLabel.text = (tagLabels.join(', ') || AD.localize('none'));
         };
         updateTagLabel();
         tagsRow.add(tagsLabel);
@@ -310,7 +310,6 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         // Display all the steps associated with this contact's campus
         // and all the completed steps, regardless of their campus
         var steps = this.contact.getSteps();
-        var stepsLength = steps.length;
         steps.forEach(function(contactStep) {
             var $stepView = this.getStepRow(contactStep);
             var step = AD.Models.Step.cache.getById(contactStep.attr('step_uuid'));
@@ -329,7 +328,7 @@ module.exports = $.Window('AppDev.UI.ViewContactWindow', {
         if (this.stepRows[contactstep_uuid]) {
             return this.stepRows[contactstep_uuid];
         }
-        return this.stepRows[contactstep_uuid] = this.createStepRow(contactStep);
+        return (this.stepRows[contactstep_uuid] = this.createStepRow(contactStep));
     },
     
     // Create and return a $.View UI element for the given contact step

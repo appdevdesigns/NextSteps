@@ -6,11 +6,11 @@ module.exports = {
     schoolYearEnd: function() {
         var schoolYearEnd = AD.PropertyStore.get('schoolYearEnd');
         var today = $.today();
-        var schoolYearEnd = new Date(today.getFullYear(), schoolYearEnd.month, schoolYearEnd.date);
-        if (today > schoolYearEnd) {
+        var schoolYearEndDate = new Date(today.getFullYear(), schoolYearEnd.month, schoolYearEnd.date);
+        if (today > schoolYearEndDate) {
             // The school year ends next year
-            schoolYearEnd.setFullYear(today.getFullYear() + 1);
+            schoolYearEndDate.setFullYear(today.getFullYear() + 1);
         }
-        return schoolYearEnd;
+        return schoolYearEndDate;
     }
 };

@@ -5,22 +5,22 @@
 
 
 (function () {
-    // Pull AppDev from the global scope on NodeJS and browser and load the AppDev CommonJS module on Titanium
-    var AD = AD || (global && global.AD) || require('AppDev');
+    var AD = require('AppDev');
+    var $ = require('jquery');
     
     // On Titanium and NodeJS, the full model definition is needed
     var extendedDefinition = typeof Titanium !== 'undefined' || typeof process !== 'undefined';
     
     var attr = {
         // Shared model attributes
-        _adModule:'nextSteps',
-        _adModel:'Contact',
-        id:'contact_uuid',
-        hasUuid:true,
-        labelKey:'contact_firstName',
-        _isMultilingual:false,
-        //connectionType:'server', // optional field
-        cache:true,
+        _adModule: 'nextSteps',
+        _adModel: 'Contact',
+        id: 'contact_uuid',
+        hasUuid: true,
+        labelKey: 'contact_firstName',
+        _isMultilingual: false,
+        //connectionType: 'server', // optional field
+        cache: true,
         
         attributes: {
             contact_recordId: 'integer',
@@ -113,20 +113,19 @@
     if (extendedDefinition) {
         // Extended model attributes
         AD.jQuery.extend(attr, {
-            type:'single',  // 'single' | 'multilingual'
-            dbTable:'nextsteps_contact',
+            type: 'single',  // 'single' | 'multilingual'
+            dbTable: 'nextsteps_contact',
             modelFields: {
-                  contact_uuid:"varchar(36)",
-                  contact_recordId:"int(11) unsigned",
-                  contact_firstName:"text",
-                  contact_lastName:"text",
-                  contact_nickname:"text",
-                  campus_uuid:"varchar(36)",
-                  year_id:"int(11)",
-                  contact_phone:"text",
-                  contact_email:"text",
-                  contact_notes:"text"
-
+                  contact_uuid: 'varchar(36)',
+                  contact_recordId: 'int(11) unsigned',
+                  contact_firstName: 'text',
+                  contact_lastName: 'text',
+                  contact_nickname: 'text',
+                  campus_uuid: 'varchar(36)',
+                  year_id: 'int(11)',
+                  contact_phone: 'text',
+                  contact_email: 'text',
+                  contact_notes: 'text'
             },
             lookupLabels: {
                 campus_uuid: {
@@ -142,12 +141,12 @@
                     label: 'year_label'
                 }
             },
-            primaryKey:'contact_uuid'
+            primaryKey: 'contact_uuid'
         });
     }
     
     
-    var Model = AD.Model.extend("nextSteps.Contact",
+    var Model = AD.Model.extend('nextSteps.Contact',
     attr,
     {
         // define instance methods here.
@@ -171,7 +170,7 @@
                 contact_uuid: this.getId()
             });
         },
-
+        
         // Set the tags associated with this contact
         setTags: function(newTags) {
             var contact_uuid = this.getId();
@@ -189,7 +188,7 @@
                 oldTag.destroy();
             });
         },
-
+        
         // Set the personal steps associated with this contact
         setPersonalSteps: function(newSteps) {
             // Models in oldSteps that are not in newSteps will be destroyed, models in newSteps
@@ -211,7 +210,7 @@
             });
             var contact_uuid = this.getId();
             toCreateSteps.forEach(function(step) {
-                var newContactStep = new AD.Models.ContactStep({ 
+                var newContactStep = new AD.Models.ContactStep({
                     contact_uuid: contact_uuid,
                     step_uuid: step.getId(),
                     step_date: null,
@@ -277,7 +276,7 @@
                 return step_campus_uuid === null || (contact_campus_uuid && step_campus_uuid === contact_campus_uuid) || contactStep.attr('step_date');
             });
         },
-
+        
         // Return a ContactStep model with the specified step_uuid associated with this contact
         getStep: function(step_uuid) {
             var contact_uuid = this.getId();
@@ -292,10 +291,9 @@
                 step_date: null
             });
         },
-
+        
         // Return the last completed step of this contact
         getLastStep: function() {
-            var self = this;
             var lastStep = null;
             var lastStepCompletionDate = null;
             this.getSteps().forEach(function(step) {
@@ -323,7 +321,7 @@
                     // General case where the two values are directly compared to determine equality
                     matchesProperty = contactValue === value;
                 }
-
+                
                 if (!matchesProperty) {
                     // This property does not match the filter, so stop the comparison
                     matches = false;
@@ -342,7 +340,7 @@
     // Listen for changes to any contact's campus_uuid field
     Model.bind('campus_uuid', function(event, contact, campus_uuid) {
         // The ContactSteps reference the contact_uuid in the database, so
-        // only create them if the contact has been saved to the database 
+        // only create them if the contact has been saved to the database
         if (contact.isSaved) {
             contact.createContactSteps();
         }

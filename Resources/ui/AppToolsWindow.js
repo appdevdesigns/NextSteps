@@ -1,6 +1,6 @@
 var AD = require('AppDev');
 var $ = require('jquery');
-var controller = require('app/controller');  
+var controller = require('app/controller');
 
 module.exports = $.Window('AppDev.UI.AppToolsWindow', {
     dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow', 'DatePickerWindow']
@@ -14,7 +14,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             }
         });
     },
-
+    
     // Create the child views
     create: function() {
         if (AD.Platform.isAndroid) {
@@ -63,7 +63,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 ('0' + (today.getMonth() + 1)).slice(-2),
                 ('0' + today.getDate()).slice(-2),
                 today.getFullYear());
-
+            
             // Prompt the user for the name of the database backup file
             _this.createWindow('StringPromptWindow', {
                 title: 'stringPromptBackupTitle',
