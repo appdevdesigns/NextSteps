@@ -55,7 +55,7 @@
     <string name="importingContacts">Contacts to import - {0}</string>
     <string name="importStatus">Importing contact {0} of {1}</string>
     <string name="importNoContacts">Please select the contacts to import.</string>
-    <string name="importWarning">You have not specified a {0}.  Would you like to import anyway?</string>
+    <string name="importWarning">You have not specified a {0}. Would you like to import anyway?</string>
     <string name="or">or</string>
     
     <!-- Groups labels -->
@@ -76,8 +76,8 @@
     <string name="saveStats">Sync</string>
     <string name="viewTotals">View totals</string>
     <string name="viewTotalsTitle">Total stats</string>
-    <string name="statsConfirmSubmit">Are you sure you want to submit the stats report and begin a new stats collection session?  Stats totals will be preserved.</string>
-    <string name="statsConfirmSave">Are you sure you want to begin a new stats collection session?  Stats totals will be preserved.</string>
+    <string name="statsConfirmSubmit">Are you sure you want to submit the stats report and begin a new stats collection session? Stats totals will be preserved.</string>
+    <string name="statsConfirmSave">Are you sure you want to begin a new stats collection session? Stats totals will be preserved.</string>
     <string name="statsMessageBody">Stats report submitted by {0} on {1}.\n\n{2}</string>
     
     <!-- Tools labels -->
