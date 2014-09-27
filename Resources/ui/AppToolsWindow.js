@@ -117,7 +117,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             titleid: 'sync'
         }));
         syncButton.addEventListener('click', function() {
-            controller.performPreSyncValidation();
+            controller.syncWithNSS();
         });
         
         

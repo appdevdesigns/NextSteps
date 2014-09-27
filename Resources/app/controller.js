@@ -15,11 +15,11 @@ var controller = module.exports = {
         
         var serverURL = AD.Config.getServer();
         
-        if (AD.Config.hasServer() && serverURL !== AD.PropertyStore.get('lastSyncServer')) {
+        if (AD.EncryptionKey.encryptionActivated() && AD.Config.hasServer() && serverURL !== AD.PropertyStore.get('lastSyncServer')) {
             console.log('AD.PropertyStore = ' + AD.PropertyStore);
             console.log('lastSyncServer = ' + AD.PropertyStore.get('lastSyncServer'));
             console.log('serverURL = ' + serverURL);
-            this.performWholeSyncProcess(true);
+            this.initiateSync(true);
         }
         
         if (controller.isPromotionPending()) {
@@ -42,19 +42,21 @@ var controller = module.exports = {
         console.log('DEBUG controller > Left start()');
     },
     
-    performPreSyncValidation: function() {
-        console.log('DEBUG controller > Entered performPreSyncValidation()');
-        if (!AD.Config.hasServer()) {
-            alert(AD.localize('syncErrorNoServer'));
-        } else {
-            this.performWholeSyncProcess(false);
+    syncWithNSS: function() {
+        if (!AD.EncryptionKey.encryptionActivated()) {
+            alert(AD.localize('syncErrorUnencrypted'));
         }
-        console.log('DEBUG controller > Left performPreSyncValidation()');
+        else if (!AD.Config.hasServer()) {
+            alert(AD.localize('syncErrorNoServer'));
+        }
+        else {
+            this.initiateSync(false);
+        }
     },
     
     // This will perform the following: check if server URL is supplied & ping with server, authenticate user, and sync with server if authentication is successful. If not, the user will be directed to the contacts page and operate in offline mode.
-    performWholeSyncProcess: function(isInitial) {
-        console.log('DEBUG controller > Entered performWholeSyncProcess()');
+    initiateSync: function(isInitial) {
+        console.log('DEBUG controller > Entered initiateSync()');
         require('app/Transactions');
         require('app/comm'); // Application-specific communications functions will be in app
         
@@ -121,7 +123,7 @@ var controller = module.exports = {
                 });
             });
         });
-        console.log('DEBUG controller > Left performWholeSyncProcess()');
+        console.log('DEBUG controller > Left initiateSync()');
     },
     
     // Determine whether or not a promotion is pending that has not yet been acted upon
