@@ -71,6 +71,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 initial: defaultTitle
             }).getDeferred().done(function(backupTitle) {
                 AD.Database.export(AD.Defaults.dbName).done(function(dump) {
+                    dump.encrypted = AD.EncryptionKey.encryptionActivated();
                     AD.Comm.GoogleDriveFileAPI.write({
                         content: JSON.stringify(dump),
                         metadata: {
@@ -97,12 +98,17 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 type: 'file',
                 folder: null
             }).getDeferred().done(function(fileId) {
-                AD.UI.yesNoAlert('restoreDatabaseWarning').done(function() {
-                    AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
-                        AD.Database.import(AD.Defaults.dbName, dump).done(function() {
-                            AD.Model.refreshCaches().done(AD.UI.initialize);
+                AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
+                    if (dump.encrypted !== false && !AD.EncryptionKey.encryptionActivated()) {
+                        AD.UI.okAlert('restoreDatabaseInsecure');
+                    }
+                    else {
+                        AD.UI.yesNoAlert('restoreDatabaseWarning').done(function() {
+                            AD.Database.import(AD.Defaults.dbName, dump).done(function() {
+                                AD.Model.refreshCaches().done(AD.UI.initialize);
+                            });
                         });
-                    });
+                    }
                 });
             });
         });
