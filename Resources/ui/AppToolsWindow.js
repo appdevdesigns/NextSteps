@@ -99,15 +99,20 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 folder: null
             }).getDeferred().done(function(fileId) {
                 AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
-                    if (dump.encrypted !== false && !AD.EncryptionKey.encryptionActivated()) {
-                        AD.UI.okAlert('restoreDatabaseInsecure');
-                    }
-                    else {
+                    var restoreDatabases = function() {
                         AD.UI.yesNoAlert('restoreDatabaseWarning').done(function() {
                             AD.Database.import(AD.Defaults.dbName, dump).done(function() {
                                 AD.Model.refreshCaches().done(AD.UI.initialize);
                             });
                         });
+                    };
+                    if (dump.encrypted !== false && !AD.EncryptionKey.encryptionActivated()) {
+                        AD.UI.yesNoAlert('restoreDatabaseInsecure').done(function() {
+                            controller.reencryptDatabases().done(restoreDatabases);
+                        });
+                    }
+                    else {
+                        restoreDatabases();
                     }
                 });
             });

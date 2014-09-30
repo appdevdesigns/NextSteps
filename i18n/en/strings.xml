@@ -102,7 +102,7 @@
     <string name="backupTitleFormat">NextSteps database dump {0}/{1}/{2}</string>
     <string name="stringPromptBackupTitle">NextSteps Database Backup</string>
     <string name="stringPromptBackupMessage">Please choose the name of the NextSteps database backup file.</string>
-    <string name="restoreDatabaseInsecure">Cannot restore encrypted database dump to an unencrypted device.</string>
+    <string name="restoreDatabaseInsecure">Cannot restore encrypted database dump to an unencrypted device. Do you want to encrypt the databases and continue restoring?</string>
     <string name="restoreDatabaseWarning">Restoring the database from a backup will replace all of your current data. Are you sure you want to proceed?</string>
     
     <!-- Controller labels -->

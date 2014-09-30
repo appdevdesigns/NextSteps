@@ -42,33 +42,41 @@ var controller = module.exports = {
         console.log('DEBUG controller > Left start()');
     },
     
+    // (Re)encrypt the databases with a new password provided by the user
+    reencryptDatabases: function() {
+        // Because the database module does not support enabling and disabling
+        // encryption, we must backup the data, delete the database file,
+        // setup database encryption, and restore the data.
+        var dfd = $.Deferred();
+        
+        var dbName = AD.Defaults.dbName;
+        AD.Database.export(dbName).done(function(databaseDump) {
+            AD.Database.DataStore.closeDatabase(dbName);
+            
+            var databaseFile = AD.Database.getFile();
+            if (databaseFile.exists()) {
+                databaseFile.deleteFile();
+            }
+            
+            AD.Auth.choosePassword().done(function() {
+                // Now that encryption is activiated, write out the property store, which
+                // will be encrypted now
+                AD.PropertyStore.write();
+                AD.Auth.choosePIN().done(function() {
+                    // Now import the data back into the database
+                    AD.Database.install(dbName);
+                    AD.Database.import(dbName, databaseDump).done(dfd.resolve).fail(dfd.reject);
+                }).fail(dfd.reject);
+            }).fail(dfd.reject);
+        }).fail(dfd.reject);
+        
+        return dfd.promise();
+    },
+    
     syncWithNSS: function() {
         if (!AD.EncryptionKey.encryptionActivated()) {
             AD.UI.yesNoAlert(AD.localize('syncErrorUnencrypted')).done(function() {
-                // Because the database module does not support enabling and disabling
-                // encryption, we must backup the data, delete the database file,
-                // setup database encryption, and restore the data.
-                var dbName = AD.Defaults.dbName;
-                AD.Database.export(dbName).done(function(databaseDump) {
-                    AD.Database.DataStore.closeDatabase(dbName);
-                    
-                    var databaseFile = AD.Database.getFile();
-                    if (databaseFile.exists()) {
-                        databaseFile.deleteFile();
-                    }
-                    
-                    AD.Auth.choosePassword().done(function() {
-                        // Now that encryption is activiated, write out the property store, which
-                        // will be encrypted now
-                        AD.PropertyStore.write();
-                        AD.Auth.choosePIN().done(function() {
-                            // Now import the data back into the database
-                            AD.Database.install(dbName);
-                            AD.Database.import(dbName, databaseDump);
-                            controller.syncWithNSS();
-                        });
-                    });
-                });
+                controller.reencryptDatabases().done(controller.syncWithNSS);
             });
         }
         else if (!AD.Config.hasServer()) {
