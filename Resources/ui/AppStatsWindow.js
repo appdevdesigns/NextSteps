@@ -201,7 +201,7 @@ module.exports = $.Window('AppDev.UI.AppStatsWindow', {
             this.get$Child('statsView').update();
             this.getChild('viewTotals').visible = true;
             
-            controller.performPreSyncValidation();
+            controller.syncWithNSS();
             
             // Possibly send a stats report email to the address set in preferences
             if (sendStatsReportEmail) {
