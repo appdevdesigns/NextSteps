@@ -44,7 +44,32 @@ var controller = module.exports = {
     
     syncWithNSS: function() {
         if (!AD.EncryptionKey.encryptionActivated()) {
-            alert(AD.localize('syncErrorUnencrypted'));
+            AD.UI.yesNoAlert(AD.localize('syncErrorUnencrypted')).done(function() {
+                // Because the database module does not support enabling and disabling
+                // encryption, we must backup the data, delete the database file,
+                // setup database encryption, and restore the data.
+                var dbName = AD.Defaults.dbName;
+                AD.Database.export(dbName).done(function(databaseDump) {
+                    AD.Database.DataStore.closeDatabase(dbName);
+                    
+                    var databaseFile = AD.Database.getFile();
+                    if (databaseFile.exists()) {
+                        databaseFile.deleteFile();
+                    }
+                    
+                    AD.Auth.choosePassword().done(function() {
+                        // Now that encryption is activiated, write out the property store, which
+                        // will be encrypted now
+                        AD.PropertyStore.write();
+                        AD.Auth.choosePIN().done(function() {
+                            // Now import the data back into the database
+                            AD.Database.install(dbName);
+                            AD.Database.import(dbName, databaseDump);
+                            controller.syncWithNSS();
+                        });
+                    });
+                });
+            });
         }
         else if (!AD.Config.hasServer()) {
             alert(AD.localize('syncErrorNoServer'));
