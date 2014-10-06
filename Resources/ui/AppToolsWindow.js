@@ -3,7 +3,7 @@ var $ = require('jquery');
 var controller = require('app/controller');
 
 module.exports = $.Window('AppDev.UI.AppToolsWindow', {
-    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow', 'DatePickerWindow']
+    dependencies: ['GoogleDriveChooseFileWindow', 'StringPromptWindow', 'PasswordPromptWindow', 'DatePickerWindow']
 }, {
     init: function(options) {
         // Initialize the base $.Window object
@@ -66,19 +66,46 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             
             // Prompt the user for the name of the database backup file
             _this.createWindow('StringPromptWindow', {
-                title: 'stringPromptBackupTitle',
-                message: 'stringPromptBackupMessage',
+                title: 'stringPromptBackupNameTitle',
+                message: 'stringPromptBackupNameMessage',
                 initial: defaultTitle
             }).getDeferred().done(function(backupTitle) {
                 AD.Database.export(AD.Defaults.dbName).done(function(dump) {
-                    dump.encrypted = AD.EncryptionKey.encryptionActivated();
-                    AD.Comm.GoogleDriveFileAPI.write({
-                        content: JSON.stringify(dump),
-                        metadata: {
-                            title: backupTitle,
-                            mimeType: 'application/json',
-                            parents: ['root']
+                    // Prompt the user for the database encryption password
+                    var passwordDfd = $.Deferred();
+                    AD.UI.yesNoAlert('backupAskEncrypt').done(function() {
+                        _this.createWindow('StringPromptWindow', {
+                            title: 'stringPromptBackupPasswordTitle',
+                            message: 'stringPromptBackupPasswordMessage',
+                            initial: AD.Platform.isiOS ? null : AD.EncryptionKey.get() || null
+                        }).getDeferred().done(passwordDfd.resolve);
+                    }).fail(function() {
+                        passwordDfd.resolve(null);
+                    });
+                    
+                    passwordDfd.done(function(password) {
+                        // Flag whether or not this database contains potentially sensitive information
+                        dump.encrypted = AD.EncryptionKey.encryptionActivated();
+                        
+                        var dumpContent = JSON.stringify(dump);
+                        if (password !== null) {
+                            // Use the passowrd to encrypt the database dump
+                            dumpContent = AD.sjcl.encrypt(password, dumpContent);
+                            
+                            var encryptedDump = JSON.parse(dumpContent);
+                            encryptedDump.passwordHash  = AD.EncryptionKey.hash(password);
+                            dumpContent = JSON.stringify(encryptedDump);
                         }
+                        
+                        // Create a file on Google Drive containing the database dump content
+                        AD.Comm.GoogleDriveFileAPI.write({
+                            content: dumpContent,
+                            metadata: {
+                                title: backupTitle,
+                                mimeType: 'application/json',
+                                parents: ['root']
+                            }
+                        });
                     });
                 });
             });
@@ -99,21 +126,43 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                 folder: null
             }).getDeferred().done(function(fileId) {
                 AD.Comm.GoogleDriveFileAPI.read(fileId, function(dump) {
-                    var restoreDatabases = function() {
+                    var restoreDatabases = function(dump) {
                         AD.UI.yesNoAlert('restoreDatabaseWarning').done(function() {
                             AD.Database.import(AD.Defaults.dbName, dump).done(function() {
                                 AD.Model.refreshCaches().done(AD.UI.initialize);
                             });
                         });
                     };
-                    if (dump.encrypted !== false && !AD.EncryptionKey.encryptionActivated()) {
-                        AD.UI.yesNoAlert('restoreDatabaseInsecure').done(function() {
-                            controller.reencryptDatabases().done(restoreDatabases);
+                    
+                    var decryptDfd = $.Deferred();
+                    if (dump.passwordHash) {
+                        _this.createWindow('PasswordPromptWindow', {
+                            title: 'stringPromptBackupPasswordTitle',
+                            message: 'stringPromptBackupPasswordMessage',
+                            passwordHash: dump.passwordHash
+                        }).getDeferred().done(function(password) {
+                            // Convert the database dump into a JSON string, decrypt it, then convert it back into JSON
+                            delete dump.passwordHash;
+                            var decryptedDump = JSON.parse(AD.sjcl.decrypt(password, JSON.stringify(dump)));
+                            decryptDfd.resolve(decryptedDump);
                         });
                     }
                     else {
-                        restoreDatabases();
+                        decryptDfd.resolve(dump);
                     }
+                    
+                    decryptDfd.done(function(dump) {
+                        if (dump.encrypted !== false && !AD.EncryptionKey.encryptionActivated()) {
+                            AD.UI.yesNoAlert('restoreDatabaseInsecure').done(function() {
+                                controller.reencryptDatabases().done(function(dump) {
+                                    restoreDatabases(dump);
+                                });
+                            });
+                        }
+                        else {
+                            restoreDatabases(dump);
+                        }
+                    });
                 });
             });
         });

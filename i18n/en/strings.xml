@@ -100,8 +100,13 @@
     <string name="syncingMessage">Syncing data with the server</string>
     <string name="updatingMessage">Updating local database</string>
     <string name="backupTitleFormat">NextSteps database dump {0}/{1}/{2}</string>
-    <string name="stringPromptBackupTitle">NextSteps Database Backup</string>
-    <string name="stringPromptBackupMessage">Please choose the name of the NextSteps database backup file.</string>
+    <string name="stringPromptBackupNameTitle">NextSteps Database Backup</string>
+    <string name="stringPromptBackupNameMessage">Please choose the name of the NextSteps database backup file.</string>
+    <string name="backupAskEncrypt">Do you want to encrypt the database backup?</string>
+    <string name="stringPromptBackupPasswordTitle">Database Backup Password</string>
+    <string name="stringPromptBackupPasswordMessage">Please choose a password for the encrypted NextSteps database backup file.</string>
+    <string name="passwordPromptBackupPasswordTitle">Database Backup Password</string>
+    <string name="passwordPromptBackupPasswordMessage">Please enter the password for the encrypted database backup file.</string>
     <string name="restoreDatabaseInsecure">Cannot restore encrypted database dump to an unencrypted device. Do you want to encrypt the databases and continue restoring?</string>
     <string name="restoreDatabaseWarning">Restoring the database from a backup will replace all of your current data. Are you sure you want to proceed?</string>
     
