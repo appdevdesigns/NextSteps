@@ -24,7 +24,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                     x: AD.UI.screenWidth / 2
                 },
                 width: 160,
-                height: Ti.UI.SIZE,
+                height: AD.UI.buttonHeight,
                 titleid: 'preferences'
             }));
             preferencesButton.addEventListener('click', function() {
@@ -200,7 +200,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             top: AD.UI.padding,
             left: AD.UI.padding * 2,
             width: 120,
-            height: AD.UI.promoteStudents,
+            height: AD.UI.buttonHeight,
             titleid: 'schoolYearEnd'
         });
         schoolYearView.add(schoolYearEndButton);
@@ -224,7 +224,7 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
             top: AD.UI.padding,
             right: AD.UI.padding * 2,
             width: 120,
-            height: AD.UI.promoteStudents,
+            height: AD.UI.buttonHeight,
             titleid: 'promoteStudents'
         });
         schoolYearView.add(promoteStudentsButton);
