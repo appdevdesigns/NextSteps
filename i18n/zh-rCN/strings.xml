@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="returnToApp">返回到应用程序?</string>
+    <string name="unencryptedConsequences">与NextSteps服务器的同步将禁用</string>
     
     <!-- Tab group labels -->
     <string name="contactsTitle">联系人</string>
@@ -84,6 +85,12 @@
     <string name="backupRestoreInfoText">备份数据库或从谷歌驱动器中恢复数据库</string>
     <string name="backupDatabase">备份</string>
     <string name="restoreDatabase">恢复</string>
+    <string name="sync">同步</string>
+    <string name="schoolYearInfoText">学年末晋升学生到下一年。</string>
+    <string name="schoolYearEnd">年末</string>
+    <string name="promoteStudents">晋升</string>
+    <string name="promoteStudentsConfirmation">你确定要晋升你联系人列表中得所有学生到下一年吗？</string>
+    <string name="syncErrorUnencrypted">不能从未加密的安装与服务器同步。你要加密数据库继续同步吗？</string>
     <string name="syncErrorNoServer">没有指定的同步服务器！请在应用程序首选项中输入同步服务器的网址。</string>
     <string name="syncErrorPingFailed">无法连接到服务器。请确定​同步服务器的网址是正确的。也确定你​连接到VPN。​你希望再试一次？</string>
     <string name="syncErrorUnknown">连接​同步服务器时发生错误。请​稍后再试。</string>
@@ -95,5 +102,15 @@
     <string name="backupTitleFormat">下一步的数据转存 {0}/{1}/{2}</string>
     <string name="stringPromptBackupNameTitle">下一步的数据备份</string>
     <string name="stringPromptBackupNameMessage">为下一步数据库的备份选择文价夹名。</string>
+    <string name="backupAskEncrypt">你要加密数据库备份吗？</string>
+    <string name="stringPromptBackupPasswordTitle">数据库备份密码</string>
+    <string name="stringPromptBackupPasswordMessage">请为加密的NextSteps数据库备份文件选择一个密码。</string>
+    <string name="passwordPromptBackupPasswordTitle">数据库备份密码</string>
+    <string name="passwordPromptBackupPasswordMessage">请为加密的数据库备份文件输入密码。</string>
+    <string name="restoreDatabaseInsecure">不能恢复加密的数据库转储到未加密的设备。你要加密数据库并继续恢复吗？</string>
     <string name="restoreDatabaseWarning">从备份恢复数据库将替换所有现有的数据。你确定要继续？</string>
+    
+    <!-- Controller labels -->
+    <string name="promoteStudentsMessage">学年末了！你要晋升你联系人列表中的所有学生到下一年吗？</string>
+    <string name="later">以后</string>
 </resources>
