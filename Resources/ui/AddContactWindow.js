@@ -180,9 +180,6 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
     
     // Create each of the form fields
     create: function() {
-        var labelWidth = 80;
-        var rowHeight = 40;
-        
         var focusedTextField = null;
         var hideKeyboard = function() {
             if (focusedTextField) {
@@ -216,13 +213,13 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 right: 0,
                 top: 0
             });
-            fieldRow.height = rowHeight;
+            fieldRow.height = AD.UI.tableViewRowHeight;
             fieldRow.index = index;
             
             // Create the field name label
             var label = Ti.UI.createLabel({
                 left: 0,
-                width: labelWidth,
+                width: 80,
                 height: Ti.UI.SIZE,
                 text: AD.localize(field.name)
             });
@@ -242,7 +239,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 // Create the value label
                 if (AD.Platform.isiPhone) {
                     fieldView = Ti.UI.createLabel({
-                        left: labelWidth + AD.UI.padding,
+                        left: label.width + AD.UI.padding,
                         width: Ti.UI.FILL,
                         height: Ti.UI.FILL,
                         text: fieldValue
@@ -250,9 +247,9 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 }
                 else {
                     fieldView = Ti.UI.createButton({
-                        left: labelWidth + AD.UI.padding,
+                        left: label.width + AD.UI.padding,
                         right: AD.UI.padding,
-                        center: { y: rowHeight / 2 },
+                        center: { y: fieldRow.height / 2 },
                         height: AD.UI.buttonHeight,
                         title: fieldValue || AD.localize('unspecified')
                     });
@@ -263,7 +260,7 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
             else if (field.type === 'text') {
                 if (field.multiline === true) {
                     fieldView = Ti.UI.createTextArea({
-                        left: labelWidth + AD.UI.padding,
+                        left: label.width + AD.UI.padding,
                         right: AD.UI.padding,
                         height: Ti.UI.FILL,
                         font: AD.UI.Fonts.small,
@@ -274,9 +271,9 @@ module.exports = $.Window('AppDev.UI.AddContactWindow', {
                 }
                 else {
                     fieldView = Ti.UI.createTextField({
-                        left: labelWidth + AD.UI.padding,
+                        left: label.width + AD.UI.padding,
                         right: AD.UI.padding,
-                        center: { y: rowHeight / 2 },
+                        center: { y: fieldRow.height / 2 },
                         height: AD.UI.textFieldHeight
                     });
                 }

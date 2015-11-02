@@ -6,7 +6,7 @@ var controller = require('app/controller');
 var StatsTable = $.ModelTable('AppDev.UI.StatsTable', {
     sortFields: [{field: 'campus_label', label: 'campus'}],
     
-    rowHeight: 40,
+    rowHeight: AD.UI.tableViewRowHeight,
     font: AD.UI.Fonts.mediumSmall
 }, {
     init: function(options) {

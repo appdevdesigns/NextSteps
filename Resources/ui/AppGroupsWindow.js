@@ -18,7 +18,8 @@ var GroupTable = $.ModelTable('AppDev.UI.GroupTable', {
     createRow: function(group) {
         // Create a table view row that represents this group
         var row = Ti.UI.createTableViewRow({
-            title: group.attr('group_name')
+            title: group.attr('group_name'),
+            height: AD.UI.tableViewRowHeight
         });
         this.smartBind(group, 'group_name', function(event) {
             // The group_name has been updated, so update the row title as well
