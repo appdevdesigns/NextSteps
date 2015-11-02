@@ -8,7 +8,7 @@
         <target device="android">true</target>
         <target device="blackberry">false</target>
     </deployment-targets>
-    <sdk-version>3.4.0.GA</sdk-version>
+    <sdk-version>5.0.2.GA</sdk-version>
     <id>net.appdevdesigns.nextsteps</id>
     <name>NextSteps</name>
     <version>2.0.0</version>
@@ -40,7 +40,7 @@
     <android xmlns:android="http://schemas.android.com/apk/res/android">
         <manifest android:versionCode="200" android:versionName="2.0.0">
             <application android:theme="@style/Theme.AppCompat.Light"/>
-            <uses-sdk targetSdkVersion="19"/>
+            <uses-sdk targetSdkVersion="22"/>
             <supports-screens android:anyDensity="false"/>
         </manifest>
         <services>
