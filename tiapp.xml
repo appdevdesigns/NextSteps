@@ -41,7 +41,6 @@
         <manifest android:versionCode="200" android:versionName="2.0.0">
             <application android:theme="@style/Theme.AppCompat.Light"/>
             <uses-sdk targetSdkVersion="22"/>
-            <supports-screens android:anyDensity="false"/>
         </manifest>
         <services>
             <service url="Keepalive.js" type="interval"/>
