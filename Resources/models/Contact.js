@@ -178,9 +178,14 @@
             newTags.forEach(function(newTag, index) {
                 // newTag can be a Tag instance or a plain object
                 var newTagAttrs = AD.jQuery.isFunction(newTag.attrs) ? newTag.attrs() : newTag;
+                // Extract from the Tag model the attributes relevant to the ContactTag model
+                var contactTagAttrs = {
+                  tag_uuid: newTagAttrs.tag_uuid,
+                  tag_label: newTagAttrs.tag_label,
+                };
                 // Reuse the existing tag if possible, but create a new tag instance if necessary
                 var tagInstance = oldTags[index] || new AD.Models.ContactTag({ contact_uuid: contact_uuid });
-                tagInstance.attrs(newTagAttrs);
+                tagInstance.attrs(contactTagAttrs);
                 tagInstance.save();
             });
             // Delete any remaining tags that were not reused
