@@ -152,6 +152,17 @@ module.exports = $.Window('AppDev.UI.AppToolsWindow', {
                     }
                     
                     decryptDfd.done(function(dump) {
+                        // Allow importing databases from the legacy NextSteps app
+                        if (dump.appName === 'NextSteps') {
+                            dump.appName = AD.Defaults.application;
+                        }
+                        if (dump.appId === 'net.appdevdesigns.nextsteps') {
+                            dump.appId = Ti.App.id;
+                        }
+                        if (dump.database === 'NextSteps') {
+                            dump.database = AD.Defaults.dbName;
+                        }
+                        
                         if (dump.encrypted !== false && !AD.EncryptionKey.encryptionActivated()) {
                             AD.UI.yesNoAlert('restoreDatabaseInsecure').done(function() {
                                 controller.reencryptDatabases().done(function(dump) {
