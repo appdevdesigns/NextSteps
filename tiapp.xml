@@ -9,8 +9,8 @@
         <target device="blackberry">false</target>
     </deployment-targets>
     <sdk-version>5.0.2.GA</sdk-version>
-    <id>net.appdevdesigns.nextsteps</id>
-    <name>NextSteps</name>
+    <id>net.appdevdesigns.nextsteps2</id>
+    <name>NextSteps 2</name>
     <version>2.1.0</version>
     <publisher>AppDev Designs</publisher>
     <url>http://www.appdevdesigns.net</url>
