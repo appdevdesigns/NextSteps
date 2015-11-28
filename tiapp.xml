@@ -24,8 +24,11 @@
     <fullscreen>false</fullscreen>
     <navbar-hidden>false</navbar-hidden>
     <analytics>false</analytics>
-    <guid>5bc35cee-e7fd-41f1-a5f2-7bd3cd6ef122</guid>
+    <guid>724291f6-8760-4c7a-9222-4b161d887d82</guid>
     <property name="ti.ui.defaultunit" type="string">dip</property>
+    <property name="appc-app-id" type="string">569cfbcbc2e0ca7513017841</property>
+    <property name="appc-org-id" type="string">100093358</property>
+    <property name="appc-creator-user-id" type="string">44e6f63c-0692-49f4-bd37-b98818323041</property>
     <iphone>
         <orientations device="iphone">
             <orientation>Ti.UI.PORTRAIT</orientation>
@@ -49,8 +52,8 @@
     <modules>
         <module platform="android">net.appdevdesigns.encryption</module>
         <module platform="iphone">com.yydigital.coretelephony</module>
-        <module platform="iphone">com.dmarie.sql</module>
-        <module platform="android">com.dmarie.sql</module>
+        <module platform="android">appcelerator.encrypteddatabase</module>
+        <module platform="iphone">appcelerator.encrypteddatabase</module>
         <module platform="iphone">com.0x82.key.chain</module>
     </modules>
     <plugins>
