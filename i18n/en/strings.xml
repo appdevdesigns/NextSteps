@@ -2,6 +2,7 @@
 <resources>
     <string name="returnToApp">Return to app?</string>
     <string name="unencryptedConsequences">syncing with the NextSteps server will be disabled</string>
+    <string name="dataTransferInstructions">Because of circumstances outside of the developers' control, it was necessary to create a new entry for NextSteps in the app stores and deprecate the old one. Development will continue on the new NextSteps 2 app, and the old NextSteps app will not receive any updates. To transfer your data from the old app to the new app, go to the "Tools" tab in the old app and click the "Backup" button to store a backup copy of all of your data in Google Drive. Then go to the "Tools" tab in the new app and click the "Restore" button to restore all of your data from the backup you just made. If you have any questions or concerns, please contact us at {0}. Thank you for your understanding, and we apologize for any inconvenience this may cause you.</string>
     
     <!-- Tab group labels -->
     <string name="contactsTitle">Contacts</string>

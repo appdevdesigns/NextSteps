@@ -2,6 +2,7 @@
 <resources>
     <string name="returnToApp">返回到应用程序?</string>
     <string name="unencryptedConsequences">与NextSteps服务器的同步将禁用</string>
+    <string name="dataTransferInstructions">因为一些情况的改变超出了我们程序员可以控制的范围，我们需要废弃现有苹果商店里的NextSteps应用，创建一个新的入口。我们将继续开发新版本的NextSteps 2，将不再跟新旧版的NextSteps应用。为了从现有的应用传输你的数据到新版的应用，请在旧版的应用程序中”工具“页，单击”备份“按钮保存你所有的数据到谷歌网盘。然后访问新版的应用程序的”工具“页，单击”恢复“按钮，从你刚做的备份恢复你的数据到新版的应用程序。如果你有任何的问题或者考虑，请通过邮件跟我们联系： {0}。谢谢你的理解，对给你带来的不便深表歉意。</string>
     
     <!-- Tab group labels -->
     <string name="contactsTitle">联系人</string>
