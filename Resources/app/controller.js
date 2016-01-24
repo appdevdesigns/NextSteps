@@ -53,10 +53,9 @@ var controller = module.exports = {
         AD.Database.export(dbName).done(function(databaseDump) {
             AD.Database.DataStore.closeDatabase(dbName);
             
-            var databaseFile = AD.Database.getFile();
-            if (databaseFile.exists()) {
-                databaseFile.deleteFile();
-            }
+            // Delete the database file
+            var connection = AD.Database.open(dbName);
+            connection.remove();
             
             AD.Auth.choosePassword().done(function() {
                 // Now that encryption is activiated, write out the property store, which
