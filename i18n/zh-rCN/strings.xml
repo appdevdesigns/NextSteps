@@ -100,7 +100,7 @@
     <string name="syncingTitle">​进行同步​</string>
     <string name="syncingMessage">与服务器同步数据</string>
     <string name="updatingMessage">更新本地数据库</string>
-    <string name="backupTitleFormat">下一步的数据转存 {0}/{1}/{2}</string>
+    <string name="backupTitleFormat">下一步的数据转存 {0}/{1}/{2}.json</string>
     <string name="stringPromptBackupNameTitle">下一步的数据备份</string>
     <string name="stringPromptBackupNameMessage">为下一步数据库的备份选择文价夹名。</string>
     <string name="backupAskEncrypt">你要加密数据库备份吗？</string>
